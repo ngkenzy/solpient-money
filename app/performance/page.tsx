@@ -1,22 +1,28 @@
 import InteractiveLineChart from "@/components/InteractiveLineChart";
 import PageHeader from "@/components/PageHeader";
-import { portfolioPerformance } from "@/lib/demo-data";
+import { requireMoneyDataset } from "@/lib/money-data";
 
-export default function PerformancePage() {
+export const dynamic = "force-dynamic";
+
+export default async function PerformancePage() {
+  const context = await requireMoneyDataset();
+  const data = context.dataset;
+  const latest = data.portfolioPerformance.at(-1) ?? { portfolio: 0, benchmark: 0 };
+
   return (
     <div className="page">
       <PageHeader
         eyebrow="PERFORMANCE"
         title="Measure the portfolio, not the noise."
-        description="Illustrative total-return history against a broad-market benchmark. Live return calculation will later use transaction-aware account data."
+        description="Performance history now comes through the shared MoneyDataset adapter. V0.5 stores snapshot history separately from holdings."
       />
       <section className="card page-card">
         <div className="section-title-row">
-          <div><span className="card-kicker">YTD TOTAL RETURN</span><h2>Portfolio vs benchmark</h2></div>
-          <span className="mini-positive">Portfolio +12.4% · Benchmark +10.6%</span>
+          <div><span className="card-kicker">TOTAL RETURN</span><h2>Portfolio vs benchmark</h2></div>
+          <span className="mini-positive">Portfolio {latest.portfolio >= 0 ? "+" : ""}{latest.portfolio.toFixed(1)}% · Benchmark {latest.benchmark >= 0 ? "+" : ""}{latest.benchmark.toFixed(1)}%</span>
         </div>
         <InteractiveLineChart
-          data={portfolioPerformance}
+          data={data.portfolioPerformance}
           series={[
             { key: "portfolio", label: "Portfolio", format: "percent" },
             { key: "benchmark", label: "Benchmark", format: "percent" },
