@@ -1,18 +1,16 @@
-import Link from "next/link";
 import {
   AlertTriangle,
-  Cable,
   CheckCircle2,
-  DatabaseZap,
   FileSpreadsheet,
-  Landmark,
   RefreshCw,
   ShieldCheck,
 } from "lucide-react";
 import PageHeader from "@/components/PageHeader";
 import FileImportWorkbench from "@/components/FileImportWorkbench";
 import UndoImportButton from "@/components/UndoImportButton";
+import ConnectorRegistryPanel from "@/components/ConnectorRegistryPanel";
 import { requireActiveHousehold } from "@/lib/money-auth";
+import { getConnectorOverviews } from "@/lib/connect/registry";
 
 export const dynamic = "force-dynamic";
 
@@ -71,6 +69,10 @@ function reconciliationLabel(delta: unknown, statement: unknown) {
 
 export default async function ConnectPage() {
   const { supabase, householdId } = await requireActiveHousehold();
+  const connectorOverviews = await getConnectorOverviews({
+    supabase,
+    householdId,
+  });
 
   const [
     { data: accounts },
@@ -133,12 +135,12 @@ export default async function ConnectPage() {
   return (
     <div className="page">
       <PageHeader
-        eyebrow="SOLPIENT CONNECT V1.1"
-        title="Import once. Recognize it next time."
-        description="Solpient remembers statement formats and account destinations, reconciles balances before import, flags anomalies, tracks freshness, and can safely undo the latest import."
+        eyebrow="SOLPIENT CONNECT V1.2"
+        title="One connector layer. Every financial source."
+        description="The Connector SDK gives Files, Plaid, and future FDX/direct integrations one capability model, one health model, one sync contract, and one normalized Money destination."
         action={
           <span className="live-pill connected">
-            RECONCILIATION LIVE
+            CONNECTOR SDK LIVE
           </span>
         }
       />
@@ -166,58 +168,7 @@ export default async function ConnectPage() {
         </div>
       </div>
 
-      <div className="connector-grid">
-        <section className="card connector-card active">
-          <FileSpreadsheet size={21} />
-          <div>
-            <span className="card-kicker">NATIVE</span>
-            <strong>CSV / QFX / OFX</strong>
-            <p>
-              Format memory, mapping correction, reconciliation,
-              duplicate protection, and undo.
-            </p>
-          </div>
-          <span className="connection-status active">live</span>
-        </section>
-
-        <section className="card connector-card">
-          <DatabaseZap size={21} />
-          <div>
-            <span className="card-kicker">AGGREGATOR</span>
-            <strong>Plaid Sandbox</strong>
-            <p>
-              Automatic test banking and investment connections remain
-              a separate adapter.
-            </p>
-          </div>
-          <Link href="/connections">Open Plaid</Link>
-        </section>
-
-        <section className="card connector-card future">
-          <Landmark size={21} />
-          <div>
-            <span className="card-kicker">DIRECT API</span>
-            <strong>FDX / OAuth</strong>
-            <p>
-              Reserved for approved direct institution connections.
-            </p>
-          </div>
-          <span>future</span>
-        </section>
-
-        <section className="card connector-card future">
-          <Cable size={21} />
-          <div>
-            <span className="card-kicker">DIRECT LEGACY</span>
-            <strong>OFX endpoint</strong>
-            <p>
-              The same normalizer can later receive direct OFX downloads
-              where institutions permit them.
-            </p>
-          </div>
-          <span>future</span>
-        </section>
-      </div>
+      <ConnectorRegistryPanel overviews={connectorOverviews} />
 
       <section className="card page-card">
         <div className="section-title-row">
