@@ -291,11 +291,20 @@ export default function DirectOfxSetupForm({
                 {candidate ? (
                   <div className="direct-ofx-known-facts">
                     <span>
-                      Endpoint{" "}
+                      Profile{" "}
+                      <strong>
+                        {new URL(
+                          profile.profileEndpointUrl ??
+                            profile.endpointUrl!
+                        ).pathname}
+                      </strong>
+                    </span>
+                    <span>
+                      Sync{" "}
                       <strong>
                         {new URL(
                           profile.endpointUrl!
-                        ).hostname}
+                        ).pathname}
                       </strong>
                     </span>
                     <span>
@@ -656,10 +665,10 @@ export default function DirectOfxSetupForm({
             <div className="direct-ofx-profile-note">
               <AlertTriangle size={15} />
               <span>
-                Vanguard settings are a candidate profile from current
-                Quicken availability plus community-observed OFX
-                configuration. Solpient keeps APPID=SOLPIENT and does
-                not impersonate Quicken.
+                Vanguard uses a separate profile servlet and transaction
+                servlet in the historical Direct Connect configuration.
+                Solpient probes the profile servlet first, keeps
+                APPID=SOLPIENT, and does not impersonate Quicken.
               </span>
             </div>
           ) : null}
