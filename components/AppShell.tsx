@@ -17,6 +17,7 @@ import {
   List,
   PiggyBank,
   Search,
+  Settings,
   SlidersHorizontal,
   WalletCards,
 } from "lucide-react";
@@ -60,6 +61,7 @@ const sections: Array<{ label?: string; items: NavItem[] }> = [
     items: [
       { href: "/insights", label: "Insights", icon: BrainCircuit, badge: "3" },
       { href: "/research", label: "Research", icon: Building2 },
+      { href: "/data", label: "Data", icon: Settings },
     ],
   },
 ];
@@ -71,6 +73,10 @@ function isActive(pathname: string, href: string) {
 
 export default function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+
+  if (pathname.startsWith("/login") || pathname.startsWith("/auth")) {
+    return <>{children}</>;
+  }
 
   return (
     <main className="app-shell">
