@@ -15,6 +15,11 @@ assert.equal(
   vanguard.endpointUrl,
   "https://vesnc.vanguard.com/us/OfxDirectConnectServlet"
 );
+assert.equal(
+  vanguard.profileEndpointUrl,
+  "https://vesnc.vanguard.com/us/OfxProfileServlet"
+);
+assert.equal(vanguard.org, "The Vanguard Group");
 assert.equal(vanguard.fid, "1358");
 assert.equal(vanguard.brokerId, "vanguard.com");
 assert.equal(vanguard.appId, "SOLPIENT");
@@ -95,6 +100,8 @@ const institutions = await readFile(
 
 assert.ok(route.includes("getDirectOfxInstitutionProfile"));
 assert.ok(route.includes("buildAnonymousProfileRequest"));
+assert.ok(route.includes("profile.profileEndpointUrl ?? profile.endpointUrl"));
+assert.ok(route.includes('stage: "profile_probe"'));
 assert.ok(route.includes("parseDirectOfxProfileResponse"));
 assert.ok(!route.includes("endpointUrl?:"));
 assert.ok(setup.includes("Probe anonymously"));
