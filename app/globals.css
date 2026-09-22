@@ -3815,3 +3815,159 @@ a {
     grid-column: 2;
   }
 }
+
+
+/* V0.6.1 Sandbox hardening */
+.topbar-product-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.global-sandbox-badge,
+.source-badge {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  border-radius: 999px;
+  font-style: normal;
+  font-weight: 850;
+  letter-spacing: .45px;
+  text-transform: uppercase;
+}
+
+.global-sandbox-badge {
+  padding: 5px 8px;
+  color: #8b5a16;
+  background: #fff0cf;
+  border: 1px solid #efd18e;
+  font-size: 7px;
+}
+
+.source-badge {
+  margin-left: 7px;
+  padding: 3px 6px;
+  vertical-align: middle;
+  font-size: 6px;
+}
+
+.source-badge.plaid-test {
+  color: #8b5a16;
+  background: #fff1d6;
+  border: 1px solid #efd59b;
+}
+
+.transaction-description {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 2px;
+}
+
+.sandbox-warning {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border-color: #efd18e;
+  background: #fffaf0;
+}
+
+.sandbox-warning strong {
+  flex: 0 0 auto;
+  color: #8b5a16;
+  font-size: 8px;
+  letter-spacing: .55px;
+}
+
+.sandbox-warning span {
+  color: #6f7f91;
+  font-size: 8px;
+  line-height: 1.45;
+}
+
+.plaid-auto-refresh {
+  display: grid;
+  grid-template-columns: 24px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
+  padding: 10px 12px;
+  border: 1px solid #dde6ef;
+  border-radius: 10px;
+  background: #f9fbfd;
+  color: #5e7389;
+}
+
+.plaid-auto-refresh > div {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.plaid-auto-refresh strong {
+  color: #425e79;
+  font-size: 8px;
+}
+
+.plaid-auto-refresh span {
+  font-size: 7px;
+}
+
+.plaid-auto-refresh.ok {
+  border-color: #cee7db;
+  background: #f5fbf8;
+}
+
+.plaid-auto-refresh.error {
+  border-color: #efcfd2;
+  background: #fff8f8;
+}
+
+.plaid-auto-refresh button {
+  min-height: 30px;
+  padding: 0 10px;
+  border: 1px solid #d7e0ea;
+  border-radius: 7px;
+  background: white;
+  color: #46617d;
+  font: inherit;
+  font-size: 7px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.plaid-auto-refresh button:disabled {
+  cursor: not-allowed;
+  opacity: .5;
+}
+
+.plaid-row-actions .repair {
+  color: #8b5a16;
+  border-color: #efd18e;
+  background: #fffaf0;
+}
+
+@media (max-width: 780px) {
+  .topbar-product-group {
+    gap: 6px;
+  }
+
+  .global-sandbox-badge {
+    padding: 4px 6px;
+    font-size: 6px;
+  }
+
+  .plaid-auto-refresh {
+    grid-template-columns: 22px 1fr;
+  }
+
+  .plaid-auto-refresh button {
+    grid-column: 2;
+    justify-self: start;
+  }
+
+  .sandbox-warning {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
