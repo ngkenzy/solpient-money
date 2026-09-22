@@ -10,6 +10,8 @@ export type Account = {
   changeYtd: number;
   owner: "Household" | "Primary" | "Joint";
   lastFour: string;
+  apr?: number;
+  minimumPayment?: number;
 };
 
 export type Holding = {
@@ -23,9 +25,6 @@ export type Holding = {
   dayChange: number;
   ytdReturn: number;
   sector: string;
-  researchScore?: number;
-  fairValue?: number;
-  thesis?: "Strong" | "Watch" | "At risk";
 };
 
 export type Transaction = {
@@ -47,9 +46,9 @@ export const accounts: Account[] = [
   { id: "taxable", name: "Taxable Brokerage", institution: "Solpient Brokerage Demo", type: "investment", balance: 486000, changeYtd: 12.8, owner: "Primary", lastFour: "2241" },
   { id: "retirement", name: "Employer Retirement", institution: "Retirement Provider Demo", type: "retirement", balance: 378000, changeYtd: 10.4, owner: "Primary", lastFour: "7710" },
   { id: "home", name: "Primary Residence", institution: "Manual Asset", type: "property", balance: 485000, changeYtd: 3.2, owner: "Joint", lastFour: "HOME" },
-  { id: "mortgage", name: "Mortgage", institution: "Demo Mortgage", type: "debt", balance: -142000, changeYtd: -7.1, owner: "Joint", lastFour: "6018" },
-  { id: "auto", name: "Auto Loan", institution: "Demo Credit Union", type: "debt", balance: -21000, changeYtd: -18.2, owner: "Joint", lastFour: "9134" },
-  { id: "card", name: "Credit Card", institution: "Demo Card", type: "debt", balance: -4500, changeYtd: -21.4, owner: "Joint", lastFour: "1157" },
+  { id: "mortgage", name: "Mortgage", institution: "Demo Mortgage", type: "debt", balance: -142000, changeYtd: -7.1, owner: "Joint", lastFour: "6018", apr: 3.25, minimumPayment: 1150 },
+  { id: "auto", name: "Auto Loan", institution: "Demo Credit Union", type: "debt", balance: -21000, changeYtd: -18.2, owner: "Joint", lastFour: "9134", apr: 4.9, minimumPayment: 620 },
+  { id: "card", name: "Credit Card", institution: "Demo Card", type: "debt", balance: -4500, changeYtd: -21.4, owner: "Joint", lastFour: "1157", apr: 21.99, minimumPayment: 150 },
 ];
 
 export const holdings: Holding[] = [
@@ -120,4 +119,23 @@ export const allocation = [
   { label: "Bonds", value: 8, tone: "sky" },
   { label: "Cash", value: 11, tone: "green" },
   { label: "Other", value: 1, tone: "slate" },
+] as const;
+
+
+export const householdPlan = {
+  demoCurrentAge: 45,
+  targetRetirementAge: 50,
+  emergencyFundTargetMonths: 6,
+  expectedAnnualReturnPct: 6,
+  targetRetirementAssets: 1800000,
+  singleStockReviewPct: 15,
+  topThreeStockReviewPct: 35,
+  portfolioCashReviewPct: 15,
+  highInterestDebtAprPct: 8,
+} as const;
+
+export const householdGoals = [
+  { id: "reserve", name: "Emergency reserve", current: 82000, target: 60000 },
+  { id: "travel", name: "Annual travel", current: 7000, target: 12000 },
+  { id: "home", name: "Home projects", current: 18000, target: 30000 },
 ] as const;
