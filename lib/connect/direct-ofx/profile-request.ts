@@ -1,5 +1,12 @@
 import { randomUUID } from "node:crypto";
-import type { DirectOfxInstitutionProfile } from "./institutions";
+type ProbeProfile = {
+  name: string;
+  endpointUrl?: string;
+  org?: string;
+  fid?: string;
+  appId: string;
+  appVer: string;
+};
 
 const ANONYMOUS = "anonymous" + "0".repeat(23);
 
@@ -27,7 +34,7 @@ function utcStamp(date: Date) {
 }
 
 export function buildAnonymousProfileRequest(
-  profile: DirectOfxInstitutionProfile,
+  profile: ProbeProfile,
   now = new Date()
 ) {
   if (!profile.endpointUrl) {
