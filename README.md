@@ -2,165 +2,210 @@
 
 Solpient Money is the private household-finance side of the Solpient platform.
 
-## V0.5 status
+## V0.6 status
 
-**Application architecture: complete.**  
-**Dedicated Solpient Money Supabase project: live.**
+**Money database + auth: live.**  
+**Plaid Sandbox architecture: built.**  
+**Plaid Sandbox credentials: add locally to activate Link/API calls.**
 
-Project ref: `lvbkyxnptohcwqtuxxxh` in `us-east-2`. The V0.5 household schema and RLS policies are applied to this project only. Solpient Research remains a separate project and receives no personal household financial data.
+V0.6 keeps the V0.5 private household database and adds a Sandbox-only Plaid connection layer for banking transactions and investment holdings.
 
-## What V0.5 adds
+## What V0.6 adds
 
-### Dedicated private Money data model
+### Plaid Sandbox Connections
 
-The committed migration creates:
-
-- profiles
-- households
-- household_members
-- accounts
-- transactions
-- holdings
-- goals
-- planning_assumptions
-- net_worth_snapshots
-- portfolio_snapshots
-- user_preferences
-
-Every exposed Money table has Row Level Security enabled. Anonymous access is revoked. Household financial rows are authorized through household membership.
-
-### Authentication
-
-V0.5 uses the current Supabase SSR pattern:
-
-- `@supabase/ssr` pinned to `0.12.7`
-- `@supabase/supabase-js` pinned to `2.116.0`
-- request-scoped browser/server clients
-- Next.js 16 `proxy.ts`
-- `auth.getClaims()` for protected-route identity validation
-- password signup/sign-in
-- PKCE confirmation callback
-- sign-out route
-
-No service-role key is used by the application.
-
-### Household onboarding
-
-The first signed-in user can:
-
-1. Create a household.
-2. Become its owner through an atomic private database trigger.
-3. Load the existing synthetic demo model into the Money database.
-4. Use the same dashboard and V0.4 intelligence engine against persisted data.
-
-### Persistence before Plaid
-
-The **Data** page supports manual creation of:
-
-- accounts
-- transactions
-- holdings
-- goals
-- planning assumptions
-
-This makes V0.5 usable before bank aggregation is added.
-
-### One MoneyDataset path
-
-The V0.4 deterministic engine no longer imports financial globals directly. Pages now request one `MoneyDataset`:
+New route:
 
 ```
-Dedicated Money Supabase
-        │
-        ▼
- authenticated household
-        │
-        ▼
-    MoneyDataset
-        │
-        ├── Financial Health
-        ├── Cash Flow
-        ├── Debt Intelligence
-        ├── Portfolio
-        ├── Retirement
-        ├── Scenario Lab
-        └── Attention Feed
+/connections
 ```
 
-The production/default configuration now points at the dedicated Money project. Environment variables can override the public project URL and publishable key for another environment.
+Two explicit connection flows are supported:
 
-### Research remains separate
+- **Bank / credit** — initializes Plaid Transactions and requests Liabilities as an optional enhancement.
+- **Investments** — initializes Plaid Investments directly and imports brokerage holdings.
+
+V0.6 never connects to Plaid Production.
+
+### Plaid Link
+
+The web app uses `react-plaid-link@5.0.0`.
+
+Flow:
 
 ```
-PRIVATE MONEY DATABASE             SOLPIENT RESEARCH
-accounts                            companies
-transactions                        scores
-holdings                   ← read   valuation
-debt                                thesis
-goals                               evidence
-planning                            risks / changes
+Money user
+   ↓
+Create link_token
+   ↓
+Plaid Link
+   ↓
+public_token
+   ↓
+server exchange
+   ↓
+encrypted access_token
+   ↓
+initial sync
 ```
 
-Research never receives household account, transaction, debt, goal, or authentication data.
+### Sandbox test Items
 
-## Environment
+The Connections page also supports a one-click Sandbox test Item using First Platypus Bank. This bypasses the Link UI for repeatable testing while still exercising Solpient's token exchange, persistence, and sync code.
 
-Copy `.env.example` to `.env.local`.
+### Banking sync
 
-The live Money project uses:
+V0.6 uses Plaid `/transactions/sync` with a persisted cursor.
+
+Imported banking data includes:
+
+- financial accounts
+- current/available balances
+- transaction history
+- added transactions
+- modified transactions
+- removed transactions
+- personal finance categories
+- liability APR/minimum-payment enrichment when available
+
+### Investment sync
+
+V0.6 uses `/investments/holdings/get` to import:
+
+- investment accounts
+- securities
+- ticker symbols when available
+- quantity
+- institution price
+- institution value
+- cost basis when available
+
+Imported holdings continue to flow through Solpient Research matching.
+
+### Token security
+
+Plaid access tokens are **never stored in plaintext**.
+
+The application:
+
+1. Encrypts each access token with AES-256-GCM.
+2. Stores only ciphertext, IV, and authentication tag.
+3. Stores token ciphertext in `private.plaid_access_tokens`.
+4. Exposes token storage/retrieval only through authenticated household-checked RPCs.
+5. Keeps `PLAID_TOKEN_ENCRYPTION_KEY` outside GitHub and outside Supabase.
+
+### Household isolation
+
+Plaid connection metadata is stored in:
+
+```
+public.plaid_connections
+```
+
+It uses the same household RLS model as the rest of Solpient Money.
+
+Anonymous users cannot read:
+
+- Plaid connection metadata
+- imported financial accounts
+- imported transactions
+- imported holdings
+- encrypted Plaid token data
+
+### Refresh and disconnect
+
+Each Sandbox Item can be manually refreshed from the Connections page.
+
+Disconnect:
+
+- calls Plaid `/item/remove`
+- deletes Plaid-imported transactions
+- deletes Plaid-imported holdings
+- removes Plaid-imported accounts
+- deletes the encrypted token
+- removes the local connection record
+
+Manual Money rows are preserved.
+
+## Plaid configuration
+
+Create a Plaid developer account and obtain Sandbox credentials from the Plaid Dashboard.
+
+Copy `.env.example` to `.env.local`, then set:
 
 ```bash
-NEXT_PUBLIC_MONEY_SUPABASE_URL=https://lvbkyxnptohcwqtuxxxh.supabase.co
-NEXT_PUBLIC_MONEY_SUPABASE_PUBLISHABLE_KEY=sb_publishable_WuuXjwPMHnohCu3D9WSP0w_ydWGaEyJ
+PLAID_ENV=sandbox
+PLAID_CLIENT_ID=...
+PLAID_SECRET=...
+PLAID_TOKEN_ENCRYPTION_KEY=...
 ```
 
-Never use a secret/service-role key in the browser or commit one to GitHub.
+Generate the encryption key locally:
 
-## Database migration
-
-The V0.5 schema is committed at:
-
-```
-supabase/migrations/20260922050000_v05_money_schema.sql
+```bash
+openssl rand -base64 32
 ```
 
-It is applied to the dedicated Solpient Money project. It has **not** been applied to Solpient Research.
+Never commit `PLAID_SECRET` or `PLAID_TOKEN_ENCRYPTION_KEY`.
+
+## Supabase migrations
+
+V0.6 adds:
+
+```
+supabase/migrations/20260922070000_v06_plaid_sandbox.sql
+supabase/migrations/20260922071500_v06_plaid_upsert_indexes.sql
+```
+
+Both are applied only to the dedicated **Solpient Money** project:
+
+```
+lvbkyxnptohcwqtuxxxh
+```
+
+Solpient Research remains a separate read-only source.
 
 ## Run locally
 
 ```bash
 git clone https://github.com/ngkenzy/solpient-money.git
 cd solpient-money
-npm install
+cp .env.example .env.local
+# add your Plaid Sandbox secrets to .env.local
+npm ci
 npm run test:research
 npm run test:money
 npm run test:v04
 npm run test:v05
+npm run test:v06
 npm run dev
 ```
 
-Then open:
+Open:
 
 ```
 http://localhost:3000
 ```
 
+Then sign in and open **Connections**.
+
 ## Release sequence
 
 1. V0.1 — dashboard shell + deterministic demo data ✅
-2. V0.2 — functional navigation, portfolio engine, holdings, transactions, charts ✅
-3. V0.3 — live Solpient Research read integration ✅
-4. V0.4 — financial intelligence, attention feed, Research alerts, Scenario Lab ✅
-5. V0.5 — auth, dedicated Money database, RLS, persistence adapter, onboarding, manual data entry ✅
-6. V0.6 — Plaid Sandbox
-7. V0.7 — personal live-account testing
+2. V0.2 — navigation, portfolio, transactions, charts ✅
+3. V0.3 — live Solpient Research integration ✅
+4. V0.4 — financial intelligence + Scenario Lab ✅
+5. V0.5 — auth + dedicated Money database + RLS + persistence ✅
+6. V0.6 — Plaid Sandbox bank/brokerage connection layer ✅ code / credentials required for live Sandbox calls
+7. V0.7 — personal Trial/Production test accounts
 8. V1.0 — personal Solpient Money
 
 ## Security principles
 
-- Never commit bank credentials, Plaid secrets, Supabase secret/service-role keys, or personal financial exports.
-- Personal financial data stays in the dedicated Money database.
-- Solpient Research is read-only from Money.
-- Authenticated routes are dynamic and are not ISR-cached.
-- Household authorization is enforced in PostgreSQL RLS, not only in the UI.
-- Research score and evidence confidence remain separate signals.
+- Never commit bank credentials.
+- Never commit Plaid secrets.
+- Never commit Supabase secret/service-role keys.
+- Never store Plaid access tokens in plaintext.
+- Personal financial data remains in the dedicated Money database.
+- Solpient Research never receives household financial or authentication data.
+- Plaid V0.6 is Sandbox-only.
