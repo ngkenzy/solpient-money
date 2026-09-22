@@ -1,10 +1,10 @@
-import type { SupabaseClient } from "@supabase/supabase-js";
+import type { SolpientDbClient } from "@/lib/local-db/client";
 import type { PlaidMode } from "@/lib/plaid/config";
 import { plaidPost } from "@/lib/plaid/client";
 import { storeAccessToken, syncPlaidConnection } from "@/lib/plaid/sync";
 
 export async function exchangeAndPersistPlaidItem(args: {
-  supabase: SupabaseClient;
+  supabase: SolpientDbClient;
   householdId: string;
   publicToken: string;
   mode: PlaidMode;
