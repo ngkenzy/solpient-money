@@ -10,7 +10,7 @@ const sdk = await readFile("lib/connect/sdk.ts", "utf8");
 const registry = await readFile("lib/connect/registry.ts", "utf8");
 const fileAdapter = await readFile("lib/connect/adapters/file.ts", "utf8");
 const plaidAdapter = await readFile("lib/connect/adapters/plaid.ts", "utf8");
-const futureAdapters = await readFile("lib/connect/adapters/future.ts", "utf8");
+const fdxAdapter = await readFile("lib/connect/adapters/fdx.ts", "utf8");
 const directOfxAdapter = await readFile("lib/connect/adapters/direct-ofx.ts", "utf8");
 const route = await readFile("app/api/connect/sync/route.ts", "utf8");
 const legacyRoute = await readFile("app/api/plaid/sync/route.ts", "utf8");
@@ -41,7 +41,8 @@ assert.ok(fileAdapter.includes("reconciliation: true"));
 assert.ok(plaidAdapter.includes('id: "plaid"'));
 assert.ok(plaidAdapter.includes("automaticSync: true"));
 assert.ok(plaidAdapter.includes("repair: true"));
-assert.ok(futureAdapters.includes('id: "fdx"'));
+assert.ok(fdxAdapter.includes('id: "fdx"'));
+assert.ok(fdxAdapter.includes('maturity: "sandbox"'));
 assert.ok(directOfxAdapter.includes('id: "ofx-direct"'));
 assert.ok(directOfxAdapter.includes('maturity: "live"'));
 
