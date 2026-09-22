@@ -271,6 +271,7 @@ export async function getMoneyContext(): Promise<MoneyContext> {
       row.minimum_payment_cents == null
         ? undefined
         : dollars(row.minimum_payment_cents),
+    source: (row.source ?? "manual") as Account["source"],
   }));
 
   const holdings: Holding[] = (holdingsResult.data ?? []).map((row) => ({
@@ -284,6 +285,7 @@ export async function getMoneyContext(): Promise<MoneyContext> {
     dayChange: numberValue(row.day_change_pct),
     ytdReturn: numberValue(row.ytd_return_pct),
     sector: String(row.sector ?? "Other"),
+    source: (row.source ?? "manual") as Holding["source"],
   }));
 
   const transactions: Transaction[] = (transactionsResult.data ?? []).map((row) => {
@@ -296,6 +298,7 @@ export async function getMoneyContext(): Promise<MoneyContext> {
       account: related?.name ?? "Unassigned",
       amount: dollars(row.amount_cents),
       type: row.transaction_type as Transaction["type"],
+      source: (row.source ?? "manual") as Transaction["source"],
     };
   });
 
