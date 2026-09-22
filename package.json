@@ -1,6 +1,6 @@
 {
   "name": "solpient-money",
-  "version": "0.7.0",
+  "version": "0.8.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -20,16 +20,20 @@
     "test:connect-v131": "node scripts/test-connect-v131.mjs",
     "test:connect-v132": "node scripts/test-connect-v131.mjs",
     "test:connect-v133": "node scripts/test-connect-v131.mjs",
-    "test:connect-v14": "node scripts/test-connect-v14.mjs"
+    "test:connect-v14": "node scripts/test-connect-v14.mjs",
+    "local:setup": "node scripts/local-setup.mjs",
+    "local:migrate": "node scripts/local-db-init.mjs",
+    "local:backup": "node scripts/local-backup.mjs",
+    "local:restore": "node scripts/local-restore.mjs",
+    "test:local": "node scripts/test-local-postgres.mjs"
   },
   "dependencies": {
     "lucide-react": "^0.468.0",
     "next": "16.3.3",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
-    "@supabase/ssr": "0.12.7",
-    "@supabase/supabase-js": "2.116.0",
-    "react-plaid-link": "5.0.0"
+    "react-plaid-link": "5.0.0",
+    "pg": "8.23.0"
   },
   "devDependencies": {
     "@types/node": "^22.10.0",
@@ -37,6 +41,7 @@
     "@types/react-dom": "^19.0.0",
     "eslint": "^9.16.0",
     "eslint-config-next": "16.3.3",
-    "typescript": "^5.7.2"
+    "typescript": "^5.7.2",
+    "@types/pg": "8.23.1"
   }
 }
