@@ -1,10 +1,4 @@
-import {
-  accounts,
-  holdings,
-  householdGoals,
-  householdPlan,
-  monthlyCashFlow,
-} from "@/lib/demo-data";
+import { demoMoneyDataset, type MoneyDataset } from "@/lib/demo-data";
 import type { ResearchSnapshot } from "@/lib/research";
 
 export type HealthComponent = {
@@ -51,8 +45,10 @@ function clamp(value: number, min = 0, max = 100) {
 }
 
 export function getHouseholdMetrics(
-  snapshots: Record<string, ResearchSnapshot> = {}
+  snapshots: Record<string, ResearchSnapshot> = {},
+  dataset: MoneyDataset = demoMoneyDataset
 ) {
+  const { accounts, holdings, householdGoals, householdPlan, monthlyCashFlow } = dataset;
   const assets = accounts.filter((a) => a.balance > 0).reduce((sum, a) => sum + a.balance, 0);
   const debtAccounts = accounts.filter((a) => a.type === "debt");
   const liabilities = Math.abs(debtAccounts.reduce((sum, a) => sum + a.balance, 0));
@@ -136,9 +132,11 @@ export function getHouseholdMetrics(
 }
 
 export function getFinancialHealth(
-  snapshots: Record<string, ResearchSnapshot> = {}
+  snapshots: Record<string, ResearchSnapshot> = {},
+  dataset: MoneyDataset = demoMoneyDataset
 ) {
-  const m = getHouseholdMetrics(snapshots);
+  const { householdPlan, householdGoals } = dataset;
+  const m = getHouseholdMetrics(snapshots, dataset);
 
   const liquidityScore =
     m.emergencyFundMonths >= householdPlan.emergencyFundTargetMonths
@@ -262,8 +260,10 @@ export function getFinancialHealth(
 }
 
 export function getResearchAlerts(
-  snapshots: Record<string, ResearchSnapshot>
+  snapshots: Record<string, ResearchSnapshot>,
+  dataset: MoneyDataset = demoMoneyDataset
 ): ResearchAlert[] {
+  const { holdings } = dataset;
   const alerts: ResearchAlert[] = [];
 
   for (const holding of holdings.filter((item) => item.kind === "stock")) {
@@ -310,9 +310,11 @@ export function getResearchAlerts(
 }
 
 export function getAttentionFeed(
-  snapshots: Record<string, ResearchSnapshot> = {}
+  snapshots: Record<string, ResearchSnapshot> = {},
+  dataset: MoneyDataset = demoMoneyDataset
 ): AttentionItem[] {
-  const health = getFinancialHealth(snapshots);
+  const { accounts, holdings, householdPlan } = dataset;
+  const health = getFinancialHealth(snapshots, dataset);
   const m = health.metrics;
   const items: AttentionItem[] = [];
 
@@ -337,7 +339,7 @@ export function getAttentionFeed(
     });
   }
 
-  const alerts = getResearchAlerts(snapshots);
+  const alerts = getResearchAlerts(snapshots, dataset);
   for (const alert of alerts.slice(0, 3)) {
     items.push({
       id: alert.id,
@@ -456,8 +458,8 @@ export function getAttentionFeed(
   return items.sort((a, b) => b.priority - a.priority);
 }
 
-export function getDebtPriority() {
-  return accounts
+export function getDebtPriority(dataset: MoneyDataset = demoMoneyDataset) {
+  return dataset.accounts
     .filter((account) => account.type === "debt")
     .map((account) => ({
       id: account.id,
