@@ -271,3 +271,61 @@ npm run test:connect-v11
 npm run lint
 npm run build
 ```
+
+
+## Solpient Connect V1.2 — Connector SDK
+
+Solpient Money 0.6.4 introduces a provider-independent connector runtime.
+
+Core contract:
+
+```text
+Connector manifest
+  → capabilities
+  → instances
+  → health / freshness
+  → normalized provenance
+  → sync result
+  → Solpient Money model
+```
+
+Registered adapters:
+
+- **Files** — live native CSV/QFX/OFX ingestion.
+- **Plaid** — live Sandbox aggregator adapter.
+- **FDX / OAuth Direct** — reserved adapter slot.
+- **Direct OFX** — reserved adapter slot.
+
+The SDK standardizes:
+
+- connector IDs and manifests
+- accounts / transactions / holdings / liabilities capabilities
+- manual-import vs automatic-sync capability
+- reconciliation / repair / disconnect capability
+- connection-instance health and freshness
+- normalized provenance
+- normalized account / transaction / holding / liability record contracts
+- provider-independent sync results
+- registry lookup and dispatch
+
+The main `/connect` screen is now the unified connector surface. Plaid's dedicated `/connections` screen remains an adapter-detail page for Plaid Link, repair, disconnect, and Sandbox-specific controls.
+
+Plaid automatic refresh and manual sync now execute through:
+
+```text
+POST /api/connect/sync
+  connectorId=plaid
+  instanceId=<optional>
+```
+
+The legacy `/api/plaid/sync` endpoint remains as a compatibility wrapper around the Connector SDK.
+
+Verification:
+
+```bash
+npm run test:connect
+npm run test:connect-v11
+npm run test:connect-v12
+npm run lint
+npm run build
+```
