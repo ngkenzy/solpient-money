@@ -14,6 +14,7 @@ import {
   Goal,
   Home,
   LineChart,
+  Link2,
   List,
   PiggyBank,
   Search,
@@ -35,6 +36,7 @@ const sections: Array<{ label?: string; items: NavItem[] }> = [
     items: [
       { href: "/", label: "Overview", icon: Home },
       { href: "/accounts", label: "Accounts", icon: WalletCards },
+      { href: "/connections", label: "Connections", icon: Link2 },
       { href: "/transactions", label: "Transactions", icon: List },
       { href: "/cash-flow", label: "Cash Flow", icon: CircleDollarSign },
     ],
