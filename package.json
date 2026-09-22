@@ -9,7 +9,8 @@
     "lint": "eslint .",
     "test:research": "node scripts/test-research-connection.mjs",
     "test:v04": "node scripts/test-v04-invariants.mjs",
-    "test:v05": "node scripts/test-v05-invariants.mjs"
+    "test:v05": "node scripts/test-v05-invariants.mjs",
+    "test:money": "node scripts/test-money-connection.mjs"
   },
   "dependencies": {
     "lucide-react": "^0.468.0",
