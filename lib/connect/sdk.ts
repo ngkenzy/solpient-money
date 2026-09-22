@@ -22,6 +22,56 @@ export type ConnectorHealth =
   | "idle"
   | "unavailable";
 
+export type ConnectorProvenance = {
+  connectorId: ConnectorId;
+  instanceId: string;
+  externalId?: string | null;
+  observedAt: string;
+};
+
+export type NormalizedConnectorAccount = {
+  externalId: string;
+  name: string;
+  institution: string;
+  accountType: "cash" | "investment" | "retirement" | "debt";
+  balance: number;
+  availableBalance?: number | null;
+  lastFour?: string | null;
+  provenance: ConnectorProvenance;
+};
+
+export type NormalizedConnectorTransaction = {
+  externalId: string;
+  accountExternalId: string;
+  postedAt: string;
+  merchant: string;
+  category: string;
+  amount: number;
+  type: "income" | "expense" | "transfer";
+  provenance: ConnectorProvenance;
+};
+
+export type NormalizedConnectorHolding = {
+  externalId: string;
+  accountExternalId: string;
+  ticker: string;
+  name: string;
+  kind: "stock" | "etf" | "bond" | "cash";
+  shares: number;
+  price: number;
+  marketValue: number;
+  costBasis?: number | null;
+  provenance: ConnectorProvenance;
+};
+
+export type NormalizedConnectorLiability = {
+  externalId: string;
+  accountExternalId: string;
+  aprPct?: number | null;
+  minimumPayment?: number | null;
+  provenance: ConnectorProvenance;
+};
+
 export type ConnectorCapabilities = {
   accounts: boolean;
   transactions: boolean;
@@ -76,6 +126,9 @@ export type ConnectorSyncResult = {
   instanceId: string;
   ok: boolean;
   accountCount?: number;
+  transactionCount?: number;
+  holdingCount?: number;
+  liabilityCount?: number;
   syncedAt?: string;
   errorCode?: string | null;
   error?: string;
