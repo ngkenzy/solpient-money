@@ -1,4 +1,4 @@
-import type { SupabaseClient } from "@supabase/supabase-js";
+import type { SolpientDbClient } from "@/lib/local-db/client";
 import {
   decryptConnectorSecret,
   encryptConnectorSecret,
@@ -25,7 +25,7 @@ type TokenRow = {
 };
 
 export async function storeOAuthFdxTokens(
-  supabase: SupabaseClient,
+  supabase: SolpientDbClient,
   connectionId: string,
   tokens: OAuthFdxTokenSet
 ) {
@@ -59,7 +59,7 @@ export async function storeOAuthFdxTokens(
 }
 
 export async function loadOAuthFdxTokens(
-  supabase: SupabaseClient,
+  supabase: SolpientDbClient,
   connectionId: string
 ): Promise<OAuthFdxTokenSet> {
   const { data, error } = await supabase.rpc(
@@ -104,7 +104,7 @@ export async function loadOAuthFdxTokens(
 }
 
 export async function deleteOAuthFdxTokens(
-  supabase: SupabaseClient,
+  supabase: SolpientDbClient,
   connectionId: string
 ) {
   const { error } = await supabase.rpc(
