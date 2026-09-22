@@ -238,7 +238,7 @@ export default async function HomePage() {
 
       <div className="bottom-note">
         <Gauge size={15} />
-        <span>{persistent ? "Household data is authenticated and persistent in Solpient Money." : "Money is in demo mode until its dedicated Supabase project is connected."} Solpient Research remains a separate read-only source.</span>
+        <span>{persistent ? "Household data is persistent in PostgreSQL on this Mac." : "Money is in demo mode until local PostgreSQL is initialized."} Solpient Research remains a separate read-only source.</span>
       </div>
     </div>
   );
