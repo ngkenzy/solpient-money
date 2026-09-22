@@ -1,61 +1,86 @@
-import { Landmark, LockKeyhole } from "lucide-react";
-import { isMoneySupabaseConfigured } from "@/lib/supabase/config";
-import { login, signup } from "./actions";
+import Link from "next/link";
+import {
+  HardDrive,
+  LockKeyhole,
+} from "lucide-react";
+import { isLocalDatabaseConfigured } from "@/lib/local-db/config";
 
-export default async function LoginPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ error?: string; message?: string; next?: string }>;
-}) {
-  const params = await searchParams;
-  const configured = isMoneySupabaseConfigured();
+export default async function LoginPage() {
+  const configured =
+    isLocalDatabaseConfigured();
 
   return (
     <main className="auth-page">
       <section className="auth-brand-panel">
         <div>
-          <div className="brand-name">SOLPIENT</div>
-          <span>MONEY</span>
+          <div className="brand-name">
+            SOLPIENT
+          </div>
+          <span>MONEY LOCAL</span>
         </div>
-        <h1>Your financial intelligence, private by default.</h1>
-        <p>Household financial data lives in a dedicated Money database. Solpient Research remains a separate read-only intelligence source.</p>
+        <h1>
+          Your financial intelligence stays on
+          your Mac.
+        </h1>
+        <p>
+          Solpient Money now uses a local
+          PostgreSQL database in Docker. There
+          is no cloud database login and no
+          hosted Money backend.
+        </p>
       </section>
 
       <section className="auth-form-panel">
         <div className="auth-card">
-          <span className="auth-icon">{configured ? <LockKeyhole size={21} /> : <Landmark size={21} />}</span>
-          <div className="eyebrow">SOLPIENT MONEY V0.5</div>
-          <h2>{configured ? "Sign in" : "Database setup required"}</h2>
+          <span className="auth-icon">
+            {configured ? (
+              <LockKeyhole size={21} />
+            ) : (
+              <HardDrive size={21} />
+            )}
+          </span>
+          <div className="eyebrow">
+            SOLPIENT LOCAL V1
+          </div>
+          <h2>
+            {configured
+              ? "Local database ready"
+              : "Local setup required"}
+          </h2>
 
-          {!configured ? (
+          {configured ? (
             <>
-              <p className="auth-copy">The app is ready for a dedicated Solpient Money Supabase project, but the required environment variables are not configured yet.</p>
-              <div className="auth-setup-code">
-                <code>NEXT_PUBLIC_MONEY_SUPABASE_URL</code>
-                <code>NEXT_PUBLIC_MONEY_SUPABASE_PUBLISHABLE_KEY</code>
-              </div>
+              <p className="auth-copy">
+                This installation is single-user
+                and local-only. PostgreSQL is
+                bound to 127.0.0.1 and the
+                browser never connects directly
+                to the database.
+              </p>
+              <Link
+                className="primary-auth-button"
+                href="/"
+              >
+                Open Solpient Money
+              </Link>
             </>
           ) : (
             <>
-              {params.error ? <div className="auth-message error">{params.error}</div> : null}
-              {params.message ? <div className="auth-message success">{params.message}</div> : null}
-              <form className="auth-form">
-                <input type="hidden" name="next" value={params.next ?? "/"} />
-                <label>
-                  <span>Email</span>
-                  <input name="email" type="email" autoComplete="email" required />
-                </label>
-                <label>
-                  <span>Password</span>
-                  <input name="password" type="password" autoComplete="current-password" minLength={8} required />
-                </label>
-                <button className="primary-auth-button" formAction={login}>Sign in</button>
-                <button className="secondary-auth-button" formAction={signup}>Create account</button>
-              </form>
+              <p className="auth-copy">
+                Start Docker, then initialize
+                the free local PostgreSQL stack.
+              </p>
+              <div className="auth-setup-code">
+                <code>npm run local:setup</code>
+                <code>npm run dev</code>
+              </div>
             </>
           )}
 
-          <small>No bank credentials belong in Solpient Money source code or GitHub.</small>
+          <small>
+            Bank passwords are never stored in
+            Solpient Money.
+          </small>
         </div>
       </section>
     </main>
