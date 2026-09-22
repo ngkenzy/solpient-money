@@ -50,6 +50,8 @@ const TABLES = new Set([
   "file_import_profiles",
   "direct_ofx_connections",
   "oauth_fdx_connections",
+  "truth_merchant_rules",
+  "account_merge_audit",
 ]);
 
 const DEFAULT_CONFLICTS: Record<string, string[]> = {
