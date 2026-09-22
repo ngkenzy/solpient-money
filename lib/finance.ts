@@ -1,4 +1,5 @@
 import { accounts, holdings, transactions } from "@/lib/demo-data";
+import type { ResearchSnapshot } from "@/lib/research";
 
 export const money = (value: number, decimals = false) =>
   new Intl.NumberFormat("en-US", {
@@ -39,9 +40,6 @@ export function getFinancialSummary() {
 export function getPortfolioMetrics() {
   const total = holdings.reduce((sum, h) => sum + h.value, 0);
   const directStocks = holdings.filter((h) => h.kind === "stock");
-  const coveredStocks = directStocks.filter((h) => h.researchScore != null);
-  const directStockValue = directStocks.reduce((sum, h) => sum + h.value, 0);
-  const coveredValue = coveredStocks.reduce((sum, h) => sum + h.value, 0);
   const stockWeights = directStocks
     .map((h) => ({ ...h, weight: total ? (h.value / total) * 100 : 0 }))
     .sort((a, b) => b.weight - a.weight);
@@ -49,17 +47,10 @@ export function getPortfolioMetrics() {
     .map((h) => ({ ...h, weight: total ? (h.value / total) * 100 : 0 }))
     .sort((a, b) => b.weight - a.weight);
   const cashValue = holdings.filter((h) => h.kind === "cash").reduce((sum, h) => sum + h.value, 0);
-  const weightedResearchScore =
-    coveredValue > 0
-      ? coveredStocks.reduce((sum, h) => sum + (h.researchScore ?? 0) * h.value, 0) / coveredValue
-      : 0;
 
   return {
     total,
-    directStockValue,
-    coveredValue,
-    researchCoverage: directStockValue ? (coveredValue / directStockValue) * 100 : 0,
-    weightedResearchScore,
+    directStockValue: directStocks.reduce((sum, h) => sum + h.value, 0),
     largestDirectStock: stockWeights[0],
     topThreeDirectStockWeight: stockWeights.slice(0, 3).reduce((sum, h) => sum + h.weight, 0),
     largestHolding: allWeights[0],
@@ -67,7 +58,9 @@ export function getPortfolioMetrics() {
   };
 }
 
-export function getPortfolioInsights() {
+export function getPortfolioInsights(
+  snapshots: Record<string, ResearchSnapshot> = {}
+) {
   const metrics = getPortfolioMetrics();
   const insights: Array<{
     level: "good" | "watch";
@@ -103,10 +96,17 @@ export function getPortfolioInsights() {
     });
   }
 
+  const directStocks = holdings.filter((holding) => holding.kind === "stock");
+  const directValue = directStocks.reduce((sum, holding) => sum + holding.value, 0);
+  const coveredValue = directStocks
+    .filter((holding) => snapshots[holding.ticker])
+    .reduce((sum, holding) => sum + holding.value, 0);
+  const coveragePct = directValue ? (coveredValue / directValue) * 100 : 0;
+
   insights.push({
-    level: metrics.researchCoverage >= 80 ? "good" : "watch",
+    level: coveragePct >= 80 ? "good" : "watch",
     title: "Research coverage",
-    detail: `${metrics.researchCoverage.toFixed(0)}% of direct-stock value has a demo Solpient Research score.`,
+    detail: `${coveragePct.toFixed(0)}% of direct-stock value is connected to live published Solpient Research.`,
   });
 
   if (metrics.cashWeight > 15) {
