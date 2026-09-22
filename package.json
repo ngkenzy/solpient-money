@@ -1,6 +1,6 @@
 {
   "name": "solpient-money",
-  "version": "0.6.3",
+  "version": "0.6.4",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -14,7 +14,8 @@
     "test:v06": "node scripts/test-v06-invariants.mjs",
     "test:v061": "node scripts/test-v061-invariants.mjs",
     "test:connect": "node scripts/test-connect-v1.mjs",
-    "test:connect-v11": "node scripts/test-connect-v11.mjs"
+    "test:connect-v11": "node scripts/test-connect-v11.mjs",
+    "test:connect-v12": "node scripts/test-connect-v12.mjs"
   },
   "dependencies": {
     "lucide-react": "^0.468.0",
