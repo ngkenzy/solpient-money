@@ -2,25 +2,27 @@
 
 Solpient Money is the personal-finance side of the Solpient platform.
 
-This repository currently contains **V0.1**, a local-first dashboard prototype using deterministic demo data. No live bank credentials, Plaid connections, or real financial accounts are stored or used.
+This repository currently contains **V0.2**, a local-first dashboard prototype using deterministic demo data. No live bank credentials, Plaid connections, or real financial accounts are stored or used.
 
-## Current V0.1
+## Current V0.2
 
-- Net worth overview and history
-- Assets and liabilities
-- Cash-flow summary
-- Investment allocation
-- Recent transactions
-- Solpient Intelligence financial-health panel
-- Solpient Research integration placeholder
+- Working route-based sidebar navigation
+- Interactive net-worth and portfolio-performance charts
+- Accounts page with grouped assets and liabilities
+- Searchable/filterable transactions explorer
+- Cash-flow analysis
+- Portfolio holdings table and allocation analysis
+- Individual holding pages
+- Deterministic concentration, research-coverage, cash-weight, and portfolio-intelligence calculations
+- Retirement, goals, debt, insights, and Research-integration surfaces
 - Responsive desktop/tablet/mobile layout
 - Clear demo-data labeling
 
 ## Run locally
 
 ```bash
-git clone https://github.com/ngkenzy/solphien-money.git
-cd solphien-money
+git clone https://github.com/ngkenzy/solpient-money.git
+cd solpient-money
 npm install
 npm run dev
 ```
@@ -54,8 +56,8 @@ The intended integration boundary is controlled read access from Money into sele
 
 ## Planned sequence
 
-1. V0.1 — dashboard shell + deterministic demo data
-2. V0.2 — portfolio engine + holdings pages
+1. V0.1 — dashboard shell + deterministic demo data ✅
+2. V0.2 — functional navigation, portfolio engine, holdings, transactions, interactive charts, intelligence ✅
 3. V0.3 — Solpient Research read integration
 4. V0.4 — deterministic financial-intelligence rules
 5. V0.5 — dedicated Supabase auth/persistence
