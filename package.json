@@ -1,6 +1,6 @@
 {
   "name": "solpient-money",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -8,13 +8,16 @@
     "start": "next start",
     "lint": "eslint .",
     "test:research": "node scripts/test-research-connection.mjs",
-    "test:v04": "node scripts/test-v04-invariants.mjs"
+    "test:v04": "node scripts/test-v04-invariants.mjs",
+    "test:v05": "node scripts/test-v05-invariants.mjs"
   },
   "dependencies": {
     "lucide-react": "^0.468.0",
     "next": "16.3.3",
     "react": "^19.2.0",
-    "react-dom": "^19.2.0"
+    "react-dom": "^19.2.0",
+    "@supabase/ssr": "0.12.7",
+    "@supabase/supabase-js": "2.116.0"
   },
   "devDependencies": {
     "@types/node": "^22.10.0",
