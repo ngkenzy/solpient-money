@@ -396,3 +396,54 @@ npm run test:connect-v13
 npm run lint
 npm run build
 ```
+
+
+## Solpient Connect V1.3.1 — Institution Profiles
+
+Solpient Money 0.6.6 adds a curated Direct OFX institution capability registry and an anonymous profile probe.
+
+Initial profiles:
+
+- **Vanguard** — candidate Direct OFX investment profile.
+- **Bank of America / Merrill** — marked unsupported for Direct OFX.
+- **Chase** — marked unsupported for Direct OFX.
+
+Vanguard candidate defaults:
+
+```text
+Endpoint: https://vesnc.vanguard.com/us/OfxDirectConnectServlet
+FID:      1358
+ORG:      Vanguard
+BROKERID: vanguard.com
+APPID:    SOLPIENT
+APPVER:   0100
+```
+
+These are treated as candidate configuration, not a Vanguard-published public developer contract. Solpient deliberately does not impersonate Quicken by substituting `QWIN` or `QBW`.
+
+Anonymous probe:
+
+```text
+POST /api/connect/ofx/probe
+{ "profileId": "vanguard" }
+```
+
+The probe:
+
+- requires an authenticated Solpient Money household
+- only accepts curated profile IDs
+- sends the OFX-standard anonymous profile request
+- uses no account number, username, or password
+- reports endpoint reachability, OFX sign-on status, FI name, advertised message sets, and advertised OFX URLs
+- reuses the Direct OFX SSRF/TLS/timeout/response-size protections
+
+The OFX specification permits the initial profile request to use the anonymous sign-on form. This lets Solpient distinguish endpoint/client compatibility problems before asking a user for any institution-issued Direct Connect secret.
+
+Verification:
+
+```bash
+npm run test:connect-v13
+npm run test:connect-v131
+npm run lint
+npm run build
+```
