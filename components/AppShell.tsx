@@ -14,7 +14,7 @@ import {
   Goal,
   Home,
   LineChart,
-  Link2,
+  PlugZap,
   List,
   PiggyBank,
   Search,
@@ -36,7 +36,7 @@ const sections: Array<{ label?: string; items: NavItem[] }> = [
     items: [
       { href: "/", label: "Overview", icon: Home },
       { href: "/accounts", label: "Accounts", icon: WalletCards },
-      { href: "/connections", label: "Connections", icon: Link2 },
+      { href: "/connect", label: "Connect", icon: PlugZap },
       { href: "/transactions", label: "Transactions", icon: List },
       { href: "/cash-flow", label: "Cash Flow", icon: CircleDollarSign },
     ],
@@ -125,7 +125,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
               <Link href="/research">Research</Link>
               <Link className={pathname === "/research" ? "" : "selected"} href="/">Money</Link>
             </div>
-            <span className="global-sandbox-badge">PLAID SANDBOX · TEST DATA</span>
+            <span className="global-sandbox-badge">CONNECT V1 · PLAID SANDBOX</span>
           </div>
 
           <div className="top-actions">
