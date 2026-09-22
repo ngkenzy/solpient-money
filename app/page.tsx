@@ -11,9 +11,11 @@ import {
   TriangleAlert,
 } from "lucide-react";
 import AllocationDonut from "@/components/AllocationDonut";
+import AttentionFeed from "@/components/AttentionFeed";
 import InteractiveLineChart from "@/components/InteractiveLineChart";
 import { allocation, dataAsOf, demoRefresh, holdings, netWorthSeries, transactions } from "@/lib/demo-data";
-import { getFinancialSummary, getPortfolioInsights, getPortfolioMetrics, money } from "@/lib/finance";
+import { getFinancialSummary, getPortfolioMetrics, money } from "@/lib/finance";
+import { getAttentionFeed, getFinancialHealth } from "@/lib/intelligence";
 import { loadResearchSnapshots, summarizeResearchCoverage } from "@/lib/research";
 
 export const dynamic = "force-dynamic";
@@ -24,9 +26,10 @@ export default async function HomePage() {
   const directTickers = holdings.filter((holding) => holding.kind === "stock").map((holding) => holding.ticker);
   const research = await loadResearchSnapshots(directTickers);
   const researchSummary = summarizeResearchCoverage(holdings, research.snapshots);
-  const insights = getPortfolioInsights(research.snapshots);
+  const health = getFinancialHealth(research.snapshots);
+  const attention = getAttentionFeed(research.snapshots);
   const recent = transactions.slice(0, 5);
-  const healthScore = 87;
+  const healthScore = health.score;
 
   return (
     <div className="dashboard">
@@ -71,14 +74,14 @@ export default async function HomePage() {
           </div>
           <div className="health-track"><div className="health-fill" style={{ width: `${healthScore}%` }} /></div>
           <div className="health-list">
-            {insights.slice(0, 4).map((item) => (
-              <div className="health-row" key={item.title}>
-                <span className={"health-icon " + (item.level === "good" ? "good" : "warn")}>
-                  {item.level === "good" ? <Check size={13} /> : <TriangleAlert size={13} />}
+            {health.components.slice(0, 4).map((item) => (
+              <div className="health-row" key={item.key}>
+                <span className={"health-icon " + (item.status === "healthy" ? "good" : "warn")}>
+                  {item.status === "healthy" ? <Check size={13} /> : <TriangleAlert size={13} />}
                 </span>
-                <span className="health-label">{item.title}</span>
-                <span className={"health-status " + (item.level === "good" ? "good" : "warn")}>
-                  {item.level === "good" ? "Healthy" : "Review"}
+                <span className="health-label">{item.label}</span>
+                <span className={"health-status " + (item.status === "healthy" ? "good" : "warn")}>
+                  {item.status === "healthy" ? "Healthy" : "Review"}
                 </span>
               </div>
             ))}
@@ -213,6 +216,17 @@ export default async function HomePage() {
           <Link className="research-button" href="/research">Open Research feed <ArrowRight size={16} /></Link>
         </section>
       </div>
+
+      <section className="card homepage-attention">
+        <div className="section-title-row">
+          <div>
+            <span className="card-kicker">WHAT DESERVES ATTENTION</span>
+            <h2>Household attention feed</h2>
+          </div>
+          <Link className="text-button" href="/insights">Explain everything <ArrowRight size={15} /></Link>
+        </div>
+        <AttentionFeed items={attention} limit={4} />
+      </section>
 
       <section className="askbar">
         <span className="ask-icon"><Sparkles size={19} /></span>
