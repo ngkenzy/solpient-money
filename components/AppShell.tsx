@@ -19,6 +19,7 @@ import {
   PiggyBank,
   Search,
   Settings,
+  ShieldCheck,
   SlidersHorizontal,
   WalletCards,
 } from "lucide-react";
@@ -63,6 +64,7 @@ const sections: Array<{ label?: string; items: NavItem[] }> = [
     items: [
       { href: "/insights", label: "Insights", icon: BrainCircuit, badge: "3" },
       { href: "/research", label: "Research", icon: Building2 },
+      { href: "/data-health", label: "Data Health", icon: ShieldCheck },
       { href: "/data", label: "Data", icon: Settings },
     ],
   },
@@ -125,7 +127,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
               <Link href="/research">Research</Link>
               <Link className={pathname === "/research" ? "" : "selected"} href="/">Money</Link>
             </div>
-            <span className="global-sandbox-badge">LOCAL POSTGRES · CONNECT V1.4</span>
+            <span className="global-sandbox-badge">LOCAL POSTGRES · MONEY V0.9</span>
           </div>
 
           <div className="top-actions">
