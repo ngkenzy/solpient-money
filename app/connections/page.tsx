@@ -53,9 +53,9 @@ export default async function ConnectionsPage() {
   return (
     <div className="page">
       <PageHeader
-        eyebrow="PLAID SANDBOX"
-        title="Connect test financial institutions."
-        description="V0.6.1 uses Plaid Sandbox only. Test Items can import banking transactions or investment holdings into the private Solpient Money household database."
+        eyebrow="CONNECTOR SDK · PLAID"
+        title="Plaid Sandbox adapter."
+        description="Plaid remains a Sandbox adapter inside Solpient Connect V1.2. Its connection-specific Link, repair, disconnect, and encrypted-token controls stay here while health and sync are surfaced through the shared Connector SDK."
         action={
           <span className={"live-pill " + (plaid.configured ? "connected" : "disconnected")}>
             {plaid.configured ? "SANDBOX READY" : "CREDENTIALS NEEDED"}
@@ -78,7 +78,7 @@ export default async function ConnectionsPage() {
 
       <section className="sandbox-warning card page-card">
         <strong>PLAID SANDBOX TEST DATA</strong>
-        <span>All Plaid-connected balances, transactions, and holdings in V0.6.1 are test data. Manual Money data is unchanged.</span>
+        <span>All Plaid-connected balances, transactions, and holdings in V1.2 are test data. Manual Money data is unchanged.</span>
       </section>
 
       <PlaidAutoRefresh
