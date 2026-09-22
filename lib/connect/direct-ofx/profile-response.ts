@@ -1,4 +1,4 @@
-import { parseOfxStatus } from "@/lib/connect/direct-ofx/status";
+import { parseOfxStatus } from "./status";
 
 function tagValue(block: string, tag: string) {
   const match = block.match(
