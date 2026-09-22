@@ -30,7 +30,9 @@ export default async function HoldingPage({
   params: Promise<{ ticker: string }>;
 }) {
   const { ticker } = await params;
-  const holding = findHolding(ticker);
+  const context = await requireMoneyDataset();
+  const data = context.dataset;
+  const holding = findHolding(ticker, data);
   if (!holding) notFound();
 
   const metrics = getPortfolioMetrics(data);
