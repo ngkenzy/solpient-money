@@ -139,3 +139,28 @@ export const householdGoals = [
   { id: "travel", name: "Annual travel", current: 7000, target: 12000 },
   { id: "home", name: "Home projects", current: 18000, target: 30000 },
 ] as const;
+
+
+export type MoneyDataset = {
+  accounts: Account[];
+  holdings: Holding[];
+  transactions: Transaction[];
+  monthlyCashFlow: Array<{ label: string; income: number; spending: number }>;
+  netWorthSeries: Array<{ label: string; value: number }>;
+  portfolioPerformance: Array<{ label: string; portfolio: number; benchmark: number }>;
+  allocation: Array<{ label: string; value: number; tone: string }>;
+  householdPlan: typeof householdPlan;
+  householdGoals: Array<{ id: string; name: string; current: number; target: number }>;
+};
+
+export const demoMoneyDataset: MoneyDataset = {
+  accounts,
+  holdings,
+  transactions: [...transactions],
+  monthlyCashFlow: [...monthlyCashFlow],
+  netWorthSeries: [...netWorthSeries],
+  portfolioPerformance: [...portfolioPerformance],
+  allocation: [...allocation],
+  householdPlan,
+  householdGoals: householdGoals.map((goal) => ({ ...goal })),
+};
