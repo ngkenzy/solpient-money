@@ -1,12 +1,16 @@
 import AllocationDonut from "@/components/AllocationDonut";
 import PageHeader from "@/components/PageHeader";
-import { allocation, holdings } from "@/lib/demo-data";
 import { getPortfolioMetrics, money } from "@/lib/finance";
+import { requireMoneyDataset } from "@/lib/money-data";
 
-export default function AllocationPage() {
-  const metrics = getPortfolioMetrics();
+export const dynamic = "force-dynamic";
+
+export default async function AllocationPage() {
+  const context = await requireMoneyDataset();
+  const data = context.dataset;
+  const metrics = getPortfolioMetrics(data);
   const bySector = Object.entries(
-    holdings.reduce<Record<string, number>>((acc, holding) => {
+    data.holdings.reduce<Record<string, number>>((acc, holding) => {
       acc[holding.sector] = (acc[holding.sector] ?? 0) + holding.value;
       return acc;
     }, {})
@@ -17,13 +21,13 @@ export default function AllocationPage() {
       <PageHeader
         eyebrow="ALLOCATION"
         title="See where portfolio risk actually lives."
-        description="Asset-class and exposure views calculated directly from the deterministic V0.2 holding set."
+        description="Asset-class and exposure views are calculated from the current household holdings dataset."
       />
       <div className="allocation-page-grid">
         <section className="card page-card allocation-center">
-          <AllocationDonut items={allocation} totalLabel="$864K" />
+          <AllocationDonut items={data.allocation} totalLabel={money(metrics.total / 1000) + "K"} />
           <div className="allocation-list roomy">
-            {allocation.map((item) => (
+            {data.allocation.map((item) => (
               <div key={item.label}><span className={"dot " + item.tone} /><span>{item.label}</span><strong>{item.value}%</strong></div>
             ))}
           </div>
@@ -32,7 +36,7 @@ export default function AllocationPage() {
           <div className="section-title-row"><div><span className="card-kicker">EXPOSURES</span><h2>By sector / sleeve</h2></div></div>
           <div className="bar-list">
             {bySector.map(([sector, value]) => {
-              const weight = (value / metrics.total) * 100;
+              const weight = metrics.total ? (value / metrics.total) * 100 : 0;
               return (
                 <div className="bar-item" key={sector}>
                   <div><span>{sector}</span><strong>{weight.toFixed(1)}% · {money(value)}</strong></div>
