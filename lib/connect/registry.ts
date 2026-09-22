@@ -12,8 +12,8 @@ import { directOfxConnector } from "@/lib/connect/adapters/direct-ofx";
 export const connectorRegistry = [
   fileConnector,
   plaidConnector,
-  fdxConnector,
   directOfxConnector,
+  fdxConnector,
 ] satisfies SolpientConnectorAdapter[];
 
 const byId = new Map<ConnectorId, SolpientConnectorAdapter>();
