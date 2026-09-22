@@ -1,7 +1,10 @@
 -- Solpient Money V0.5
 -- Private household data model. All public-schema tables use RLS.
 
-create extension if not exists pgcrypto;\n\ncreate schema if not exists private;\nrevoke all on schema private from public, anon, authenticated;
+create extension if not exists pgcrypto;
+
+create schema if not exists private;
+revoke all on schema private from public, anon, authenticated;
 
 create table if not exists public.profiles (
   user_id uuid primary key references auth.users(id) on delete cascade,
