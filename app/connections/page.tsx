@@ -7,6 +7,7 @@ import {
 import PageHeader from "@/components/PageHeader";
 import PlaidConnectButton from "@/components/PlaidConnectButton";
 import PlaidConnectionActions from "@/components/PlaidConnectionActions";
+import PlaidAutoRefresh from "@/components/PlaidAutoRefresh";
 import { requireActiveHousehold } from "@/lib/money-auth";
 import { getPlaidStatus } from "@/lib/plaid/config";
 
@@ -75,6 +76,16 @@ export default async function ConnectionsPage() {
         </section>
       ) : null}
 
+      <section className="sandbox-warning card page-card">
+        <strong>PLAID SANDBOX TEST DATA</strong>
+        <span>All Plaid-connected balances, transactions, and holdings in V0.6.1 are test data. Manual Money data is unchanged.</span>
+      </section>
+
+      <PlaidAutoRefresh
+        enabled={plaid.configured}
+        connectionCount={connections?.length ?? 0}
+      />
+
       <div className="plaid-connect-grid">
         <section className="card page-card">
           <PlaidConnectButton mode="banking" configured={plaid.configured} />
@@ -100,11 +111,26 @@ export default async function ConnectionsPage() {
                   <span>{connection.connection_mode} · {accountCounts.get(String(connection.id)) ?? 0} imported account{accountCounts.get(String(connection.id)) === 1 ? "" : "s"}</span>
                 </div>
                 <div className="plaid-connection-status">
-                  <span className={"connection-status " + connection.status}>{connection.status}</span>
+                  <span className={"connection-status " + connection.status}>
+                    {connection.status === "needs_update"
+                      ? "repair required"
+                      : connection.status === "error"
+                        ? "sync failed"
+                        : connection.status}
+                  </span>
                   <small>Last sync {formatDate(connection.last_synced_at)}</small>
                 </div>
-                <PlaidConnectionActions connectionId={String(connection.id)} configured={plaid.configured} />
-                {connection.last_error_message ? <p className="plaid-row-error">{connection.last_error_message}</p> : null}
+                <PlaidConnectionActions
+                  connectionId={String(connection.id)}
+                  configured={plaid.configured}
+                  status={String(connection.status)}
+                />
+                {connection.last_error_message ? (
+                  <p className="plaid-row-error">
+                    {connection.last_error_code ? <strong>{connection.last_error_code}: </strong> : null}
+                    {connection.last_error_message}
+                  </p>
+                ) : null}
               </article>
             ))}
           </div>
