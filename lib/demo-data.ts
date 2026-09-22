@@ -122,7 +122,19 @@ export const allocation = [
 ] as const;
 
 
-export const householdPlan = {
+export type HouseholdPlan = {
+  demoCurrentAge: number;
+  targetRetirementAge: number;
+  emergencyFundTargetMonths: number;
+  expectedAnnualReturnPct: number;
+  targetRetirementAssets: number;
+  singleStockReviewPct: number;
+  topThreeStockReviewPct: number;
+  portfolioCashReviewPct: number;
+  highInterestDebtAprPct: number;
+};
+
+export const householdPlan: HouseholdPlan = {
   demoCurrentAge: 45,
   targetRetirementAge: 50,
   emergencyFundTargetMonths: 6,
@@ -132,7 +144,7 @@ export const householdPlan = {
   topThreeStockReviewPct: 35,
   portfolioCashReviewPct: 15,
   highInterestDebtAprPct: 8,
-} as const;
+};
 
 export const householdGoals = [
   { id: "reserve", name: "Emergency reserve", current: 82000, target: 60000 },
@@ -149,7 +161,7 @@ export type MoneyDataset = {
   netWorthSeries: Array<{ label: string; value: number }>;
   portfolioPerformance: Array<{ label: string; portfolio: number; benchmark: number }>;
   allocation: Array<{ label: string; value: number; tone: string }>;
-  householdPlan: typeof householdPlan;
+  householdPlan: HouseholdPlan;
   householdGoals: Array<{ id: string; name: string; current: number; target: number }>;
 };
 
