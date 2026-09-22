@@ -447,3 +447,38 @@ npm run test:connect-v131
 npm run lint
 npm run build
 ```
+
+
+## Solpient Connect V1.3.2 — Vanguard Profile/Sync Split
+
+Solpient Money 0.6.7 fixes Vanguard OFX probing after a real local timeout exposed a protocol-profile mismatch.
+
+Vanguard now has two candidate endpoints:
+
+```text
+Anonymous profile/bootstrap:
+https://vesnc.vanguard.com/us/OfxProfileServlet
+
+Investment transaction sync:
+https://vesnc.vanguard.com/us/OfxDirectConnectServlet
+```
+
+Candidate identifiers:
+
+```text
+ORG:      The Vanguard Group
+FID:      1358
+BROKERID: vanguard.com
+APPID:    SOLPIENT
+APPVER:   0100
+```
+
+The anonymous `PROFRQ` probe now targets the profile/bootstrap servlet. Actual account synchronization continues to use the Direct Connect transaction servlet.
+
+Network failures are also staged:
+
+- `connect` — TCP connection did not complete.
+- `tls` — TLS handshake did not complete.
+- `response` — HTTPS/TLS succeeded but the OFX server did not answer in time.
+
+The API returns the profile-probe stage and target host on failure. Solpient continues to use `APPID=SOLPIENT`; it does not impersonate Quicken.
