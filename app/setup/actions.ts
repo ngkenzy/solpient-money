@@ -66,13 +66,6 @@ export async function createHouseholdWithDemoData(formData: FormData) {
 
   const householdId = String(household.id);
 
-  const { error: memberError } = await supabase.from("household_members").insert({
-    household_id: householdId,
-    user_id: userId,
-    role: "owner",
-  });
-  if (memberError) throw new Error(memberError.message);
-
   const { error: preferenceError } = await supabase.from("user_preferences").upsert({
     user_id: userId,
     active_household_id: householdId,
