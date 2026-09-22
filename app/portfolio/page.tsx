@@ -84,7 +84,7 @@ export default async function PortfolioPage() {
                   <strong>{holding.ticker}</strong>
                   <small>
                     {holding.name}
-                    {holding.source === "plaid" ? <em className="source-badge plaid-test">PLAID TEST</em> : holding.source === "file" ? <em className="source-badge file-import">FILE IMPORT</em> : holding.source === "ofx_direct" ? <em className="source-badge direct-ofx">DIRECT OFX</em> : null}
+                    {holding.source === "plaid" ? <em className="source-badge plaid-test">PLAID TEST</em> : holding.source === "file" ? <em className="source-badge file-import">FILE IMPORT</em> : holding.source === "ofx_direct" ? <em className="source-badge direct-ofx">DIRECT OFX</em> : holding.source === "fdx" ? <em className="source-badge fdx-source">OAUTH / FDX</em> : null}
                   </small>
                 </span>
                 <strong>{money(holding.value)}</strong>
