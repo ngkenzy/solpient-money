@@ -10,6 +10,7 @@ export type DirectOfxInstitutionProfile = {
   summary: string;
   messageSet?: "banking" | "credit_card" | "investment";
   endpointUrl?: string;
+  profileEndpointUrl?: string;
   org?: string;
   fid?: string;
   brokerId?: string;
@@ -33,14 +34,17 @@ export const directOfxInstitutionProfiles: DirectOfxInstitutionProfile[] = [
     messageSet: "investment",
     endpointUrl:
       "https://vesnc.vanguard.com/us/OfxDirectConnectServlet",
-    org: "Vanguard",
+    profileEndpointUrl:
+      "https://vesnc.vanguard.com/us/OfxProfileServlet",
+    org: "The Vanguard Group",
     fid: "1358",
     brokerId: "vanguard.com",
     appId: "SOLPIENT",
     appVer: "0100",
     notes: [
       "Use the profile probe first. It sends an anonymous OFX profile request and no account credentials.",
-      "ORG has historically appeared as both Vanguard and The Vanguard Group in community configuration references.",
+      "Profile discovery and transaction download use different historical Vanguard servlet paths.",
+      "ORG is set to The Vanguard Group from the community profile/bootstrap reference.",
       "Solpient deliberately does not impersonate Quicken by auto-filling a QWIN/QBW application identity.",
       "A reachable server can still reject Solpient because Direct Connect access may depend on institution/vendor enrollment or an approved client identity.",
     ],
