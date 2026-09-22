@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { requireActiveHousehold } from "@/lib/money-auth";
+import { normalizeMerchant } from "@/lib/truth-engine";
 
 function text(formData: FormData, key: string) {
   return String(formData.get(key) ?? "").trim();
@@ -49,12 +50,14 @@ export async function addTransaction(formData: FormData) {
   const type = text(formData, "transaction_type");
   const rawAmount = Math.abs(num(formData, "amount"));
   const signedAmount = type === "income" ? rawAmount : -rawAmount;
+  const merchant = text(formData, "merchant");
 
   const { error } = await supabase.from("transactions").insert({
     household_id: householdId,
     account_id: text(formData, "account_id") || null,
     posted_at: text(formData, "posted_at"),
-    merchant: text(formData, "merchant"),
+    merchant,
+    normalized_merchant: normalizeMerchant(merchant),
     category: text(formData, "category") || "Uncategorized",
     amount_cents: cents(signedAmount),
     transaction_type: type,
