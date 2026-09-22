@@ -17,6 +17,7 @@ import {
   List,
   PiggyBank,
   Search,
+  SlidersHorizontal,
   WalletCards,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
@@ -51,6 +52,7 @@ const sections: Array<{ label?: string; items: NavItem[] }> = [
       { href: "/retirement", label: "Retirement", icon: PiggyBank },
       { href: "/goals", label: "Goals", icon: Goal },
       { href: "/debt", label: "Debt", icon: CreditCard },
+      { href: "/scenario-lab", label: "Scenario Lab", icon: SlidersHorizontal },
     ],
   },
   {
