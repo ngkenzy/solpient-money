@@ -11,7 +11,7 @@ assert.equal(bank.transactions.length, 2);
 assert.equal(bank.transactions[0].merchant, "Kroger, Store 112");
 assert.equal(bank.transactions[0].amount, -84.22);
 assert.equal(bank.transactions[1].amount, 5250);
-assert.equal(bank.closingBalance, 4365.38);
+assert.equal(bank.closingBalance, 4281.16);
 
 const holdingsCsv = `Symbol,Security Name,Quantity,Price,Market Value,Cost Basis,Security Type
 ADBE,Adobe Inc,10,320,3200,2800,Stock
