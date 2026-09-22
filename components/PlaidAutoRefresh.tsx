@@ -27,10 +27,10 @@ export default function PlaidAutoRefresh({
     setMessage("Refreshing Sandbox Items...");
 
     try {
-      const response = await fetch("/api/plaid/sync", {
+      const response = await fetch("/api/connect/sync", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: "{}",
+        body: JSON.stringify({ connectorId: "plaid" }),
       });
       const body = await response.json();
       if (!response.ok) throw new Error(body.error ?? "Automatic refresh failed.");
