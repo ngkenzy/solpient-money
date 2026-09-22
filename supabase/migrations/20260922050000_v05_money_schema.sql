@@ -1,7 +1,7 @@
 -- Solpient Money V0.5
 -- Private household data model. All public-schema tables use RLS.
 
-create extension if not exists pgcrypto;
+create extension if not exists pgcrypto;\n\ncreate schema if not exists private;\nrevoke all on schema private from public, anon, authenticated;
 
 create table if not exists public.profiles (
   user_id uuid primary key references auth.users(id) on delete cascade,
@@ -145,6 +145,26 @@ create table if not exists public.user_preferences (
   updated_at timestamptz not null default now()
 );
 
+create or replace function private.add_household_owner_membership()
+returns trigger
+language plpgsql
+security definer
+set search_path = ''
+as $
+begin
+  insert into public.household_members (household_id, user_id, role)
+  values (new.id, new.created_by, 'owner');
+  return new;
+end;
+$;
+
+revoke all on function private.add_household_owner_membership() from public, anon, authenticated;
+
+drop trigger if exists on_household_created_add_owner on public.households;
+create trigger on_household_created_add_owner
+after insert on public.households
+for each row execute function private.add_household_owner_membership();
+
 create index if not exists household_members_user_id_idx on public.household_members(user_id);
 create index if not exists accounts_household_id_idx on public.accounts(household_id);
 create index if not exists transactions_household_posted_idx on public.transactions(household_id, posted_at desc);
@@ -203,54 +223,9 @@ create policy "households_delete_creator"
 on public.households for delete to authenticated
 using (created_by = (select auth.uid()));
 
-create policy "household_members_select_visible"
+create policy "household_members_select_own"
 on public.household_members for select to authenticated
-using (
-  user_id = (select auth.uid())
-  or exists (
-    select 1 from public.households h
-    where h.id = household_members.household_id
-      and h.created_by = (select auth.uid())
-  )
-);
-
-create policy "household_members_insert_creator_self"
-on public.household_members for insert to authenticated
-with check (
-  user_id = (select auth.uid())
-  and exists (
-    select 1 from public.households h
-    where h.id = household_members.household_id
-      and h.created_by = (select auth.uid())
-  )
-);
-
-create policy "household_members_update_creator"
-on public.household_members for update to authenticated
-using (
-  exists (
-    select 1 from public.households h
-    where h.id = household_members.household_id
-      and h.created_by = (select auth.uid())
-  )
-)
-with check (
-  exists (
-    select 1 from public.households h
-    where h.id = household_members.household_id
-      and h.created_by = (select auth.uid())
-  )
-);
-
-create policy "household_members_delete_creator"
-on public.household_members for delete to authenticated
-using (
-  exists (
-    select 1 from public.households h
-    where h.id = household_members.household_id
-      and h.created_by = (select auth.uid())
-  )
-);
+using (user_id = (select auth.uid()));
 
 create policy "accounts_household_access"
 on public.accounts for all to authenticated
@@ -390,7 +365,7 @@ revoke all on public.user_preferences from anon;
 
 grant select, insert, update, delete on public.profiles to authenticated;
 grant select, insert, update, delete on public.households to authenticated;
-grant select, insert, update, delete on public.household_members to authenticated;
+grant select on public.household_members to authenticated;
 grant select, insert, update, delete on public.accounts to authenticated;
 grant select, insert, update, delete on public.transactions to authenticated;
 grant select, insert, update, delete on public.holdings to authenticated;
