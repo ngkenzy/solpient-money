@@ -23,6 +23,19 @@ try {
       to_regclass('public.direct_ofx_connections') is not null as direct_ofx_connections,
       to_regclass('public.oauth_fdx_connections') is not null as oauth_fdx_connections,
       to_regclass('private.oauth_fdx_tokens') is not null as oauth_fdx_tokens,
+      to_regclass('public.truth_merchant_rules') is not null as truth_merchant_rules,
+      to_regclass('public.account_merge_audit') is not null as account_merge_audit,
+      to_regprocedure('public.merge_truth_accounts(uuid,uuid)') is not null as merge_truth_accounts,
+      exists (
+        select 1 from information_schema.columns
+        where table_schema = 'public' and table_name = 'transactions'
+          and column_name = 'truth_category'
+      ) as truth_category,
+      exists (
+        select 1 from information_schema.columns
+        where table_schema = 'public' and table_name = 'holdings'
+          and column_name = 'truth_suppressed'
+      ) as truth_suppressed,
       to_regclass('public.local_migrations') is not null as local_migrations,
       auth.uid()::text as local_user_id
   `);
@@ -38,6 +51,11 @@ try {
     "direct_ofx_connections",
     "oauth_fdx_connections",
     "oauth_fdx_tokens",
+    "truth_merchant_rules",
+    "account_merge_audit",
+    "merge_truth_accounts",
+    "truth_category",
+    "truth_suppressed",
     "local_migrations",
   ]) {
     if (row[key] !== true) {
