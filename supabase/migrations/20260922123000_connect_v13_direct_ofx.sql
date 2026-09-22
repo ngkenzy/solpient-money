@@ -26,6 +26,7 @@ create index if not exists direct_ofx_connections_household_idx
 
 alter table public.direct_ofx_connections enable row level security;
 
+drop policy if exists "direct_ofx_connections_household_access" on public.direct_ofx_connections;
 create policy "direct_ofx_connections_household_access"
 on public.direct_ofx_connections for all to authenticated
 using (
@@ -61,6 +62,7 @@ alter table private.direct_ofx_secrets enable row level security;
 grant usage on schema private to authenticated;
 grant select, insert, update, delete on private.direct_ofx_secrets to authenticated;
 
+drop policy if exists "direct_ofx_secrets_household_access" on private.direct_ofx_secrets;
 create policy "direct_ofx_secrets_household_access"
 on private.direct_ofx_secrets for all to authenticated
 using (
