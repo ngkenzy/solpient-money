@@ -1,4 +1,114 @@
+
 # Solpient Money
+
+## Solpient Local V1 — current architecture
+
+**Current release: Solpient Money 0.8.0.** Money no longer requires hosted Supabase at runtime.
+
+```text
+Browser
+   ↓
+Next.js on this Mac
+   ↓
+server-only Solpient DB layer
+   ↓
+PostgreSQL 17 in Docker
+   ↓
+127.0.0.1:5432 only
+```
+
+Solpient Research remains a separate read-only online data source. Household Money data stays in the local PostgreSQL database unless a connector is explicitly used.
+
+### First-time Mac setup
+
+Prerequisite: a Docker-compatible runtime such as Docker Desktop, OrbStack, or Colima must be running.
+
+```bash
+cd ~/Documents/solpient-money
+git pull
+npm ci
+npm run local:setup
+npm run dev
+```
+
+`local:setup`:
+
+- creates a random PostgreSQL password
+- creates a dedicated connector encryption key
+- creates a dedicated backup encryption key
+- writes secrets only to gitignored local environment files
+- binds PostgreSQL to `127.0.0.1:5432`
+- starts PostgreSQL 17 in Docker
+- applies the existing PostgreSQL schema migrations
+- creates the single local Solpient identity
+
+Open:
+
+```text
+http://localhost:3000
+```
+
+If no household exists yet, open `/setup` to create one and optionally load the synthetic demo data.
+
+### One-time hosted Money → Mac migration
+
+Only use this if you want to copy existing Money data from the old hosted PostgreSQL database.
+
+Set the source PostgreSQL URL temporarily in your shell:
+
+```bash
+export SOLPIENT_SOURCE_DATABASE_URL='postgresql://...'
+npm run local:migrate-from-hosted
+unset SOLPIENT_SOURCE_DATABASE_URL
+```
+
+If the remote Money database contains more than one user, also set:
+
+```bash
+export SOLPIENT_SOURCE_USER_ID='...'
+```
+
+The migration remaps the selected user to the single local identity and copies household financial data while preserving IDs and provenance.
+
+Encrypted cloud connector secrets are deliberately **not** copied. Plaid, Direct OFX, and OAuth/FDX connection metadata is marked `needs_update` so those connectors can be re-authorized locally rather than carrying ciphertext encrypted under an old key.
+
+If the local database already has household data, the migration refuses to overwrite it. Use the explicit replacement mode only when intended:
+
+```bash
+npm run local:migrate-from-hosted -- --replace
+```
+
+### Encrypted local backups
+
+Create a backup:
+
+```bash
+npm run local:backup
+```
+
+Backups are compressed, then encrypted with AES-256-GCM and stored under the gitignored `backups/` directory. The setup command creates `SOLPIENT_BACKUP_ENCRYPTION_KEY` locally.
+
+Restore one:
+
+```bash
+npm run local:restore -- backups/solpient-money-<timestamp>.sql.gz.enc
+```
+
+Keep `.env.local` and at least one encrypted backup copy off the laptop. Without the backup encryption key, the encrypted backup cannot be restored.
+
+### Cost
+
+The local database path itself has no hosted database fee:
+
+- PostgreSQL Docker image: $0
+- local database storage: uses your Mac disk
+- Next.js local runtime: $0
+- native CSV/QFX/OFX imports: $0
+
+External services such as Plaid production, paid market data, AI APIs, or future bank-provider onboarding can still have their own costs.
+
+---
+
 
 Solpient Money is the private household-finance side of the Solpient platform.
 
