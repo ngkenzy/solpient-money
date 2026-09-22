@@ -45,30 +45,3 @@ export const fdxConnector: SolpientConnectorAdapter = {
     return futureOverview(fdxConnector.manifest);
   },
 };
-
-export const directOfxConnector: SolpientConnectorAdapter = {
-  manifest: {
-    id: "ofx-direct",
-    name: "Direct OFX",
-    shortName: "OFX",
-    description:
-      "Direct OFX download adapter slot using the same native parser and normalization model.",
-    kind: "direct-legacy",
-    maturity: "future",
-    href: "/connect",
-    capabilities: {
-      accounts: true,
-      transactions: true,
-      holdings: true,
-      liabilities: false,
-      manualImport: false,
-      automaticSync: true,
-      reconciliation: true,
-      repair: false,
-      disconnect: true,
-    },
-  },
-  async overview() {
-    return futureOverview(directOfxConnector.manifest);
-  },
-};
