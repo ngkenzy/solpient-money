@@ -23,10 +23,10 @@ export default function PlaidConnectionActions({
   async function sync() {
     setBusy("sync");
     setError(null);
-    const response = await fetch("/api/plaid/sync", {
+    const response = await fetch("/api/connect/sync", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ connectionId }),
+      body: JSON.stringify({ connectorId: "plaid", instanceId: connectionId }),
     });
     const body = await response.json();
     if (!response.ok || body.ok === false) {
@@ -43,10 +43,10 @@ export default function PlaidConnectionActions({
     setBusy("sync");
     setError(null);
 
-    const response = await fetch("/api/plaid/sync", {
+    const response = await fetch("/api/connect/sync", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ connectionId }),
+      body: JSON.stringify({ connectorId: "plaid", instanceId: connectionId }),
     });
     const body = await response.json();
     if (!response.ok || body.ok === false) {
@@ -86,7 +86,7 @@ export default function PlaidConnectionActions({
     const response = await fetch("/api/plaid/update-link-token", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ connectionId }),
+      body: JSON.stringify({ connectorId: "plaid", instanceId: connectionId }),
     });
     const body = await response.json();
 
@@ -109,7 +109,7 @@ export default function PlaidConnectionActions({
     const response = await fetch("/api/plaid/disconnect", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ connectionId }),
+      body: JSON.stringify({ connectorId: "plaid", instanceId: connectionId }),
     });
     const body = await response.json();
     if (!response.ok) {
