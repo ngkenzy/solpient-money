@@ -364,7 +364,7 @@ export default async function DataHealthPage() {
               <span className="card-kicker">MERCHANT RULES</span>
               <h2>Teach once, reuse forever</h2>
               <p className="empty-copy">
-                Rules affect Solpient's derived merchant and category only. Imported raw fields
+                Rules affect Solpient’s derived merchant and category only. Imported raw fields
                 remain unchanged.
               </p>
             </div>
