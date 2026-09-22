@@ -11,6 +11,7 @@ const registry = await readFile("lib/connect/registry.ts", "utf8");
 const fileAdapter = await readFile("lib/connect/adapters/file.ts", "utf8");
 const plaidAdapter = await readFile("lib/connect/adapters/plaid.ts", "utf8");
 const futureAdapters = await readFile("lib/connect/adapters/future.ts", "utf8");
+const directOfxAdapter = await readFile("lib/connect/adapters/direct-ofx.ts", "utf8");
 const route = await readFile("app/api/connect/sync/route.ts", "utf8");
 const legacyRoute = await readFile("app/api/plaid/sync/route.ts", "utf8");
 const panel = await readFile("components/ConnectorRegistryPanel.tsx", "utf8");
@@ -41,7 +42,8 @@ assert.ok(plaidAdapter.includes('id: "plaid"'));
 assert.ok(plaidAdapter.includes("automaticSync: true"));
 assert.ok(plaidAdapter.includes("repair: true"));
 assert.ok(futureAdapters.includes('id: "fdx"'));
-assert.ok(futureAdapters.includes('id: "ofx-direct"'));
+assert.ok(directOfxAdapter.includes('id: "ofx-direct"'));
+assert.ok(directOfxAdapter.includes('maturity: "live"'));
 
 assert.ok(route.includes("isConnectorId"));
 assert.ok(route.includes("runConnectorSync"));
