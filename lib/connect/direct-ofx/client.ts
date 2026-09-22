@@ -100,6 +100,19 @@ export function validateDirectOfxUrl(raw: string) {
   return url;
 }
 
+export function orderPublicAddresses(
+  addresses: PublicAddress[]
+) {
+  return [...addresses]
+    .sort((a, b) => {
+      if (a.family !== b.family) {
+        return a.family === 4 ? -1 : 1;
+      }
+      return a.address.localeCompare(b.address);
+    })
+    .slice(0, MAX_ADDRESS_ATTEMPTS);
+}
+
 export async function resolvePublicAddresses(
   url: URL
 ): Promise<PublicAddress[]> {
@@ -152,14 +165,9 @@ export async function resolvePublicAddresses(
     );
   }
 
-  const addresses = Array.from(unique.values())
-    .sort((a, b) => {
-      if (a.family !== b.family) {
-        return a.family === 4 ? -1 : 1;
-      }
-      return a.address.localeCompare(b.address);
-    })
-    .slice(0, MAX_ADDRESS_ATTEMPTS);
+  const addresses = orderPublicAddresses(
+    Array.from(unique.values())
+  );
 
   if (!addresses.length) {
     throw new Error(
