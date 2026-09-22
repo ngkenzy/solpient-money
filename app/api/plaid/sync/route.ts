@@ -54,13 +54,26 @@ export async function POST(request: Request) {
       } catch (syncError) {
         const code =
           syncError instanceof PlaidApiError ? syncError.errorCode ?? null : null;
+        const needsUpdate = ["ITEM_LOGIN_REQUIRED", "ITEM_LOCKED", "MFA_NOT_SUPPORTED"].includes(
+          code ?? ""
+        );
+        const invalidToken = ["INVALID_ACCESS_TOKEN", "ITEM_NOT_FOUND"].includes(
+          code ?? ""
+        );
+        const clearMessage = needsUpdate
+          ? "This Sandbox Item needs re-authentication. Use Repair to reopen Plaid Link in update mode."
+          : invalidToken
+            ? "This Sandbox Item token is no longer valid. Disconnect it and create a new test Item."
+            : syncError instanceof Error
+              ? syncError.message
+              : "Plaid sync failed.";
+
         await supabase
           .from("plaid_connections")
           .update({
-            status: code === "ITEM_LOGIN_REQUIRED" ? "needs_update" : "error",
+            status: needsUpdate ? "needs_update" : "error",
             last_error_code: code,
-            last_error_message:
-              syncError instanceof Error ? syncError.message : "Plaid sync failed.",
+            last_error_message: clearMessage,
             updated_at: new Date().toISOString(),
           })
           .eq("id", connection.id)
@@ -69,7 +82,14 @@ export async function POST(request: Request) {
         results.push({
           connectionId: connection.id,
           ok: false,
-          error: syncError instanceof Error ? syncError.message : "Plaid sync failed.",
+          error:
+            ["ITEM_LOGIN_REQUIRED", "ITEM_LOCKED", "MFA_NOT_SUPPORTED"].includes(code ?? "")
+              ? "Repair required."
+              : ["INVALID_ACCESS_TOKEN", "ITEM_NOT_FOUND"].includes(code ?? "")
+                ? "Reconnect required."
+                : syncError instanceof Error
+                  ? syncError.message
+                  : "Plaid sync failed.",
         });
       }
     }
