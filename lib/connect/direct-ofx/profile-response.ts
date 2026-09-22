@@ -7,10 +7,10 @@ function tagValue(block: string, tag: string) {
 
 function parseSignonStatus(text: string) {
   const signon =
-    text.match(/<SONRS(?:\\s[^>]*)?>([\\s\\S]*?)(?:<\\/SONRS>|$)/i)?.[1] ??
+    text.match(/<SONRS(?:\\s[^>]*)?>([\\s\\S]*?)(?:<\/SONRS>|$)/i)?.[1] ??
     text;
   const status =
-    signon.match(/<STATUS(?:\\s[^>]*)?>([\\s\\S]*?)(?:<\\/STATUS>|$)/i)?.[1] ??
+    signon.match(/<STATUS(?:\\s[^>]*)?>([\\s\\S]*?)(?:<\/STATUS>|$)/i)?.[1] ??
     signon;
   return {
     code: tagValue(status, "CODE") || "0",
