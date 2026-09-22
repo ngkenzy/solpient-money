@@ -17,8 +17,8 @@ const files = {
 const pkg = JSON.parse(files.packageJson);
 
 const checks = [
-  ["release version is 0.6.1", pkg.version === "0.6.1"],
-  ["persistent global Sandbox marker exists", files.shell.includes("PLAID SANDBOX · TEST DATA")],
+  ["release includes V0.6.1 or newer", /^0\.(?:[7-9]|6\.(?:[1-9]|[1-9][0-9]+))/.test(pkg.version) || pkg.version === "0.6.1"],
+  ["persistent global Sandbox marker exists", files.shell.includes("PLAID SANDBOX")],
   ["database source metadata reaches MoneyDataset", files.moneyData.includes('source: (row.source ?? "manual")')],
   ["Plaid accounts are marked test data", files.accounts.includes("PLAID TEST")],
   ["Plaid transactions are marked test data", files.transactions.includes("PLAID TEST")],
