@@ -1,6 +1,6 @@
 {
-  "name": "solphien-money",
-  "version": "0.1.0",
+  "name": "solpient-money",
+  "version": "0.2.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
