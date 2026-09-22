@@ -54,4 +54,5 @@ jobs:
       - run: npm run test:connect-v133
       - run: npm run test:connect-v14
       - run: npm run test:v09
+      - run: npm run test:v091
       - run: npm run build
