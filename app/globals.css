@@ -4426,3 +4426,368 @@ a {
     width: 100%;
   }
 }
+
+
+/* Solpient Connect V1.1 */
+.connect-recognized,
+.connect-prior-file {
+  margin-top: 12px;
+  padding: 10px 12px;
+  border: 1px solid #cfe3d9;
+  border-radius: 9px;
+  background: #f5fbf8;
+  color: #2b6f55;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+
+.connect-recognized > div {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.connect-recognized strong {
+  font-size: 9px;
+}
+
+.connect-recognized span,
+.connect-prior-file span {
+  font-size: 8px;
+  line-height: 1.45;
+}
+
+.connect-prior-file {
+  border-color: #ead9ad;
+  background: #fffaf0;
+  color: #7e641d;
+}
+
+.connect-mapping-toggle {
+  margin-top: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.connect-mapping-toggle button,
+.connect-undo button {
+  min-height: 32px;
+  border: 1px solid #d4dfeb;
+  border-radius: 8px;
+  padding: 0 10px;
+  background: white;
+  color: #315d89;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 8px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.connect-mapping-toggle span {
+  color: #7b8da3;
+  font-size: 8px;
+}
+
+.connect-mapping-editor {
+  margin-top: 12px;
+  padding: 15px;
+  border: 1px solid #d8e5f1;
+  border-radius: 10px;
+  background: #f8fbff;
+}
+
+.connect-mapping-editor > .section-title-row > select {
+  min-height: 34px;
+  border: 1px solid #d7e1ec;
+  border-radius: 8px;
+  padding: 0 9px;
+  color: #264663;
+  background: white;
+  font-size: 8px;
+}
+
+.connect-mapping-grid {
+  margin: 13px 0;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 9px;
+}
+
+.connect-mapping-grid label {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.connect-mapping-grid label > span {
+  color: #667c92;
+  font-size: 7px;
+  font-weight: 750;
+}
+
+.connect-mapping-grid select {
+  width: 100%;
+  min-height: 34px;
+  border: 1px solid #d8e2ec;
+  border-radius: 8px;
+  padding: 0 8px;
+  color: #183351;
+  background: white;
+  font-size: 8px;
+}
+
+.connect-remember {
+  margin-top: 12px;
+  padding: 10px 12px;
+  border: 1px solid #e0e7ef;
+  border-radius: 9px;
+  background: #fbfcfe;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #60768e;
+  font-size: 8px;
+  line-height: 1.45;
+}
+
+.connect-remember input {
+  width: 14px;
+  height: 14px;
+  accent-color: #1f6fc8;
+}
+
+.connect-reconciliation {
+  margin-top: 14px;
+  padding: 15px;
+  border: 1px solid #dde6ef;
+  border-radius: 10px;
+  background: #fbfcfe;
+}
+
+.connect-reconciliation.matched,
+.connect-reconciliation.captured {
+  border-color: #cfe6da;
+  background: #f7fbf9;
+}
+
+.connect-reconciliation.attention {
+  border-color: #ead9ad;
+  background: #fffaf2;
+}
+
+.connect-reconciliation-grid {
+  margin-top: 12px;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.connect-reconciliation-grid > div {
+  padding: 10px;
+  border: 1px solid rgba(210, 222, 234, .85);
+  border-radius: 8px;
+  background: rgba(255,255,255,.82);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.connect-reconciliation-grid span {
+  color: #7b8da3;
+  font-size: 7px;
+  text-transform: uppercase;
+  letter-spacing: .45px;
+}
+
+.connect-reconciliation-grid strong {
+  font-size: 11px;
+}
+
+.connect-anomalies {
+  margin-top: 10px;
+  display: grid;
+  gap: 6px;
+}
+
+.connect-anomalies > div,
+.connect-no-anomalies {
+  padding: 8px 9px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 8px;
+}
+
+.connect-anomalies .warning {
+  border: 1px solid #ead9ad;
+  background: #fff7e7;
+  color: #80621b;
+}
+
+.connect-anomalies .info {
+  border: 1px solid #d8e5f0;
+  background: #f7faff;
+  color: #55718e;
+}
+
+.connect-no-anomalies {
+  margin-top: 10px;
+  border: 1px solid #d2e7db;
+  background: #f6fbf8;
+  color: #2b7356;
+}
+
+.connection-status.matched,
+.connection-status.captured,
+.connection-status.estimated {
+  color: #277354;
+  background: #eef8f3;
+  border-color: #cbe4d7;
+}
+
+.connection-status.attention {
+  color: #856119;
+  background: #fff5df;
+  border-color: #ebd39b;
+}
+
+.connect-freshness-list,
+.connect-profile-list {
+  margin-top: 10px;
+}
+
+.connect-freshness-row {
+  min-height: 64px;
+  border-top: 1px solid #e6ecf2;
+  display: grid;
+  grid-template-columns: 40px minmax(200px, 1fr) 145px 100px;
+  gap: 12px;
+  align-items: center;
+}
+
+.connect-freshness-row.stale {
+  background: linear-gradient(90deg, rgba(255,248,231,.6), transparent 55%);
+}
+
+.connect-freshness-row > div:nth-child(2),
+.connect-freshness-row > div:nth-child(3) {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.connect-freshness-row strong {
+  font-size: 10px;
+}
+
+.connect-freshness-row span {
+  color: #7b8ca1;
+  font-size: 8px;
+}
+
+.connect-freshness-row.stale .connect-file-icon {
+  color: #9a6d17;
+  background: #fff4d8;
+}
+
+.connect-profile-row {
+  min-height: 58px;
+  border-top: 1px solid #e7edf3;
+  display: grid;
+  grid-template-columns: 40px minmax(220px, 1fr) 80px 150px;
+  gap: 10px;
+  align-items: center;
+}
+
+.connect-profile-row > div {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.connect-profile-row strong {
+  font-size: 9px;
+}
+
+.connect-profile-row span {
+  color: #7a8ca2;
+  font-size: 7px;
+}
+
+.connect-history-row.v11 {
+  grid-template-columns: 40px minmax(240px, 1fr) 70px 60px 88px 90px;
+}
+
+.connect-undo {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.connect-undo button {
+  min-height: 30px;
+  justify-content: center;
+  color: #8b4b35;
+  border-color: #ead5ca;
+  background: #fffaf7;
+}
+
+.connect-undo button:disabled {
+  opacity: .5;
+  cursor: not-allowed;
+}
+
+.connect-undo small {
+  max-width: 170px;
+  color: #a04a52;
+  font-size: 7px;
+  line-height: 1.35;
+}
+
+@media (max-width: 1050px) {
+  .connect-mapping-grid,
+  .connect-reconciliation-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .connect-history-row.v11 {
+    grid-template-columns: 40px minmax(200px, 1fr) 65px 65px;
+  }
+
+  .connect-history-row.v11 > .connection-status,
+  .connect-history-row.v11 > .connect-undo,
+  .connect-history-row.v11 > .small-muted {
+    grid-column: 2;
+    justify-self: start;
+  }
+}
+
+@media (max-width: 720px) {
+  .connect-mapping-grid,
+  .connect-reconciliation-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .connect-freshness-row,
+  .connect-profile-row,
+  .connect-history-row.v11 {
+    grid-template-columns: 40px 1fr;
+    padding: 10px 0;
+  }
+
+  .connect-freshness-row > div:nth-child(n+3),
+  .connect-freshness-row > .connection-status,
+  .connect-profile-row > div:nth-child(n+3),
+  .connect-history-row.v11 > div:nth-child(n+3),
+  .connect-history-row.v11 > .connection-status,
+  .connect-history-row.v11 > .connect-undo,
+  .connect-history-row.v11 > .small-muted {
+    grid-column: 2;
+  }
+}
