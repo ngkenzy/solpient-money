@@ -132,8 +132,8 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
               <Bell size={18} />
             </button>
             <div className="profile">
-              <span className="avatar">PN</span>
-              <span>Phuoc Nguyen</span>
+              <span className="avatar">SM</span>
+              <span>Money Household</span>
               <ChevronDown size={15} />
             </div>
           </div>
