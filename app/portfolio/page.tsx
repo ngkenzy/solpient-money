@@ -80,7 +80,13 @@ export default async function PortfolioPage() {
             const snapshot = research.snapshots[holding.ticker];
             return (
               <Link className="table-row table-link" href={`/portfolio/${holding.ticker.toLowerCase()}`} key={holding.ticker}>
-                <span className="holding-name"><strong>{holding.ticker}</strong><small>{holding.name}</small></span>
+                <span className="holding-name">
+                  <strong>{holding.ticker}</strong>
+                  <small>
+                    {holding.name}
+                    {holding.source === "plaid" ? <em className="source-badge plaid-test">PLAID TEST</em> : null}
+                  </small>
+                </span>
                 <strong>{money(holding.value)}</strong>
                 <span>{weight.toFixed(1)}%</span>
                 <span className={holding.ytdReturn >= 0 ? "positive-text" : "negative-text"}>{holding.ytdReturn >= 0 ? "+" : ""}{holding.ytdReturn.toFixed(1)}%</span>
