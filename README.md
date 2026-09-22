@@ -246,3 +246,28 @@ npm run test:connect
 npm run lint
 npm run build
 ```
+
+
+## Solpient Connect V1.1
+
+Solpient Money 0.6.3 turns native file imports into a repeatable personal-finance workflow.
+
+- Remembers successful CSV format signatures, column mappings, institution details, and preferred destination accounts.
+- Lets users correct nonstandard CSV columns once and reuse that mapping next time.
+- Reconciles projected activity against statement balances before import.
+- Flags high duplicate ratios, reconciliation gaps, large balance jumps, future-dated rows, zero-value rows, and parser warnings.
+- Tracks last file refresh per account and marks file sources stale after 14 days.
+- Stores rollback metadata for every import batch.
+- Supports one-click Undo for the latest import on an account and restores prior holdings/balance state.
+- Prevents undoing an older batch before newer account imports are rolled back.
+- Keeps the original statement file client-side; only normalized records and import metadata are persisted.
+- New profile and audit fields remain household-isolated with RLS.
+
+Verification:
+
+```bash
+npm run test:connect
+npm run test:connect-v11
+npm run lint
+npm run build
+```
