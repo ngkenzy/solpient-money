@@ -1,4 +1,4 @@
-import { accounts, holdings, transactions } from "@/lib/demo-data";
+import { demoMoneyDataset, type MoneyDataset } from "@/lib/demo-data";
 import type { ResearchSnapshot } from "@/lib/research";
 
 export const money = (value: number, decimals = false) =>
@@ -10,7 +10,8 @@ export const money = (value: number, decimals = false) =>
 
 export const pct = (value: number, digits = 1) => `${value.toFixed(digits)}%`;
 
-export function getFinancialSummary() {
+export function getFinancialSummary(dataset: MoneyDataset = demoMoneyDataset) {
+  const { accounts, holdings, transactions } = dataset;
   const assets = accounts.filter((a) => a.balance > 0).reduce((sum, a) => sum + a.balance, 0);
   const liabilities = Math.abs(accounts.filter((a) => a.balance < 0).reduce((sum, a) => sum + a.balance, 0));
   const netWorth = assets - liabilities;
@@ -37,7 +38,8 @@ export function getFinancialSummary() {
   };
 }
 
-export function getPortfolioMetrics() {
+export function getPortfolioMetrics(dataset: MoneyDataset = demoMoneyDataset) {
+  const { holdings } = dataset;
   const total = holdings.reduce((sum, h) => sum + h.value, 0);
   const directStocks = holdings.filter((h) => h.kind === "stock");
   const stockWeights = directStocks
@@ -59,30 +61,35 @@ export function getPortfolioMetrics() {
 }
 
 export function getPortfolioInsights(
-  snapshots: Record<string, ResearchSnapshot> = {}
+  snapshots: Record<string, ResearchSnapshot> = {},
+  dataset: MoneyDataset = demoMoneyDataset
 ) {
-  const metrics = getPortfolioMetrics();
+  const metrics = getPortfolioMetrics(dataset);
+  const { holdings, householdPlan } = dataset;
   const insights: Array<{
     level: "good" | "watch";
     title: string;
     detail: string;
   }> = [];
 
-  if (metrics.largestDirectStock && metrics.largestDirectStock.weight > 15) {
+  if (
+    metrics.largestDirectStock &&
+    metrics.largestDirectStock.weight > householdPlan.singleStockReviewPct
+  ) {
     insights.push({
       level: "watch",
       title: "Single-stock concentration",
-      detail: `${metrics.largestDirectStock.ticker} is ${metrics.largestDirectStock.weight.toFixed(1)}% of the total investment portfolio, above the 15% demo review threshold.`,
+      detail: `${metrics.largestDirectStock.ticker} is ${metrics.largestDirectStock.weight.toFixed(1)}% of the total investment portfolio, above the ${householdPlan.singleStockReviewPct}% review threshold.`,
     });
   } else {
     insights.push({
       level: "good",
       title: "Single-stock concentration",
-      detail: "No individual stock exceeds the 15% demo review threshold.",
+      detail: `No individual stock exceeds the ${householdPlan.singleStockReviewPct}% review threshold.`,
     });
   }
 
-  if (metrics.topThreeDirectStockWeight > 35) {
+  if (metrics.topThreeDirectStockWeight > householdPlan.topThreeStockReviewPct) {
     insights.push({
       level: "watch",
       title: "Top-three stock exposure",
@@ -109,7 +116,7 @@ export function getPortfolioInsights(
     detail: `${coveragePct.toFixed(0)}% of direct-stock value is connected to live published Solpient Research.`,
   });
 
-  if (metrics.cashWeight > 15) {
+  if (metrics.cashWeight > householdPlan.portfolioCashReviewPct) {
     insights.push({
       level: "watch",
       title: "Portfolio cash",
@@ -119,13 +126,18 @@ export function getPortfolioInsights(
     insights.push({
       level: "good",
       title: "Portfolio cash",
-      detail: `Cash is ${metrics.cashWeight.toFixed(1)}% of invested assets, below the 15% demo review threshold.`,
+      detail: `Cash is ${metrics.cashWeight.toFixed(1)}% of invested assets, below the ${householdPlan.portfolioCashReviewPct}% review threshold.`,
     });
   }
 
   return insights;
 }
 
-export function findHolding(ticker: string) {
-  return holdings.find((holding) => holding.ticker.toLowerCase() === ticker.toLowerCase());
+export function findHolding(
+  ticker: string,
+  dataset: MoneyDataset = demoMoneyDataset
+) {
+  return dataset.holdings.find(
+    (holding) => holding.ticker.toLowerCase() === ticker.toLowerCase()
+  );
 }
