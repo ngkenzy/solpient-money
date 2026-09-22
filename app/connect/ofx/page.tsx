@@ -50,9 +50,9 @@ export default async function DirectOfxPage() {
   return (
     <div className="page">
       <PageHeader
-        eyebrow="SOLPIENT CONNECT V1.3"
-        title="Direct OFX Connector"
-        description="Connect directly to an institution-provided OFX endpoint using an institution-issued Direct Connect credential. Solpient encrypts the credential, sends OFX over hardened HTTPS, and normalizes the response into Money."
+        eyebrow="SOLPIENT CONNECT V1.3.1"
+        title="Direct OFX + Institution Profiles"
+        description="Start from a curated institution capability profile, probe known OFX endpoints anonymously, then connect only when the institution supports a safe Direct Connect credential or token."
         action={
           <Link className="research-button" href="/connect">
             <ArrowLeft size={14} />
