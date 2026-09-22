@@ -57,9 +57,12 @@ export default function PlaidAutoRefresh({
 
   useEffect(() => {
     if (!enabled || connectionCount === 0) return;
-    void refresh();
+    const initial = window.setTimeout(() => void refresh(), 0);
     const timer = window.setInterval(() => void refresh(), REFRESH_INTERVAL_MS);
-    return () => window.clearInterval(timer);
+    return () => {
+      window.clearTimeout(initial);
+      window.clearInterval(timer);
+    };
   }, [connectionCount, enabled, refresh]);
 
   return (
