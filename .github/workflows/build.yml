@@ -27,4 +27,5 @@ jobs:
       - run: npm run test:connect-v12
       - run: npm run test:connect-v13
       - run: npm run test:connect-v131
+      - run: npm run test:connect-v132
       - run: npm run build
