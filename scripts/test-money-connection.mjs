@@ -1,23 +1,50 @@
-const baseUrl=(process.env.NEXT_PUBLIC_MONEY_SUPABASE_URL||"https://lvbkyxnptohcwqtuxxxh.supabase.co").replace(/\/$/,"");
-const key=process.env.NEXT_PUBLIC_MONEY_SUPABASE_PUBLISHABLE_KEY||"sb_publishable_WuuXjwPMHnohCu3D9WSP0w_ydWGaEyJ";
+import { readFile } from "node:fs/promises";
 
-const authHealth=await fetch(`${baseUrl}/auth/v1/health`,{
-  headers:{apikey:key,Accept:"application/json"},
-});
-if(!authHealth.ok){
-  throw new Error(`Money Auth health failed: HTTP ${authHealth.status}`);
+const packageJson = JSON.parse(
+  await readFile("package.json", "utf8")
+);
+const compose = await readFile(
+  "docker-compose.local.yml",
+  "utf8"
+);
+const client = await readFile(
+  "lib/local-db/client.ts",
+  "utf8"
+);
+const auth = await readFile(
+  "lib/money-auth.ts",
+  "utf8"
+);
+
+if (packageJson.dependencies?.["@supabase/ssr"]) {
+  throw new Error(
+    "Supabase SSR remains in Money runtime dependencies."
+  );
+}
+if (packageJson.dependencies?.["@supabase/supabase-js"]) {
+  throw new Error(
+    "Supabase JS remains in Money runtime dependencies."
+  );
+}
+if (packageJson.dependencies?.pg !== "8.23.0") {
+  throw new Error("Local PostgreSQL driver is not pinned.");
+}
+if (!compose.includes('"127.0.0.1:5432:5432"')) {
+  throw new Error(
+    "Local PostgreSQL is not bound to loopback only."
+  );
+}
+if (!client.includes("LocalDbClient")) {
+  throw new Error(
+    "Local PostgreSQL client is missing."
+  );
+}
+if (!auth.includes("LOCAL_USER_ID")) {
+  throw new Error(
+    "Single-user local identity is missing."
+  );
 }
 
-for(const table of ["accounts","transactions","holdings","goals"]){
-  const response=await fetch(`${baseUrl}/rest/v1/${table}?select=id&limit=1`,{
-    headers:{apikey:key,Accept:"application/json"},
-  });
-  if(response.ok){
-    throw new Error(`Anonymous client unexpectedly read private Money table: ${table}`);
-  }
-  if(![401,403].includes(response.status)){
-    throw new Error(`Unexpected anonymous response for ${table}: HTTP ${response.status} ${(await response.text()).slice(0,200)}`);
-  }
-}
-
-console.log("Solpient Money live connection OK; anonymous financial-table reads are blocked.");
+console.log(
+  "Solpient Money local PostgreSQL runtime checks passed."
+);
