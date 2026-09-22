@@ -1,10 +1,22 @@
-import { parseOfxStatus } from "./status";
-
 function tagValue(block: string, tag: string) {
   const match = block.match(
     new RegExp(`<${tag}(?:\\s[^>]*)?>([^<\\r\\n]*)`, "i")
   );
   return match?.[1]?.trim() ?? "";
+}
+
+function parseSignonStatus(text: string) {
+  const signon =
+    text.match(/<SONRS(?:\\s[^>]*)?>([\\s\\S]*?)(?:<\\/SONRS>|$)/i)?.[1] ??
+    text;
+  const status =
+    signon.match(/<STATUS(?:\\s[^>]*)?>([\\s\\S]*?)(?:<\\/STATUS>|$)/i)?.[1] ??
+    signon;
+  return {
+    code: tagValue(status, "CODE") || "0",
+    severity: tagValue(status, "SEVERITY") || "INFO",
+    message: tagValue(status, "MESSAGE"),
+  };
 }
 
 export type DirectOfxProbeResult = {
@@ -43,7 +55,7 @@ export function parseDirectOfxProfileResponse(
     };
   }
 
-  const status = parseOfxStatus(text);
+  const status = parseSignonStatus(text);
   const urls = Array.from(
     text.matchAll(/<URL(?:\s[^>]*)?>([^<\r\n]*)/gi),
     (match) => match[1].trim()
