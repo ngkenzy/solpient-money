@@ -6114,3 +6114,258 @@ a {
     text-align: left;
   }
 }
+
+
+/* Solpient Money V0.9.1 Review & Reconcile */
+.truth-account-row.inactive {
+  opacity: .68;
+}
+
+.truth-reviewed-label {
+  min-height: 28px;
+  padding: 0 8px;
+  border: 1px solid #d9e4ec;
+  border-radius: 8px;
+  background: #f8fafc;
+  color: #64798d;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  font-size: 7px;
+  font-weight: 800;
+}
+
+.truth-reviewed-label.confirmed,
+.truth-reviewed-label.confirmed_duplicate {
+  color: #35705a;
+  border-color: #cae1d6;
+  background: #f3faf6;
+}
+
+.truth-reviewed-label.rejected,
+.truth-reviewed-label.not_duplicate {
+  color: #6d7884;
+  background: #f5f7f9;
+}
+
+.truth-review-actions {
+  grid-column: 1 / -1;
+  display: flex;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 7px;
+  padding: 6px 0 3px;
+}
+
+.truth-review-actions.compact {
+  grid-column: 2 / -1;
+  padding-top: 2px;
+}
+
+.truth-review-actions button {
+  min-height: 30px;
+  padding: 0 10px;
+  border-radius: 8px;
+  border: 1px solid #d7e1ea;
+  background: white;
+  font: inherit;
+  font-size: 7px;
+  font-weight: 850;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  cursor: pointer;
+}
+
+.truth-review-actions button.confirm {
+  color: #2e6b55;
+  border-color: #cce1d7;
+  background: #f5faf7;
+}
+
+.truth-review-actions button.reject {
+  color: #7c5860;
+  border-color: #e4d2d6;
+  background: #fff9fa;
+}
+
+.truth-signal-row.reconcile {
+  grid-template-columns: 34px minmax(260px, 1fr) 110px 90px;
+}
+
+.truth-two-column {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 12px;
+}
+
+.truth-rule-form {
+  margin-top: 12px;
+  display: grid;
+  gap: 9px;
+}
+
+.truth-rule-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.truth-rule-form label > span {
+  color: #6f8295;
+  font-size: 7px;
+  font-weight: 800;
+}
+
+.truth-rule-form input,
+.truth-rule-form select {
+  width: 100%;
+  min-height: 36px;
+  border: 1px solid #d9e3ec;
+  border-radius: 8px;
+  padding: 0 10px;
+  background: white;
+  color: #29445c;
+  font: inherit;
+  font-size: 8px;
+}
+
+.truth-rule-form select {
+  padding-right: 28px;
+}
+
+.truth-rule-form .data-submit {
+  width: fit-content;
+  min-height: 32px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.truth-rule-split {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.truth-rule-list {
+  margin-top: 14px;
+  border-top: 1px solid #e5ecf2;
+}
+
+.truth-rule-row {
+  min-height: 50px;
+  border-bottom: 1px solid #e8eef3;
+  display: grid;
+  grid-template-columns: 1fr 32px;
+  gap: 10px;
+  align-items: center;
+}
+
+.truth-rule-row > div {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.truth-rule-row strong {
+  color: #2b465f;
+  font-size: 8px;
+}
+
+.truth-rule-row span,
+.truth-rule-empty {
+  color: #8191a2;
+  font-size: 7px;
+}
+
+.truth-rule-empty {
+  display: block;
+  padding: 12px 0;
+}
+
+.truth-icon-danger {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  border: 1px solid #e5d4d7;
+  background: #fffafa;
+  color: #8c5b64;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+}
+
+.truth-audit-list {
+  margin-top: 9px;
+}
+
+.truth-audit-row {
+  min-height: 56px;
+  border-top: 1px solid #e6edf3;
+  display: grid;
+  grid-template-columns: 28px minmax(220px, 1fr) repeat(3, minmax(120px, auto));
+  gap: 10px;
+  align-items: center;
+  padding: 8px 0;
+}
+
+.truth-audit-row > svg {
+  color: #49775f;
+}
+
+.truth-audit-row > div {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.truth-audit-row strong {
+  color: #2d475e;
+  font-size: 8px;
+}
+
+.truth-audit-row span {
+  color: #8091a2;
+  font-size: 7px;
+}
+
+@media (max-width: 1050px) {
+  .truth-two-column {
+    grid-template-columns: 1fr;
+  }
+
+  .truth-audit-row {
+    grid-template-columns: 28px 1fr 1fr;
+  }
+
+  .truth-audit-row > span:nth-last-child(-n+2) {
+    grid-column: 2 / -1;
+  }
+}
+
+@media (max-width: 720px) {
+  .truth-rule-split {
+    grid-template-columns: 1fr;
+  }
+
+  .truth-review-actions,
+  .truth-review-actions.compact {
+    grid-column: 1 / -1;
+    justify-content: stretch;
+  }
+
+  .truth-review-actions button {
+    flex: 1 1 150px;
+  }
+
+  .truth-audit-row {
+    grid-template-columns: 28px 1fr;
+  }
+
+  .truth-audit-row > span {
+    grid-column: 2;
+  }
+}
