@@ -301,7 +301,6 @@ export async function runTruthEngineForHousehold(): Promise<TruthEngineSummary> 
   }
 
   const canonicalByAccount = new Map<string, string>();
-  const accountStatus = new Map<string, string>();
   let duplicateAccountCandidates = 0;
   let staleAccounts = 0;
 
@@ -323,7 +322,6 @@ export async function runTruthEngineForHousehold(): Promise<TruthEngineSummary> 
       }
 
       canonicalByAccount.set(String(account.id), String(canonical.id));
-      accountStatus.set(String(account.id), status);
 
       const { error } = await supabase
         .from("accounts")
