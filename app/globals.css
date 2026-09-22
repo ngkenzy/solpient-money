@@ -5779,3 +5779,338 @@ a {
     grid-column: 2;
   }
 }
+
+
+/* Solpient Money V0.9 Truth Engine */
+.truth-run-button {
+  border: 0;
+  cursor: pointer;
+  font: inherit;
+}
+
+.truth-hero {
+  margin-bottom: 12px;
+  padding: 18px;
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr) auto;
+  gap: 14px;
+  align-items: center;
+}
+
+.truth-hero-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  color: #1e6a52;
+  background: #eef8f4;
+  border: 1px solid #cfe6dd;
+}
+
+.truth-hero h2,
+.truth-section h2 {
+  margin: 3px 0 4px;
+}
+
+.truth-hero p,
+.truth-section p {
+  margin: 0;
+  color: #718399;
+  font-size: 8px;
+  line-height: 1.5;
+}
+
+.truth-last-run {
+  min-width: 155px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  text-align: right;
+}
+
+.truth-last-run span,
+.truth-account-confidence span,
+.truth-account-freshness span,
+.truth-signal-confidence span {
+  color: #8493a5;
+  font-size: 7px;
+  font-weight: 750;
+}
+
+.truth-last-run strong,
+.truth-account-confidence strong,
+.truth-account-freshness strong,
+.truth-signal-confidence strong {
+  color: #29465f;
+  font-size: 8px;
+}
+
+.truth-metric-grid {
+  margin-bottom: 12px;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.truth-metric {
+  min-height: 112px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.truth-metric > svg {
+  margin-bottom: 6px;
+  color: #4779a3;
+}
+
+.truth-metric span {
+  color: #71859a;
+  font-size: 7px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+}
+
+.truth-metric strong {
+  color: #1f3d57;
+  font-size: 22px;
+  line-height: 1;
+}
+
+.truth-metric small {
+  margin-top: auto;
+  color: #8292a4;
+  font-size: 7px;
+}
+
+.truth-section {
+  margin-top: 12px;
+}
+
+.truth-health-pill {
+  min-height: 28px;
+  padding: 0 9px;
+  border: 1px solid #cfe4d9;
+  border-radius: 999px;
+  background: #f3faf6;
+  color: #37705d;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 7px;
+  font-weight: 800;
+}
+
+.truth-health-pill.warning {
+  border-color: #ead8aa;
+  background: #fffaf0;
+  color: #8a651d;
+}
+
+.truth-account-list,
+.truth-signal-list {
+  margin-top: 10px;
+}
+
+.truth-account-row {
+  min-height: 66px;
+  border-top: 1px solid #e6edf3;
+  display: grid;
+  grid-template-columns: minmax(220px, 1fr) 90px 145px 120px;
+  gap: 12px;
+  align-items: center;
+  padding: 9px 0;
+}
+
+.truth-account-main,
+.truth-account-confidence,
+.truth-account-freshness,
+.truth-status {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.truth-account-main strong {
+  color: #263f57;
+  font-size: 9px;
+}
+
+.truth-account-main span {
+  color: #8291a2;
+  font-size: 7px;
+}
+
+.truth-status {
+  justify-self: end;
+  min-width: 108px;
+  padding: 7px 8px;
+  border: 1px solid #dce5ed;
+  border-radius: 8px;
+  color: #62758a;
+  background: #f9fbfd;
+  font-size: 7px;
+  font-weight: 800;
+  text-align: right;
+}
+
+.truth-status small {
+  color: #8392a2;
+  font-size: 6px;
+  font-weight: 650;
+}
+
+.truth-status.healthy {
+  color: #34705a;
+  border-color: #cfe4d9;
+  background: #f4faf7;
+}
+
+.truth-status.stale,
+.truth-status.needs_review {
+  color: #8a651d;
+  border-color: #ead8aa;
+  background: #fffaf0;
+}
+
+.truth-status.duplicate_candidate {
+  color: #8d4d58;
+  border-color: #e9cfd4;
+  background: #fff7f8;
+}
+
+.truth-signal-row {
+  min-height: 60px;
+  border-top: 1px solid #e6edf3;
+  display: grid;
+  grid-template-columns: 34px minmax(260px, 1fr) 110px 90px;
+  gap: 10px;
+  align-items: center;
+  padding: 8px 0;
+}
+
+.truth-signal-icon {
+  width: 30px;
+  height: 30px;
+  border-radius: 9px;
+  display: grid;
+  place-items: center;
+  color: #476f96;
+  background: #f0f6fb;
+}
+
+.truth-signal-icon.duplicate {
+  color: #8d4d58;
+  background: #fff1f3;
+}
+
+.truth-signal-row > div:nth-child(2) {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.truth-signal-row > div:nth-child(2) strong {
+  color: #29435a;
+  font-size: 9px;
+}
+
+.truth-signal-row > div:nth-child(2) span {
+  color: #8393a4;
+  font-size: 7px;
+}
+
+.truth-signal-row > strong {
+  justify-self: end;
+  color: #315f51;
+  font-size: 9px;
+}
+
+.truth-signal-row > strong.negative {
+  color: #8e4f58;
+}
+
+.truth-signal-confidence {
+  justify-self: end;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  text-align: right;
+}
+
+.truth-empty {
+  min-height: 150px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  color: #8091a2;
+  text-align: center;
+}
+
+.truth-empty > svg {
+  color: #4d806d;
+}
+
+.truth-empty strong {
+  color: #405b73;
+  font-size: 9px;
+}
+
+.truth-empty span {
+  font-size: 7px;
+}
+
+@media (max-width: 1050px) {
+  .truth-metric-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .truth-account-row {
+    grid-template-columns: minmax(220px, 1fr) 85px 120px;
+  }
+
+  .truth-status {
+    grid-column: 2 / -1;
+    justify-self: stretch;
+    text-align: left;
+  }
+}
+
+@media (max-width: 720px) {
+  .truth-hero {
+    grid-template-columns: 42px 1fr;
+  }
+
+  .truth-last-run {
+    grid-column: 2;
+    text-align: left;
+  }
+
+  .truth-metric-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .truth-account-row,
+  .truth-signal-row {
+    grid-template-columns: 34px 1fr;
+  }
+
+  .truth-account-main {
+    grid-column: 1 / -1;
+  }
+
+  .truth-account-confidence,
+  .truth-account-freshness,
+  .truth-status,
+  .truth-signal-row > strong,
+  .truth-signal-confidence {
+    grid-column: 2;
+    justify-self: stretch;
+    text-align: left;
+  }
+}
