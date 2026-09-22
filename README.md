@@ -513,3 +513,109 @@ https://vesnc.vanguard.com/us/OfxDirectConnectServlet
 ```
 
 If every validated Vanguard route fails during the TCP connect stage, Solpient should treat that as evidence that the legacy endpoint is not generally reachable from the user's network/client path and stop before requesting credentials.
+
+
+## Solpient Connect V1.4 — OAuth / FDX Framework
+
+Solpient Money 0.7.0 adds a production-aware OAuth/FDX architecture without pretending sandbox OAuth is equivalent to a bank-approved FDX/FAPI integration.
+
+### Provider capability registry
+
+- **Solpient FDX Sandbox** — local end-to-end OAuth 2.0 Authorization Code + PKCE test provider.
+- **External FDX Sandbox** — configurable through environment variables.
+- **Bank of America / Merrill** — onboarding profile only; no fake production endpoints or client credentials.
+- **Chase** — partner-registration profile only; no fake production endpoints or client credentials.
+
+### OAuth security
+
+- Authorization Code flow with PKCE S256.
+- Cryptographically random state + verifier.
+- HttpOnly, SameSite=Lax, short-lived authorization-flow cookies.
+- State validation on callback.
+- No bank passwords collected by Solpient.
+- Access and refresh tokens encrypted with AES-256-GCM before database storage.
+- Refresh-token lifecycle supported.
+- Provider redirect and API endpoints must use HTTPS outside localhost.
+- Redirect following is disabled for OAuth token and FDX API requests.
+- Production FDX/FAPI profiles are explicitly blocked from the sandbox PKCE path.
+
+### FDX / FAPI production gates
+
+The framework models production requirements separately from sandbox OAuth:
+
+- client registration
+- FAPI security profile
+- Pushed Authorization Requests (PAR)
+- mTLS sender-constrained tokens
+- institution-specific certificates / onboarding
+
+V1.4 does not downgrade a provider marked `fdx_fapi` to ordinary OAuth just to make a button work.
+
+### Local FDX sandbox
+
+The built-in simulator validates the full Solpient flow:
+
+```text
+/connect/fdx
+   ↓
+OAuth start
+   ↓
+PKCE + state cookies
+   ↓
+Solpient FDX Sandbox consent page
+   ↓
+authorization code
+   ↓
+callback + state verification
+   ↓
+token exchange
+   ↓
+encrypted token vault
+   ↓
+FDX-aligned /accounts
+   ↓
+FDX-aligned /accounts/{id}/transactions
+   ↓
+Normalizer
+   ↓
+Money accounts / transactions / holdings
+```
+
+Synthetic sandbox data is used; no real financial institution or bank credential is involved.
+
+### Optional external sandbox configuration
+
+```bash
+FDX_SANDBOX_AUTHORIZATION_URL=
+FDX_SANDBOX_TOKEN_URL=
+FDX_SANDBOX_API_BASE_URL=
+FDX_SANDBOX_CLIENT_ID=
+FDX_SANDBOX_CLIENT_SECRET=
+FDX_SANDBOX_SCOPES="openid profile ACCOUNT_BASIC TRANSACTIONS INVESTMENTS"
+```
+
+`CONNECT_SECRET_ENCRYPTION_KEY` must also be configured because OAuth access/refresh tokens are encrypted before persistence.
+
+### Data provenance
+
+FDX-sourced Money records use:
+
+```text
+source = fdx
+oauth_fdx_connection_id
+fdx_account_id
+fdx_transaction_id
+fdx_security_id
+```
+
+Accounts, transactions, and holdings display an `OAUTH / FDX` provenance badge.
+
+### Verification
+
+```bash
+npm run test:connect-v12
+npm run test:connect-v13
+npm run test:connect-v14
+npm run lint
+npm run build
+```
