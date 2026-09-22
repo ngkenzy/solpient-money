@@ -6,6 +6,7 @@ import {
 } from "../lib/connect/direct-ofx/institutions.ts";
 import { buildAnonymousProfileRequest } from "../lib/connect/direct-ofx/profile-request.ts";
 import { parseDirectOfxProfileResponse } from "../lib/connect/direct-ofx/profile-response.ts";
+import { orderPublicAddresses } from "../lib/connect/direct-ofx/client.ts";
 
 const vanguard = getDirectOfxInstitutionProfile("vanguard");
 assert.ok(vanguard);
@@ -85,6 +86,19 @@ assert.equal(nonOfx.reachable, true);
 assert.equal(nonOfx.ofxResponse, false);
 assert.equal(nonOfx.accepted, false);
 
+const ordered = orderPublicAddresses([
+  { address: "2001:db8::2", family: 6 },
+  { address: "203.0.113.20", family: 4 },
+  { address: "203.0.113.10", family: 4 },
+  { address: "2001:db8::1", family: 6 },
+]);
+assert.deepEqual(ordered, [
+  { address: "203.0.113.10", family: 4 },
+  { address: "203.0.113.20", family: 4 },
+  { address: "2001:db8::1", family: 6 },
+  { address: "2001:db8::2", family: 6 },
+]);
+
 const route = await readFile(
   "app/api/connect/ofx/probe/route.ts",
   "utf8"
@@ -102,6 +116,8 @@ assert.ok(route.includes("getDirectOfxInstitutionProfile"));
 assert.ok(route.includes("buildAnonymousProfileRequest"));
 assert.ok(route.includes("profile.profileEndpointUrl ?? profile.endpointUrl"));
 assert.ok(route.includes('stage: "profile_probe"'));
+assert.ok(setup.includes("Profile"));
+assert.ok(setup.includes("Sync"));
 assert.ok(route.includes("parseDirectOfxProfileResponse"));
 assert.ok(!route.includes("endpointUrl?:"));
 assert.ok(setup.includes("Probe anonymously"));
