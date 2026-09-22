@@ -1,16 +1,20 @@
 import PageHeader from "@/components/PageHeader";
 import TransactionsExplorer from "@/components/TransactionsExplorer";
-import { transactions } from "@/lib/demo-data";
+import { requireMoneyDataset } from "@/lib/money-data";
 
-export default function TransactionsPage() {
+export const dynamic = "force-dynamic";
+
+export default async function TransactionsPage() {
+  const context = await requireMoneyDataset();
+
   return (
     <div className="page">
       <PageHeader
         eyebrow="TRANSACTIONS"
         title="Know where the money moved."
-        description="Search and filter deterministic demo activity by merchant, category, account, or transaction type."
+        description={context.source === "database" ? "Search and filter persisted household transactions." : "Search and filter deterministic demo activity until the Money database is connected."}
       />
-      <TransactionsExplorer transactions={transactions} />
+      <TransactionsExplorer transactions={context.dataset.transactions} />
     </div>
   );
 }
