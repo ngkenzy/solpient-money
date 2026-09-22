@@ -3,30 +3,32 @@ import { ArrowRight, CheckCircle2, TriangleAlert } from "lucide-react";
 import AllocationDonut from "@/components/AllocationDonut";
 import InteractiveLineChart from "@/components/InteractiveLineChart";
 import PageHeader from "@/components/PageHeader";
-import { allocation, holdings, portfolioPerformance } from "@/lib/demo-data";
 import { getPortfolioInsights, getPortfolioMetrics, money } from "@/lib/finance";
+import { requireMoneyDataset } from "@/lib/money-data";
 import { loadResearchSnapshots, summarizeResearchCoverage } from "@/lib/research";
 
 export const dynamic = "force-dynamic";
 
 export default async function PortfolioPage() {
-  const metrics = getPortfolioMetrics();
-  const directTickers = holdings.filter((holding) => holding.kind === "stock").map((holding) => holding.ticker);
+  const context = await requireMoneyDataset();
+  const data = context.dataset;
+  const metrics = getPortfolioMetrics(data);
+  const directTickers = data.holdings.filter((holding) => holding.kind === "stock").map((holding) => holding.ticker);
   const research = await loadResearchSnapshots(directTickers);
-  const researchSummary = summarizeResearchCoverage(holdings, research.snapshots);
-  const insights = getPortfolioInsights(research.snapshots);
+  const researchSummary = summarizeResearchCoverage(data.holdings, research.snapshots);
+  const insights = getPortfolioInsights(research.snapshots, data);
 
   return (
     <div className="page">
       <PageHeader
         eyebrow="PORTFOLIO"
         title="Your investments, connected to live Research."
-        description="Holdings remain demo positions. Research scores, fair values, thesis health, evidence confidence, risks, and published changes come from Solpient Research."
+        description={context.source === "database" ? "Persisted household holdings are matched to live published Solpient Research." : "Demo holdings are matched to live published Solpient Research until Money persistence is connected."}
         action={<span className={"live-pill " + (research.connected ? "connected" : "disconnected")}>{research.connected ? "RESEARCH LIVE" : "RESEARCH UNAVAILABLE"}</span>}
       />
 
       <div className="metric-grid four">
-        <div className="metric-card"><span>Portfolio value</span><strong>{money(metrics.total)}</strong><small>Demo holdings</small></div>
+        <div className="metric-card"><span>Portfolio value</span><strong>{money(metrics.total)}</strong><small>{data.holdings.length} holdings</small></div>
         <div className="metric-card"><span>Research coverage</span><strong>{researchSummary.coveragePct.toFixed(0)}%</strong><small>Of direct-stock value</small></div>
         <div className="metric-card"><span>Weighted Research score</span><strong>{researchSummary.weightedScore?.toFixed(0) ?? "—"}</strong><small>Latest published runs</small></div>
         <div className="metric-card"><span>Evidence confidence</span><strong>{researchSummary.weightedEvidenceConfidence?.toFixed(0) ?? "—"}</strong><small>Current Research ranking layer</small></div>
@@ -39,7 +41,7 @@ export default async function PortfolioPage() {
             <Link className="text-button" href="/performance">Open performance <ArrowRight size={15} /></Link>
           </div>
           <InteractiveLineChart
-            data={portfolioPerformance}
+            data={data.portfolioPerformance}
             series={[
               { key: "portfolio", label: "Portfolio", format: "percent" },
               { key: "benchmark", label: "Benchmark", format: "percent" },
@@ -54,14 +56,10 @@ export default async function PortfolioPage() {
             <Link className="text-button" href="/allocation">Details <ArrowRight size={15} /></Link>
           </div>
           <div className="portfolio-allocation">
-            <AllocationDonut items={allocation} totalLabel="$864K" />
+            <AllocationDonut items={data.allocation} totalLabel={money(metrics.total / 1000) + "K"} />
             <div className="allocation-list roomy">
-              {allocation.map((item) => (
-                <div key={item.label}>
-                  <span className={"dot " + item.tone} />
-                  <span>{item.label}</span>
-                  <strong>{item.value}%</strong>
-                </div>
+              {data.allocation.map((item) => (
+                <div key={item.label}><span className={"dot " + item.tone} /><span>{item.label}</span><strong>{item.value}%</strong></div>
               ))}
             </div>
           </div>
@@ -77,8 +75,8 @@ export default async function PortfolioPage() {
           <div className="table-row table-head-row">
             <span>Holding</span><span>Value</span><span>Weight</span><span>YTD</span><span>Research</span><span>Fair value</span><span>Thesis</span>
           </div>
-          {holdings.map((holding) => {
-            const weight = (holding.value / metrics.total) * 100;
+          {data.holdings.map((holding) => {
+            const weight = metrics.total ? (holding.value / metrics.total) * 100 : 0;
             const snapshot = research.snapshots[holding.ticker];
             return (
               <Link className="table-row table-link" href={`/portfolio/${holding.ticker.toLowerCase()}`} key={holding.ticker}>
