@@ -12,13 +12,19 @@ import {
 } from "lucide-react";
 import AllocationDonut from "@/components/AllocationDonut";
 import InteractiveLineChart from "@/components/InteractiveLineChart";
-import { allocation, dataAsOf, demoRefresh, netWorthSeries, transactions } from "@/lib/demo-data";
+import { allocation, dataAsOf, demoRefresh, holdings, netWorthSeries, transactions } from "@/lib/demo-data";
 import { getFinancialSummary, getPortfolioInsights, getPortfolioMetrics, money } from "@/lib/finance";
+import { loadResearchSnapshots, summarizeResearchCoverage } from "@/lib/research";
 
-export default function HomePage() {
+export const dynamic = "force-dynamic";
+
+export default async function HomePage() {
   const summary = getFinancialSummary();
   const portfolio = getPortfolioMetrics();
-  const insights = getPortfolioInsights();
+  const directTickers = holdings.filter((holding) => holding.kind === "stock").map((holding) => holding.ticker);
+  const research = await loadResearchSnapshots(directTickers);
+  const researchSummary = summarizeResearchCoverage(holdings, research.snapshots);
+  const insights = getPortfolioInsights(research.snapshots);
   const recent = transactions.slice(0, 5);
   const healthScore = 87;
 
@@ -26,13 +32,13 @@ export default function HomePage() {
     <div className="dashboard">
       <div className="welcome-row">
         <div>
-          <div className="eyebrow">SOLPIENT MONEY <span className="demo-pill">DEMO DATA</span></div>
+          <div className="eyebrow">SOLPIENT MONEY <span className="demo-pill">DEMO MONEY DATA</span></div>
           <h1>Good evening, Phuoc.</h1>
-          <p>Here&apos;s your complete financial picture.</p>
+          <p>Your household data is demo-only. Research intelligence is live from Solpient Research.</p>
         </div>
         <div className="asof">
           <strong>{dataAsOf}</strong>
-          <span>Last demo refresh · {demoRefresh}</span>
+          <span>Money refresh · {demoRefresh}</span>
         </div>
       </div>
 
@@ -174,7 +180,7 @@ export default function HomePage() {
             <span className="mini-positive">+12.4% YTD</span>
           </div>
           <div className="investment-body">
-            <AllocationDonut items={allocation} totalLabel={money(portfolio.total / 1000).replace("$", "$") + "K"} />
+            <AllocationDonut items={allocation} totalLabel={money(portfolio.total / 1000) + "K"} />
             <div className="allocation-list">
               {allocation.map((item) => (
                 <div key={item.label}>
@@ -188,14 +194,23 @@ export default function HomePage() {
           <Link className="text-button portfolio-link" href="/portfolio">View portfolio <ArrowRight size={15} /></Link>
         </section>
 
-        <section className="card research-card">
+        <section className="card research-card live-research-card">
           <div className="research-icon"><ShieldCheck size={21} /></div>
           <div>
-            <span className="card-kicker">SOLPIENT RESEARCH</span>
-            <h2>{portfolio.researchCoverage.toFixed(0)}% direct-stock coverage</h2>
-            <p>Research scores are still deterministic demo values in V0.2. The next integration can replace them with controlled read-only outputs from Solpient Research.</p>
+            <div className="research-live-line">
+              <span className="card-kicker">SOLPIENT RESEARCH</span>
+              <span className={"live-pill " + (research.connected ? "connected" : "disconnected")}>
+                {research.connected ? "LIVE" : "UNAVAILABLE"}
+              </span>
+            </div>
+            <h2>{researchSummary.coveragePct.toFixed(0)}% direct-stock value covered</h2>
+            <p>
+              {research.connected
+                ? `${researchSummary.coveredCount} of ${researchSummary.totalDirectStockCount} direct-stock holdings match a latest published Research package. Weighted live Research score: ${researchSummary.weightedScore?.toFixed(0) ?? "—"}; evidence confidence: ${researchSummary.weightedEvidenceConfidence?.toFixed(0) ?? "—"}.`
+                : "The live Research contract could not be reached. Money will not substitute synthetic Research values."}
+            </p>
           </div>
-          <Link className="research-button" href="/portfolio">Review holdings <ArrowRight size={16} /></Link>
+          <Link className="research-button" href="/research">Open Research feed <ArrowRight size={16} /></Link>
         </section>
       </div>
 
@@ -203,11 +218,11 @@ export default function HomePage() {
         <span className="ask-icon"><Sparkles size={19} /></span>
         <div className="ask-copy">
           <strong>Ask Solpient about your finances...</strong>
-          <span>Financial calculations stay deterministic; AI will explain the results later.</span>
+          <span>Financial calculations stay deterministic; Research facts now come from the live published Research system.</span>
         </div>
         <div className="ask-prompts">
           <Link href="/retirement">Can I retire at 50?</Link>
-          <Link href="/insights">Why did my net worth change?</Link>
+          <Link href="/insights">What deserves attention?</Link>
           <Link href="/portfolio">How concentrated is my portfolio?</Link>
         </div>
         <Link className="ask-send" aria-label="Open Solpient Intelligence" href="/insights"><ArrowRight size={18} /></Link>
@@ -215,7 +230,7 @@ export default function HomePage() {
 
       <div className="bottom-note">
         <Gauge size={15} />
-        <span>V0.2 uses deterministic demo data only. No bank credentials or live financial accounts are connected.</span>
+        <span>Money account balances remain deterministic demo data. Solpient Research fields are live read-only data from the published Research system.</span>
       </div>
     </div>
   );
