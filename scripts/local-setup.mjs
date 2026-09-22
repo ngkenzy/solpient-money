@@ -115,6 +115,19 @@ if (
   );
 }
 
+if (
+  !readKey(
+    nextEnv,
+    "SOLPIENT_BACKUP_ENCRYPTION_KEY"
+  )
+) {
+  nextEnv = upsertEnv(
+    nextEnv,
+    "SOLPIENT_BACKUP_ENCRYPTION_KEY",
+    randomBytes(32).toString("base64")
+  );
+}
+
 await writeFile(nextEnvPath, nextEnv, {
   mode: 0o600,
 });
