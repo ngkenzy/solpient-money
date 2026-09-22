@@ -116,6 +116,10 @@ const page = await readFile(
   "app/connect/fdx/page.tsx",
   "utf8"
 );
+const providersSource = await readFile(
+  "lib/connect/fdx/providers.ts",
+  "utf8"
+);
 const registry = await readFile(
   "lib/connect/registry.ts",
   "utf8"
@@ -173,7 +177,7 @@ assert.ok(tokenVault.includes("encryptConnectorSecret"));
 assert.ok(tokenVault.includes("decryptConnectorSecret"));
 
 assert.ok(page.includes("Sandbox OAuth is not being mislabeled as production FDX."));
-assert.ok(page.includes("Bank of America"));
+assert.ok(providersSource.includes("Bank of America / Merrill"));
 assert.ok(page.includes("PAR"));
 assert.ok(page.includes("mTLS"));
 assert.ok(registry.includes('adapters/fdx'));
