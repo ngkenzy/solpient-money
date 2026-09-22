@@ -1,4 +1,4 @@
-import type { SupabaseClient } from "@supabase/supabase-js";
+import type { SolpientDbClient } from "@/lib/local-db/client";
 import { decryptSecret, encryptSecret } from "@/lib/plaid/crypto";
 import { PlaidApiError, plaidPost } from "@/lib/plaid/client";
 
@@ -90,7 +90,7 @@ function signedTransactionAmount(transaction: PlaidTransaction) {
 }
 
 export async function storeAccessToken(
-  supabase: SupabaseClient,
+  supabase: SolpientDbClient,
   connectionId: string,
   accessToken: string
 ) {
@@ -105,7 +105,7 @@ export async function storeAccessToken(
 }
 
 export async function loadAccessToken(
-  supabase: SupabaseClient,
+  supabase: SolpientDbClient,
   connectionId: string
 ) {
   const { data, error } = await supabase.rpc("get_plaid_access_token", {
@@ -124,7 +124,7 @@ export async function loadAccessToken(
 }
 
 export async function syncPlaidAccounts(
-  supabase: SupabaseClient,
+  supabase: SolpientDbClient,
   connection: PlaidConnection,
   accessToken: string
 ) {
@@ -174,7 +174,7 @@ export async function syncPlaidAccounts(
 }
 
 export async function syncPlaidTransactions(
-  supabase: SupabaseClient,
+  supabase: SolpientDbClient,
   connection: PlaidConnection,
   accessToken: string,
   accountMap: Map<string, string>
@@ -259,7 +259,7 @@ export async function syncPlaidTransactions(
 }
 
 export async function syncPlaidInvestments(
-  supabase: SupabaseClient,
+  supabase: SolpientDbClient,
   connection: PlaidConnection,
   accessToken: string,
   accountMap: Map<string, string>
@@ -336,7 +336,7 @@ export async function syncPlaidInvestments(
 }
 
 export async function syncPlaidLiabilitiesBestEffort(
-  supabase: SupabaseClient,
+  supabase: SolpientDbClient,
   connection: PlaidConnection,
   accessToken: string,
   accountMap: Map<string, string>
@@ -409,7 +409,7 @@ export async function syncPlaidLiabilitiesBestEffort(
 }
 
 export async function syncPlaidConnection(
-  supabase: SupabaseClient,
+  supabase: SolpientDbClient,
   connection: PlaidConnection,
   accessToken?: string
 ) {
