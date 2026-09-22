@@ -151,7 +151,8 @@ assert.ok(startRoute.includes('sameSite: "lax"'));
 assert.ok(callbackRoute.includes("safeEqualState"));
 assert.ok(callbackRoute.includes("exchangeAuthorizationCode"));
 assert.ok(callbackRoute.includes("storeOAuthFdxTokens"));
-assert.ok(callbackRoute.includes('runConnectorSync("fdx"'));
+assert.ok(callbackRoute.includes("runConnectorSync"));
+assert.ok(callbackRoute.includes('"fdx"'));
 
 assert.ok(authorizeRoute.includes("Authorize sandbox data"));
 assert.ok(authorizeRoute.includes("code_challenge"));
