@@ -1,4 +1,4 @@
-import type { SupabaseClient } from "@supabase/supabase-js";
+import type { SolpientDbClient } from "@/lib/local-db/client";
 
 export type ConnectorId =
   | "files"
@@ -143,7 +143,7 @@ export type ConnectorDisconnectResult = {
 };
 
 export type ConnectorRuntimeContext = {
-  supabase: SupabaseClient;
+  supabase: SolpientDbClient;
   householdId: string;
 };
 
