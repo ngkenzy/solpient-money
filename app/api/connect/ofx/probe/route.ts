@@ -10,6 +10,7 @@ import { postDirectOfx } from "@/lib/connect/direct-ofx/client";
 export const dynamic = "force-dynamic";
 
 export async function POST(request: Request) {
+  let targetHost: string | null = null;
   try {
     await getConnectHouseholdContext();
 
@@ -30,9 +31,12 @@ export async function POST(request: Request) {
       );
     }
 
+    const probeEndpoint =
+      profile.profileEndpointUrl ?? profile.endpointUrl;
+
     if (
       profile.status !== "candidate" ||
-      !profile.endpointUrl
+      !probeEndpoint
     ) {
       return NextResponse.json(
         {
@@ -45,9 +49,10 @@ export async function POST(request: Request) {
       );
     }
 
+    targetHost = new URL(probeEndpoint).hostname;
     const requestBody = buildAnonymousProfileRequest(profile);
     const response = await postDirectOfx(
-      profile.endpointUrl,
+      probeEndpoint,
       requestBody
     );
     const probe = parseDirectOfxProfileResponse(response);
@@ -57,7 +62,10 @@ export async function POST(request: Request) {
       profile: {
         id: profile.id,
         name: profile.name,
-        endpointHost: new URL(profile.endpointUrl).hostname,
+        profileEndpointHost: targetHost,
+        transactionEndpointHost: profile.endpointUrl
+          ? new URL(profile.endpointUrl).hostname
+          : null,
         fid: profile.fid ?? null,
         org: profile.org ?? null,
         brokerId: profile.brokerId ?? null,
@@ -67,14 +75,21 @@ export async function POST(request: Request) {
       probe,
     });
   } catch (error) {
+    const message =
+      error instanceof Error
+        ? error.message
+        : "Direct OFX profile probe failed.";
+    const timeout = /timed out/i.test(message);
+
     return NextResponse.json(
       {
-        error:
-          error instanceof Error
-            ? error.message
-            : "Direct OFX profile probe failed.",
+        error: targetHost
+          ? `${targetHost}: ${message}`
+          : message,
+        stage: "profile_probe",
+        targetHost,
       },
-      { status: 502 }
+      { status: timeout ? 504 : 502 }
     );
   }
 }
