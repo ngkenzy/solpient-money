@@ -5,24 +5,31 @@ import InteractiveLineChart from "@/components/InteractiveLineChart";
 import PageHeader from "@/components/PageHeader";
 import { allocation, holdings, portfolioPerformance } from "@/lib/demo-data";
 import { getPortfolioInsights, getPortfolioMetrics, money } from "@/lib/finance";
+import { loadResearchSnapshots, summarizeResearchCoverage } from "@/lib/research";
 
-export default function PortfolioPage() {
+export const dynamic = "force-dynamic";
+
+export default async function PortfolioPage() {
   const metrics = getPortfolioMetrics();
-  const insights = getPortfolioInsights();
+  const directTickers = holdings.filter((holding) => holding.kind === "stock").map((holding) => holding.ticker);
+  const research = await loadResearchSnapshots(directTickers);
+  const researchSummary = summarizeResearchCoverage(holdings, research.snapshots);
+  const insights = getPortfolioInsights(research.snapshots);
 
   return (
     <div className="page">
       <PageHeader
         eyebrow="PORTFOLIO"
-        title="Your investments, connected to intelligence."
-        description="Holdings, allocation, concentration, performance, and demo Solpient Research signals in one decision surface."
+        title="Your investments, connected to live Research."
+        description="Holdings remain demo positions. Research scores, fair values, thesis health, evidence confidence, risks, and published changes come from Solpient Research."
+        action={<span className={"live-pill " + (research.connected ? "connected" : "disconnected")}>{research.connected ? "RESEARCH LIVE" : "RESEARCH UNAVAILABLE"}</span>}
       />
 
       <div className="metric-grid four">
-        <div className="metric-card"><span>Portfolio value</span><strong>{money(metrics.total)}</strong><small>Across demo holdings</small></div>
-        <div className="metric-card"><span>Largest holding</span><strong>{metrics.largestHolding.ticker}</strong><small>{metrics.largestHolding.weight.toFixed(1)}% of portfolio</small></div>
-        <div className="metric-card"><span>Research coverage</span><strong>{metrics.researchCoverage.toFixed(0)}%</strong><small>Of direct-stock value</small></div>
-        <div className="metric-card"><span>Research score</span><strong>{metrics.weightedResearchScore.toFixed(0)}</strong><small>Value-weighted demo score</small></div>
+        <div className="metric-card"><span>Portfolio value</span><strong>{money(metrics.total)}</strong><small>Demo holdings</small></div>
+        <div className="metric-card"><span>Research coverage</span><strong>{researchSummary.coveragePct.toFixed(0)}%</strong><small>Of direct-stock value</small></div>
+        <div className="metric-card"><span>Weighted Research score</span><strong>{researchSummary.weightedScore?.toFixed(0) ?? "—"}</strong><small>Latest published runs</small></div>
+        <div className="metric-card"><span>Evidence confidence</span><strong>{researchSummary.weightedEvidenceConfidence?.toFixed(0) ?? "—"}</strong><small>Current Research ranking layer</small></div>
       </div>
 
       <div className="portfolio-layout">
@@ -63,23 +70,25 @@ export default function PortfolioPage() {
 
       <section className="card page-card">
         <div className="section-title-row">
-          <div><span className="card-kicker">HOLDINGS</span><h2>Positions</h2></div>
-          <span className="small-muted">Click a holding for position detail</span>
+          <div><span className="card-kicker">HOLDINGS</span><h2>Positions + live Research</h2></div>
+          <span className="small-muted">Click a holding for position and Research detail</span>
         </div>
-        <div className="data-table holdings-table">
+        <div className="data-table holdings-table v03">
           <div className="table-row table-head-row">
-            <span>Holding</span><span>Value</span><span>Weight</span><span>YTD</span><span>Research</span><span>Thesis</span>
+            <span>Holding</span><span>Value</span><span>Weight</span><span>YTD</span><span>Research</span><span>Fair value</span><span>Thesis</span>
           </div>
           {holdings.map((holding) => {
             const weight = (holding.value / metrics.total) * 100;
+            const snapshot = research.snapshots[holding.ticker];
             return (
               <Link className="table-row table-link" href={`/portfolio/${holding.ticker.toLowerCase()}`} key={holding.ticker}>
                 <span className="holding-name"><strong>{holding.ticker}</strong><small>{holding.name}</small></span>
                 <strong>{money(holding.value)}</strong>
                 <span>{weight.toFixed(1)}%</span>
                 <span className={holding.ytdReturn >= 0 ? "positive-text" : "negative-text"}>{holding.ytdReturn >= 0 ? "+" : ""}{holding.ytdReturn.toFixed(1)}%</span>
-                <span>{holding.researchScore ?? "—"}</span>
-                <span><span className={"thesis-pill " + (holding.thesis?.toLowerCase().replace(" ", "-") ?? "none")}>{holding.thesis ?? "Index / cash"}</span></span>
+                <span>{snapshot?.overall_score ?? "—"}</span>
+                <span>{snapshot?.base_value != null ? money(snapshot.base_value, true) : "—"}</span>
+                <span><span className={"thesis-pill " + (snapshot?.thesis_health ?? "none")}>{snapshot?.thesis_health?.replace("_", " ") ?? "No coverage"}</span></span>
               </Link>
             );
           })}
