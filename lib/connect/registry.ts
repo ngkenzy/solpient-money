@@ -66,3 +66,18 @@ export async function runConnectorSync(
   }
   return connector.sync(context, instanceId);
 }
+
+
+export async function runConnectorDisconnect(
+  id: ConnectorId,
+  context: ConnectorRuntimeContext,
+  instanceId: string
+) {
+  const connector = getConnector(id);
+  if (!connector.disconnect) {
+    throw new Error(
+      `${connector.manifest.name} does not support disconnect through the Connector SDK.`
+    );
+  }
+  return connector.disconnect(context, instanceId);
+}
