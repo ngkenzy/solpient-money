@@ -229,6 +229,7 @@ export async function getMoneyContext(): Promise<MoneyContext> {
       .from("holdings")
       .select("*")
       .eq("household_id", householdId)
+      .eq("truth_suppressed", false)
       .order("market_value_cents", { ascending: false }),
     supabase
       .from("transactions")
@@ -311,7 +312,7 @@ export async function getMoneyContext(): Promise<MoneyContext> {
       id: String(row.id),
       date: normalizeDate(row.posted_at),
       merchant: String(row.normalized_merchant ?? row.merchant),
-      category: String(row.category ?? "Uncategorized"),
+      category: String(row.truth_category ?? row.category ?? "Uncategorized"),
       account: related?.name ?? "Unassigned",
       amount: dollars(row.amount_cents),
       type: (row.detected_transfer ? "transfer" : row.transaction_type) as Transaction["type"],
@@ -362,7 +363,7 @@ export async function getMoneyContext(): Promise<MoneyContext> {
   }));
 
   const portfolioPerformance = (portfolioResult.data ?? []).map((row) => ({
-    label: monthLabel(String(row.snapshot_date)),
+    label: monthLabel(row.snapshot_date),
     portfolio: numberValue(row.portfolio_return_pct),
     benchmark: numberValue(row.benchmark_return_pct),
   }));
