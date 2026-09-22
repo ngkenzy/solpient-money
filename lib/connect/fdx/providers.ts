@@ -44,7 +44,11 @@ function envSandbox(): FdxProviderProfile {
     process.env.FDX_SANDBOX_CLIENT_SECRET?.trim();
 
   const ready = Boolean(
-    authorizationUrl && tokenUrl && apiBaseUrl && clientId
+    authorizationUrl &&
+      tokenUrl &&
+      apiBaseUrl &&
+      clientId &&
+      process.env.CONNECT_SECRET_ENCRYPTION_KEY?.trim()
   );
 
   return {
@@ -79,7 +83,9 @@ export function getFdxProviders(): FdxProviderProfile[] {
     {
       id: "solpient-fdx-sandbox",
       name: "Solpient FDX Sandbox",
-      status: "sandbox_ready",
+      status: process.env.CONNECT_SECRET_ENCRYPTION_KEY?.trim()
+        ? "sandbox_ready"
+        : "setup_required",
       securityProfile: "oauth_pkce_sandbox",
       summary:
         "Local end-to-end OAuth/PKCE + FDX-aligned simulator for validating Solpient Connect without bank credentials or aggregator fees.",
