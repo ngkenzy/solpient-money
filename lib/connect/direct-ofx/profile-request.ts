@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import type { DirectOfxInstitutionProfile } from "@/lib/connect/direct-ofx/institutions";
+import type { DirectOfxInstitutionProfile } from "./institutions";
 
 const ANONYMOUS = "anonymous" + "0".repeat(23);
 
