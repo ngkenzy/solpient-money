@@ -1,8 +1,12 @@
-import type { NextRequest } from "next/server";
-import { updateSession } from "@/lib/supabase/proxy";
+import { NextResponse, type NextRequest } from "next/server";
 
 export async function proxy(request: NextRequest) {
-  return updateSession(request);
+  const response = NextResponse.next({ request });
+  response.headers.set(
+    "X-Solpient-Mode",
+    "local-postgresql"
+  );
+  return response;
 }
 
 export const config = {
