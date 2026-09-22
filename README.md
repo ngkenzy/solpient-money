@@ -329,3 +329,70 @@ npm run test:connect-v12
 npm run lint
 npm run build
 ```
+
+
+## Solpient Connect V1.3 — Direct OFX
+
+Solpient Money 0.6.5 promotes Direct OFX from a reserved SDK slot to a live connector at `/connect/ofx`.
+
+What it adds:
+
+- Institution-configurable HTTPS OFX endpoints.
+- Banking, credit-card, and investment request builders.
+- OFX 1.x-compatible SGML request envelope for broad legacy server compatibility.
+- Direct Connect/app-credential and OFX `USERKEY` authentication modes.
+- Optional `CLIENTUID`, `AUTHTOKEN`, `ORG`, and `FID` fields for institutions that require them.
+- One-time `AUTHTOKEN` removal from the encrypted secret after a successful sync.
+- AES-256-GCM encryption using a dedicated `CONNECT_SECRET_ENCRYPTION_KEY`.
+- Household-isolated public connection metadata plus private encrypted secret storage.
+- Generic Connector SDK sync and disconnect.
+- Banking transactions deduplicated/upserted by OFX FITID (with deterministic fallback).
+- Investment positions replaced as a current snapshot.
+- Direct OFX provenance on accounts, transactions, and holdings.
+- `DIRECT OFX` labels throughout Money.
+- OFX sign-on error parsing, including credential-update handling for code 15512.
+
+Outbound-request safety:
+
+- HTTPS only.
+- Port 443 only.
+- No credentials embedded in URLs.
+- Rejects localhost, private, link-local, reserved, and multicast addresses.
+- Resolves DNS before connecting and pins the request to the validated public address.
+- TLS certificate validation is performed against the original institution hostname.
+- Redirects are not followed.
+- 20-second request timeout.
+- 5 MB response-size ceiling.
+
+Credential policy:
+
+Solpient V1.3 does **not** ask users to store their normal online-banking password. The UI and API require explicit confirmation that the supplied secret is an institution-issued Direct Connect/app credential, `USERKEY`, or similar token.
+
+Local configuration:
+
+```bash
+openssl rand -base64 32
+```
+
+Add the result to `.env.local`:
+
+```bash
+CONNECT_SECRET_ENCRYPTION_KEY=...
+```
+
+Then open:
+
+```text
+http://localhost:3000/connect/ofx
+```
+
+Verification:
+
+```bash
+npm run test:connect
+npm run test:connect-v11
+npm run test:connect-v12
+npm run test:connect-v13
+npm run lint
+npm run build
+```
