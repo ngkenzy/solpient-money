@@ -55,7 +55,7 @@ export default async function ConnectionsPage() {
       <PageHeader
         eyebrow="PLAID SANDBOX"
         title="Connect test financial institutions."
-        description="V0.6 uses Plaid Sandbox only. Test Items can import banking transactions or investment holdings into the private Solpient Money household database."
+        description="V0.6.1 uses Plaid Sandbox only. Test Items can import banking transactions or investment holdings into the private Solpient Money household database."
         action={
           <span className={"live-pill " + (plaid.configured ? "connected" : "disconnected")}>
             {plaid.configured ? "SANDBOX READY" : "CREDENTIALS NEEDED"}
