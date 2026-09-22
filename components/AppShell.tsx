@@ -120,9 +120,12 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
 
       <section className="workspace">
         <header className="topbar">
-          <div className="product-switch">
-            <Link href="/research">Research</Link>
-            <Link className={pathname === "/research" ? "" : "selected"} href="/">Money</Link>
+          <div className="topbar-product-group">
+            <div className="product-switch">
+              <Link href="/research">Research</Link>
+              <Link className={pathname === "/research" ? "" : "selected"} href="/">Money</Link>
+            </div>
+            <span className="global-sandbox-badge">PLAID SANDBOX · TEST DATA</span>
           </div>
 
           <div className="top-actions">
