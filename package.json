@@ -1,12 +1,13 @@
 {
   "name": "solpient-money",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "test:research": "node scripts/test-research-connection.mjs"
   },
   "dependencies": {
     "lucide-react": "^0.468.0",
