@@ -9,12 +9,34 @@ jobs:
   build:
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_DB: solpient
+          POSTGRES_USER: solpient
+          POSTGRES_PASSWORD: solpient_ci
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U solpient -d solpient"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 12
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: 24
       - run: npm ci
+      - name: Apply Solpient schema to plain PostgreSQL 17
+        run: npm run local:migrate
+        env:
+          DATABASE_URL: postgresql://solpient:solpient_ci@127.0.0.1:5432/solpient
+      - name: Verify live PostgreSQL schema
+        run: node scripts/test-local-db-live.mjs
+        env:
+          DATABASE_URL: postgresql://solpient:solpient_ci@127.0.0.1:5432/solpient
       - run: npm run lint
       - run: npm run test:research
       - run: npm run test:money
