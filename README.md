@@ -221,3 +221,28 @@ Then sign in and open **Connections**.
 - Personal financial data remains in the dedicated Money database.
 - Solpient Research never receives household financial or authentication data.
 - Plaid V0.6 is Sandbox-only.
+
+
+## Solpient Connect V1
+
+Solpient Money 0.6.2 adds a provider-independent ingestion layer at `/connect`.
+
+- Native CSV transaction imports with flexible header detection.
+- Native brokerage holdings CSV imports.
+- QFX/OFX bank transaction parsing.
+- QFX/OFX investment position parsing.
+- Browser-side file parsing: the original statement file is not stored in Supabase.
+- Server-side transaction fingerprints prevent duplicate file imports.
+- Holding imports upsert positions by account + ticker.
+- File import batches provide an authenticated household audit trail.
+- Imported accounts, transactions, and holdings are labeled `FILE IMPORT`.
+- Plaid Sandbox remains available as a separate adapter at `/connections`.
+- FDX/OAuth and direct OFX adapters are reserved behind the same normalized Money model.
+
+Verification:
+
+```bash
+npm run test:connect
+npm run lint
+npm run build
+```
