@@ -5,9 +5,9 @@ Solpient Money is the private household-finance side of the Solpient platform.
 ## V0.5 status
 
 **Application architecture: complete.**  
-**Dedicated Supabase project: pending an available free-project slot.**
+**Dedicated Solpient Money Supabase project: live.**
 
-The Nexus Supabase organization currently has an older inactive project plus Solpient Research, and Supabase rejected creation of a third free project. V0.5 therefore remains in deterministic demo mode until the dedicated Money project can be created. No personal household data has been moved into Solpient Research.
+Project ref: `lvbkyxnptohcwqtuxxxh` in `us-east-2`. The V0.5 household schema and RLS policies are applied to this project only. Solpient Research remains a separate project and receives no personal household financial data.
 
 ## What V0.5 adds
 
@@ -46,7 +46,7 @@ No service-role key is used by the application.
 
 ### Household onboarding
 
-After the dedicated project is connected, the first signed-in user can:
+The first signed-in user can:
 
 1. Create a household.
 2. Become its owner through an atomic private database trigger.
@@ -87,7 +87,7 @@ Dedicated Money Supabase
         └── Attention Feed
 ```
 
-If the Money Supabase project is not configured, the same adapter intentionally returns the deterministic demo dataset.
+The production/default configuration now points at the dedicated Money project. Environment variables can override the public project URL and publishable key for another environment.
 
 ### Research remains separate
 
@@ -107,11 +107,11 @@ Research never receives household account, transaction, debt, goal, or authentic
 
 Copy `.env.example` to `.env.local`.
 
-The dedicated Money project will supply:
+The live Money project uses:
 
 ```bash
-NEXT_PUBLIC_MONEY_SUPABASE_URL=...
-NEXT_PUBLIC_MONEY_SUPABASE_PUBLISHABLE_KEY=...
+NEXT_PUBLIC_MONEY_SUPABASE_URL=https://lvbkyxnptohcwqtuxxxh.supabase.co
+NEXT_PUBLIC_MONEY_SUPABASE_PUBLISHABLE_KEY=sb_publishable_WuuXjwPMHnohCu3D9WSP0w_ydWGaEyJ
 ```
 
 Never use a secret/service-role key in the browser or commit one to GitHub.
@@ -124,7 +124,7 @@ The V0.5 schema is committed at:
 supabase/migrations/20260922050000_v05_money_schema.sql
 ```
 
-It has **not** been applied to Solpient Research. Apply it only to the dedicated Solpient Money project.
+It is applied to the dedicated Solpient Money project. It has **not** been applied to Solpient Research.
 
 ## Run locally
 
@@ -133,6 +133,7 @@ git clone https://github.com/ngkenzy/solpient-money.git
 cd solpient-money
 npm install
 npm run test:research
+npm run test:money
 npm run test:v04
 npm run test:v05
 npm run dev
@@ -150,7 +151,7 @@ http://localhost:3000
 2. V0.2 — functional navigation, portfolio engine, holdings, transactions, charts ✅
 3. V0.3 — live Solpient Research read integration ✅
 4. V0.4 — financial intelligence, attention feed, Research alerts, Scenario Lab ✅
-5. V0.5 — auth, household schema, RLS, persistence adapter, onboarding, manual data entry ✅ code / ⏳ project slot
+5. V0.5 — auth, dedicated Money database, RLS, persistence adapter, onboarding, manual data entry ✅
 6. V0.6 — Plaid Sandbox
 7. V0.7 — personal live-account testing
 8. V1.0 — personal Solpient Money
