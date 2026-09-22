@@ -10,6 +10,7 @@ type AccountRow = {
   account_type?: string | null;
   last_four?: string | null;
   source?: string | null;
+  is_active?: boolean | null;
   created_at?: unknown;
   updated_at?: unknown;
   last_file_import_at?: unknown;
@@ -17,6 +18,8 @@ type AccountRow = {
   identity_confidence?: unknown;
   canonical_account_id?: string | null;
   data_health_status?: string | null;
+  identity_review_status?: string | null;
+  merged_at?: unknown;
   truth_checked_at?: unknown;
 };
 
@@ -26,6 +29,7 @@ type TransactionRow = {
   posted_at: unknown;
   merchant: string;
   category?: string | null;
+  truth_category?: string | null;
   amount_cents: unknown;
   transaction_type?: string | null;
   source?: string | null;
@@ -34,8 +38,30 @@ type TransactionRow = {
   duplicate_of_transaction_id?: string | null;
   detected_transfer?: boolean | null;
   transfer_group_id?: string | null;
+  duplicate_review_status?: string | null;
+  transfer_review_status?: string | null;
   truth_confidence?: unknown;
   truth_checked_at?: unknown;
+};
+
+type MerchantRuleRow = {
+  id: string;
+  match_merchant: string;
+  normalized_merchant?: string | null;
+  category?: string | null;
+  priority?: unknown;
+  is_active?: boolean | null;
+  created_at?: unknown;
+};
+
+type MergeAuditRow = {
+  id: string;
+  duplicate_account_id: string;
+  canonical_account_id: string;
+  moved_transaction_count?: unknown;
+  reassigned_holding_count?: unknown;
+  suppressed_holding_count?: unknown;
+  created_at?: unknown;
 };
 
 export type TruthEngineSummary = {
@@ -55,8 +81,17 @@ export type TruthAccountHealth = {
   institution: string;
   source: string;
   lastFour: string;
-  status: "unreviewed" | "healthy" | "stale" | "duplicate_candidate" | "needs_review";
+  isActive: boolean;
+  status:
+    | "unreviewed"
+    | "healthy"
+    | "stale"
+    | "duplicate_candidate"
+    | "needs_review"
+    | "merged";
+  reviewStatus: "unreviewed" | "confirmed_duplicate" | "not_duplicate";
   identityConfidence: number;
+  canonicalAccountId: string | null;
   canonicalAccountName: string | null;
   lastUpdatedAt: string | null;
 };
@@ -66,16 +101,51 @@ export type TruthTransactionSignal = {
   postedAt: string;
   merchant: string;
   normalizedMerchant: string;
+  accountName: string;
   amount: number;
   source: string;
   signal: "duplicate" | "transfer";
   confidence: number;
+  duplicateOfId: string | null;
+  transferGroupId: string | null;
+  duplicateReviewStatus: "unreviewed" | "confirmed" | "rejected";
+  transferReviewStatus: "unreviewed" | "confirmed" | "rejected";
+};
+
+export type TruthTransferCandidate = {
+  id: string;
+  postedAt: string;
+  merchant: string;
+  accountId: string;
+  accountName: string;
+  amount: number;
+};
+
+export type TruthMerchantRule = {
+  id: string;
+  matchMerchant: string;
+  normalizedMerchant: string | null;
+  category: string | null;
+  priority: number;
+};
+
+export type TruthMergeAudit = {
+  id: string;
+  duplicateAccountName: string;
+  canonicalAccountName: string;
+  movedTransactions: number;
+  reassignedHoldings: number;
+  suppressedHoldings: number;
+  createdAt: string | null;
 };
 
 export type TruthEngineReport = {
   summary: TruthEngineSummary;
   accounts: TruthAccountHealth[];
   signals: TruthTransactionSignal[];
+  transferCandidates: TruthTransferCandidate[];
+  merchantRules: TruthMerchantRule[];
+  mergeAudits: TruthMergeAudit[];
 };
 
 const SOURCE_RANK: Record<string, number> = {
@@ -103,7 +173,18 @@ function simpleText(value: unknown) {
 }
 
 function titleCase(value: string) {
-  const preserve = new Set(["ACH", "ATM", "CVS", "FDX", "HSA", "IRA", "IRS", "UPS", "USAA"]);
+  const preserve = new Set([
+    "ACH",
+    "ATM",
+    "CVS",
+    "FDX",
+    "HSA",
+    "IRA",
+    "IRS",
+    "UPS",
+    "USAA",
+  ]);
+
   return value
     .split(" ")
     .filter(Boolean)
@@ -149,6 +230,10 @@ export function normalizeMerchant(value: unknown) {
   return titleCase(simpleText(merchant)) || "Unknown";
 }
 
+export function merchantRuleKey(value: unknown) {
+  return simpleText(normalizeMerchant(value));
+}
+
 function isoDate(value: unknown) {
   if (value instanceof Date) {
     return Number.isNaN(value.getTime()) ? "" : value.toISOString().slice(0, 10);
@@ -183,7 +268,9 @@ function identityLastFour(value: unknown) {
   return digits.length >= 4 ? digits.slice(-4) : "";
 }
 
-export function deriveAccountIdentity(account: Pick<AccountRow, "name" | "institution" | "account_type" | "last_four">) {
+export function deriveAccountIdentity(
+  account: Pick<AccountRow, "name" | "institution" | "account_type" | "last_four">
+) {
   const institution = simpleText(account.institution || "unknown");
   const type = simpleText(account.account_type || "unknown");
   const lastFour = identityLastFour(account.last_four);
@@ -191,7 +278,8 @@ export function deriveAccountIdentity(account: Pick<AccountRow, "name" | "instit
   if (lastFour) {
     return {
       key: [institution, type, lastFour].join("|"),
-      confidence: institution === "manual" || institution === "unknown" ? 0.84 : 0.97,
+      confidence:
+        institution === "manual" || institution === "unknown" ? 0.84 : 0.97,
     };
   }
 
@@ -219,6 +307,10 @@ function accountFreshnessStatus(account: AccountRow) {
 }
 
 function canonicalSort(a: AccountRow, b: AccountRow) {
+  const aRejected = a.identity_review_status === "not_duplicate" ? 1 : 0;
+  const bRejected = b.identity_review_status === "not_duplicate" ? 1 : 0;
+  if (aRejected !== bRejected) return aRejected - bRejected;
+
   const sourceDifference = sourceRank(b.source) - sourceRank(a.source);
   if (sourceDifference !== 0) return sourceDifference;
 
@@ -259,35 +351,67 @@ function dayDistance(a: unknown, b: unknown) {
   const left = isoDate(a);
   const right = isoDate(b);
   if (!left || !right) return Number.POSITIVE_INFINITY;
-  return Math.abs(
-    new Date(left + "T12:00:00Z").getTime() -
-      new Date(right + "T12:00:00Z").getTime()
-  ) / 86_400_000;
+
+  return (
+    Math.abs(
+      new Date(left + "T12:00:00Z").getTime() -
+        new Date(right + "T12:00:00Z").getTime()
+    ) / 86_400_000
+  );
+}
+
+function uniqueTransferCount(states: Array<{ detectedTransfer: boolean; transferGroupId: string | null }>) {
+  return new Set(
+    states
+      .filter((state) => state.detectedTransfer && state.transferGroupId)
+      .map((state) => state.transferGroupId as string)
+  ).size;
 }
 
 export async function runTruthEngineForHousehold(): Promise<TruthEngineSummary> {
   const { supabase, householdId } = await requireActiveHousehold();
-  const [{ data: accountData, error: accountError }, { data: transactionData, error: transactionError }] =
-    await Promise.all([
-      supabase
-        .from("accounts")
-        .select("*")
-        .eq("household_id", householdId)
-        .order("created_at", { ascending: true }),
-      supabase
-        .from("transactions")
-        .select("*")
-        .eq("household_id", householdId)
-        .order("posted_at", { ascending: true })
-        .limit(5000),
-    ]);
+
+  const [
+    { data: accountData, error: accountError },
+    { data: transactionData, error: transactionError },
+    { data: ruleData, error: ruleError },
+  ] = await Promise.all([
+    supabase
+      .from("accounts")
+      .select("*")
+      .eq("household_id", householdId)
+      .eq("is_active", true)
+      .order("created_at", { ascending: true }),
+    supabase
+      .from("transactions")
+      .select("*")
+      .eq("household_id", householdId)
+      .order("posted_at", { ascending: true })
+      .limit(5000),
+    supabase
+      .from("truth_merchant_rules")
+      .select("*")
+      .eq("household_id", householdId)
+      .eq("is_active", true)
+      .order("priority", { ascending: true })
+      .order("created_at", { ascending: true }),
+  ]);
 
   if (accountError) throw new Error(accountError.message);
   if (transactionError) throw new Error(transactionError.message);
+  if (ruleError) throw new Error(ruleError.message);
 
   const accounts = (accountData ?? []) as AccountRow[];
   const transactions = (transactionData ?? []) as TransactionRow[];
+  const rules = (ruleData ?? []) as MerchantRuleRow[];
   const now = new Date().toISOString();
+
+  const ruleMap = new Map<string, MerchantRuleRow>();
+  for (const rule of rules) {
+    if (!ruleMap.has(String(rule.match_merchant))) {
+      ruleMap.set(String(rule.match_merchant), rule);
+    }
+  }
 
   const identityGroups = new Map<string, AccountRow[]>();
   const identities = new Map<string, ReturnType<typeof deriveAccountIdentity>>();
@@ -310,25 +434,36 @@ export async function runTruthEngineForHousehold(): Promise<TruthEngineSummary> 
 
     for (const account of ordered) {
       const identity = identities.get(String(account.id))!;
-      const isDuplicate = account.id !== canonical.id && identity.confidence >= 0.8;
-      const freshness = accountFreshnessStatus(account);
-      let status = identity.confidence < 0.6 ? "needs_review" : freshness;
+      const reviewStatus = String(account.identity_review_status ?? "unreviewed");
+      const autoDuplicate =
+        account.id !== canonical.id &&
+        identity.confidence >= 0.8 &&
+        reviewStatus === "unreviewed";
 
-      if (isDuplicate) {
+      const freshness = accountFreshnessStatus(account);
+      let status =
+        identity.confidence < 0.6 ? "needs_review" : freshness;
+
+      if (reviewStatus === "not_duplicate") {
+        status = freshness;
+      } else if (autoDuplicate) {
         status = "duplicate_candidate";
         duplicateAccountCandidates += 1;
-      } else if (status === "stale") {
-        staleAccounts += 1;
       }
 
-      canonicalByAccount.set(String(account.id), String(canonical.id));
+      if (status === "stale") staleAccounts += 1;
+
+      canonicalByAccount.set(
+        String(account.id),
+        reviewStatus === "not_duplicate" ? String(account.id) : String(canonical.id)
+      );
 
       const { error } = await supabase
         .from("accounts")
         .update({
           identity_key: identity.key,
           identity_confidence: identity.confidence,
-          canonical_account_id: isDuplicate ? canonical.id : null,
+          canonical_account_id: autoDuplicate ? canonical.id : null,
           data_health_status: status,
           truth_checked_at: now,
         })
@@ -340,20 +475,47 @@ export async function runTruthEngineForHousehold(): Promise<TruthEngineSummary> 
   }
 
   const states = transactions.map((transaction) => {
-    const normalizedMerchant = normalizeMerchant(transaction.merchant);
+    const builtInMerchant = normalizeMerchant(transaction.merchant);
+    const rule = ruleMap.get(merchantRuleKey(builtInMerchant));
+    const normalizedMerchant =
+      String(rule?.normalized_merchant ?? "").trim() || builtInMerchant;
     const canonicalAccountId =
       canonicalByAccount.get(String(transaction.account_id ?? "")) ??
       String(transaction.account_id ?? "unassigned");
+
+    const duplicateReviewStatus = String(
+      transaction.duplicate_review_status ?? "unreviewed"
+    );
+    const transferReviewStatus = String(
+      transaction.transfer_review_status ?? "unreviewed"
+    );
 
     return {
       row: transaction,
       canonicalAccountId,
       normalizedMerchant,
-      fingerprint: transactionFingerprint(transaction, normalizedMerchant, canonicalAccountId),
-      duplicateOf: null as string | null,
-      detectedTransfer: false,
-      transferGroupId: null as string | null,
-      confidence: 0.8,
+      truthCategory: String(rule?.category ?? "").trim() || null,
+      fingerprint: transactionFingerprint(
+        transaction,
+        normalizedMerchant,
+        canonicalAccountId
+      ),
+      duplicateReviewStatus,
+      transferReviewStatus,
+      duplicateOf:
+        duplicateReviewStatus === "confirmed"
+          ? String(transaction.duplicate_of_transaction_id ?? "") || null
+          : null,
+      detectedTransfer: transferReviewStatus === "confirmed",
+      transferGroupId:
+        transferReviewStatus === "confirmed"
+          ? String(transaction.transfer_group_id ?? "") || null
+          : null,
+      confidence:
+        duplicateReviewStatus === "confirmed" ||
+        transferReviewStatus === "confirmed"
+          ? 1
+          : 0.8,
     };
   });
 
@@ -364,34 +526,44 @@ export async function runTruthEngineForHousehold(): Promise<TruthEngineSummary> 
     fingerprintGroups.set(state.fingerprint, bucket);
   }
 
-  let duplicateTransactions = 0;
-
   for (const group of fingerprintGroups.values()) {
     if (group.length < 2) continue;
 
-    const distinctSources = new Set(group.map((state) => String(state.row.source ?? "")));
+    const distinctSources = new Set(
+      group.map((state) => String(state.row.source ?? ""))
+    );
     if (distinctSources.size < 2) continue;
 
-    const ordered = [...group].sort(
+    const keeperCandidates = group.filter(
+      (state) => state.duplicateReviewStatus !== "confirmed"
+    );
+    const keeper = [...(keeperCandidates.length ? keeperCandidates : group)].sort(
       (a, b) =>
         sourceRank(b.row.source) - sourceRank(a.row.source) ||
         String(a.row.id).localeCompare(String(b.row.id))
-    );
-    const keeper = ordered[0];
+    )[0];
 
-    for (const duplicate of ordered.slice(1)) {
+    for (const duplicate of group) {
+      if (duplicate.row.id === keeper.row.id) continue;
+      if (duplicate.duplicateReviewStatus !== "unreviewed") continue;
+
       duplicate.duplicateOf = String(keeper.row.id);
       duplicate.confidence = 0.99;
-      duplicateTransactions += 1;
     }
   }
 
   const available = states
-    .filter((state) => !state.duplicateOf && state.row.account_id)
-    .sort((a, b) => isoDate(a.row.posted_at).localeCompare(isoDate(b.row.posted_at)));
+    .filter(
+      (state) =>
+        !state.duplicateOf &&
+        state.row.account_id &&
+        state.transferReviewStatus === "unreviewed"
+    )
+    .sort((a, b) =>
+      isoDate(a.row.posted_at).localeCompare(isoDate(b.row.posted_at))
+    );
 
   const paired = new Set<string>();
-  let detectedTransfers = 0;
 
   for (let i = 0; i < available.length; i += 1) {
     const left = available[i];
@@ -425,7 +597,6 @@ export async function runTruthEngineForHousehold(): Promise<TruthEngineSummary> 
       right.confidence = Math.max(right.confidence, 0.93);
       paired.add(String(left.row.id));
       paired.add(String(right.row.id));
-      detectedTransfers += 1;
       break;
     }
   }
@@ -435,10 +606,18 @@ export async function runTruthEngineForHousehold(): Promise<TruthEngineSummary> 
       .from("transactions")
       .update({
         normalized_merchant: state.normalizedMerchant,
+        truth_category: state.truthCategory,
         truth_fingerprint: state.fingerprint,
-        duplicate_of_transaction_id: state.duplicateOf,
-        detected_transfer: state.detectedTransfer,
-        transfer_group_id: state.transferGroupId,
+        duplicate_of_transaction_id:
+          state.duplicateReviewStatus === "rejected" ? null : state.duplicateOf,
+        detected_transfer:
+          state.transferReviewStatus === "rejected"
+            ? false
+            : state.detectedTransfer,
+        transfer_group_id:
+          state.transferReviewStatus === "rejected"
+            ? null
+            : state.transferGroupId,
         truth_confidence: state.confidence,
         truth_checked_at: now,
       })
@@ -454,36 +633,61 @@ export async function runTruthEngineForHousehold(): Promise<TruthEngineSummary> 
     staleAccounts,
     transactionsScanned: transactions.length,
     normalizedTransactions: states.length,
-    duplicateTransactions,
-    detectedTransfers,
+    duplicateTransactions: states.filter((state) => Boolean(state.duplicateOf))
+      .length,
+    detectedTransfers: uniqueTransferCount(states),
     lastRunAt: now,
   };
 }
 
 export async function getTruthEngineReport(): Promise<TruthEngineReport> {
   const { supabase, householdId } = await requireActiveHousehold();
-  const [{ data: accountData, error: accountError }, { data: transactionData, error: transactionError }] =
-    await Promise.all([
-      supabase
-        .from("accounts")
-        .select("*")
-        .eq("household_id", householdId)
-        .order("sort_order", { ascending: true })
-        .order("created_at", { ascending: true }),
-      supabase
-        .from("transactions")
-        .select("*")
-        .eq("household_id", householdId)
-        .order("posted_at", { ascending: false })
-        .limit(5000),
-    ]);
+
+  const [
+    { data: accountData, error: accountError },
+    { data: transactionData, error: transactionError },
+    { data: ruleData, error: ruleError },
+    { data: mergeAuditData, error: mergeAuditError },
+  ] = await Promise.all([
+    supabase
+      .from("accounts")
+      .select("*")
+      .eq("household_id", householdId)
+      .order("sort_order", { ascending: true })
+      .order("created_at", { ascending: true }),
+    supabase
+      .from("transactions")
+      .select("*")
+      .eq("household_id", householdId)
+      .order("posted_at", { ascending: false })
+      .limit(5000),
+    supabase
+      .from("truth_merchant_rules")
+      .select("*")
+      .eq("household_id", householdId)
+      .eq("is_active", true)
+      .order("priority", { ascending: true })
+      .order("created_at", { ascending: true }),
+    supabase
+      .from("account_merge_audit")
+      .select("*")
+      .eq("household_id", householdId)
+      .order("created_at", { ascending: false })
+      .limit(25),
+  ]);
 
   if (accountError) throw new Error(accountError.message);
   if (transactionError) throw new Error(transactionError.message);
+  if (ruleError) throw new Error(ruleError.message);
+  if (mergeAuditError) throw new Error(mergeAuditError.message);
 
   const accounts = (accountData ?? []) as AccountRow[];
   const transactions = (transactionData ?? []) as TransactionRow[];
-  const accountNames = new Map(accounts.map((account) => [String(account.id), String(account.name)]));
+  const rules = (ruleData ?? []) as MerchantRuleRow[];
+  const mergeAudits = (mergeAuditData ?? []) as MergeAuditRow[];
+  const accountNames = new Map(
+    accounts.map((account) => [String(account.id), String(account.name)])
+  );
 
   const accountHealth: TruthAccountHealth[] = accounts.map((account) => ({
     id: String(account.id),
@@ -491,26 +695,77 @@ export async function getTruthEngineReport(): Promise<TruthEngineReport> {
     institution: String(account.institution ?? "Manual"),
     source: String(account.source ?? "manual"),
     lastFour: String(account.last_four ?? "—"),
-    status: (account.data_health_status ?? "unreviewed") as TruthAccountHealth["status"],
+    isActive: account.is_active !== false,
+    status: (account.data_health_status ??
+      "unreviewed") as TruthAccountHealth["status"],
+    reviewStatus: (account.identity_review_status ??
+      "unreviewed") as TruthAccountHealth["reviewStatus"],
     identityConfidence: numeric(account.identity_confidence),
-    canonicalAccountName: account.canonical_account_id
-      ? accountNames.get(String(account.canonical_account_id)) ?? "Linked account"
+    canonicalAccountId: account.canonical_account_id
+      ? String(account.canonical_account_id)
       : null,
-    lastUpdatedAt: isoInstant(account.last_file_import_at ?? account.updated_at),
+    canonicalAccountName: account.canonical_account_id
+      ? accountNames.get(String(account.canonical_account_id)) ??
+        "Linked account"
+      : null,
+    lastUpdatedAt: isoInstant(
+      account.last_file_import_at ?? account.updated_at
+    ),
   }));
 
   const signals: TruthTransactionSignal[] = transactions
-    .filter((transaction) => transaction.duplicate_of_transaction_id || transaction.detected_transfer)
-    .slice(0, 100)
+    .filter(
+      (transaction) =>
+        transaction.duplicate_of_transaction_id || transaction.detected_transfer
+    )
+    .slice(0, 150)
     .map((transaction) => ({
       id: String(transaction.id),
       postedAt: isoDate(transaction.posted_at),
       merchant: String(transaction.merchant),
-      normalizedMerchant: String(transaction.normalized_merchant ?? normalizeMerchant(transaction.merchant)),
+      normalizedMerchant: String(
+        transaction.normalized_merchant ?? normalizeMerchant(transaction.merchant)
+      ),
+      accountName: transaction.account_id
+        ? accountNames.get(String(transaction.account_id)) ?? "Account"
+        : "Unassigned",
       amount: numeric(transaction.amount_cents) / 100,
       source: String(transaction.source ?? "manual"),
-      signal: transaction.duplicate_of_transaction_id ? "duplicate" : "transfer",
+      signal: transaction.duplicate_of_transaction_id
+        ? "duplicate"
+        : "transfer",
       confidence: numeric(transaction.truth_confidence),
+      duplicateOfId: transaction.duplicate_of_transaction_id
+        ? String(transaction.duplicate_of_transaction_id)
+        : null,
+      transferGroupId: transaction.transfer_group_id
+        ? String(transaction.transfer_group_id)
+        : null,
+      duplicateReviewStatus: (transaction.duplicate_review_status ??
+        "unreviewed") as TruthTransactionSignal["duplicateReviewStatus"],
+      transferReviewStatus: (transaction.transfer_review_status ??
+        "unreviewed") as TruthTransactionSignal["transferReviewStatus"],
+    }));
+
+  const transferCandidates: TruthTransferCandidate[] = transactions
+    .filter(
+      (transaction) =>
+        transaction.account_id &&
+        !transaction.duplicate_of_transaction_id &&
+        transaction.transfer_review_status !== "confirmed" &&
+        !transaction.detected_transfer
+    )
+    .slice(0, 60)
+    .map((transaction) => ({
+      id: String(transaction.id),
+      postedAt: isoDate(transaction.posted_at),
+      merchant: String(
+        transaction.normalized_merchant ?? transaction.merchant
+      ),
+      accountId: String(transaction.account_id),
+      accountName:
+        accountNames.get(String(transaction.account_id)) ?? "Account",
+      amount: numeric(transaction.amount_cents) / 100,
     }));
 
   const checked = [
@@ -522,16 +777,54 @@ export async function getTruthEngineReport(): Promise<TruthEngineReport> {
 
   return {
     summary: {
-      accountsScanned: accounts.length,
-      duplicateAccountCandidates: accountHealth.filter((account) => account.status === "duplicate_candidate").length,
-      staleAccounts: accountHealth.filter((account) => account.status === "stale").length,
+      accountsScanned: accountHealth.filter((account) => account.isActive).length,
+      duplicateAccountCandidates: accountHealth.filter(
+        (account) =>
+          account.isActive && account.status === "duplicate_candidate"
+      ).length,
+      staleAccounts: accountHealth.filter(
+        (account) => account.isActive && account.status === "stale"
+      ).length,
       transactionsScanned: transactions.length,
-      normalizedTransactions: transactions.filter((transaction) => transaction.normalized_merchant).length,
-      duplicateTransactions: transactions.filter((transaction) => transaction.duplicate_of_transaction_id).length,
-      detectedTransfers: Math.floor(transactions.filter((transaction) => transaction.detected_transfer).length / 2),
+      normalizedTransactions: transactions.filter(
+        (transaction) => transaction.normalized_merchant
+      ).length,
+      duplicateTransactions: transactions.filter(
+        (transaction) => transaction.duplicate_of_transaction_id
+      ).length,
+      detectedTransfers: new Set(
+        transactions
+          .filter(
+            (transaction) =>
+              transaction.detected_transfer && transaction.transfer_group_id
+          )
+          .map((transaction) => String(transaction.transfer_group_id))
+      ).size,
       lastRunAt: checked.at(-1) ?? null,
     },
     accounts: accountHealth,
     signals,
+    transferCandidates,
+    merchantRules: rules.map((rule) => ({
+      id: String(rule.id),
+      matchMerchant: String(rule.match_merchant),
+      normalizedMerchant: rule.normalized_merchant
+        ? String(rule.normalized_merchant)
+        : null,
+      category: rule.category ? String(rule.category) : null,
+      priority: numeric(rule.priority),
+    })),
+    mergeAudits: mergeAudits.map((audit) => ({
+      id: String(audit.id),
+      duplicateAccountName:
+        accountNames.get(String(audit.duplicate_account_id)) ?? "Merged account",
+      canonicalAccountName:
+        accountNames.get(String(audit.canonical_account_id)) ??
+        "Canonical account",
+      movedTransactions: numeric(audit.moved_transaction_count),
+      reassignedHoldings: numeric(audit.reassigned_holding_count),
+      suppressedHoldings: numeric(audit.suppressed_holding_count),
+      createdAt: isoInstant(audit.created_at),
+    })),
   };
 }
