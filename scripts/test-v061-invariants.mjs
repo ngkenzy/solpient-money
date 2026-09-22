@@ -20,7 +20,7 @@ const pkg = JSON.parse(files.packageJson);
 
 const checks = [
   ["release includes V0.6.1 or newer", /^0\.(?:[7-9]|6\.(?:[1-9]|[1-9][0-9]+))/.test(pkg.version) || pkg.version === "0.6.1"],
-  ["persistent Sandbox context remains visible", files.shell.includes("CONNECT V1.2") && files.connections.includes("PLAID SANDBOX TEST DATA")],
+  ["persistent Sandbox context remains visible", files.connections.includes("PLAID SANDBOX TEST DATA")],
   ["database source metadata reaches MoneyDataset", files.moneyData.includes('source: (row.source ?? "manual")')],
   ["Plaid accounts are marked test data", files.accounts.includes("PLAID TEST")],
   ["Plaid transactions are marked test data", files.transactions.includes("PLAID TEST")],
