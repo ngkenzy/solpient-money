@@ -135,6 +135,13 @@ export type ConnectorSyncResult = {
   action?: "none" | "repair" | "reconnect";
 };
 
+export type ConnectorDisconnectResult = {
+  connectorId: ConnectorId;
+  instanceId: string;
+  ok: boolean;
+  error?: string;
+};
+
 export type ConnectorRuntimeContext = {
   supabase: SupabaseClient;
   householdId: string;
@@ -147,6 +154,10 @@ export interface SolpientConnectorAdapter {
     context: ConnectorRuntimeContext,
     instanceId?: string
   ): Promise<ConnectorSyncResult[]>;
+  disconnect?(
+    context: ConnectorRuntimeContext,
+    instanceId: string
+  ): Promise<ConnectorDisconnectResult>;
 }
 
 export function connectorHealthRank(health: ConnectorHealth) {
