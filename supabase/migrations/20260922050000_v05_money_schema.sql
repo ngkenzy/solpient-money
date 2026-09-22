@@ -153,13 +153,13 @@ returns trigger
 language plpgsql
 security definer
 set search_path = ''
-as $
+as $$
 begin
   insert into public.household_members (household_id, user_id, role)
   values (new.id, new.created_by, 'owner');
   return new;
 end;
-$;
+$$;
 
 revoke all on function private.add_household_owner_membership() from public, anon, authenticated;
 
