@@ -3,7 +3,6 @@ import {
   createDecipheriv,
   randomBytes,
 } from "node:crypto";
-import { getConnectSecretKey } from "@/lib/connect/direct-ofx/config";
 
 export type EncryptedConnectorSecret = {
   ciphertext: string;
@@ -12,7 +11,12 @@ export type EncryptedConnectorSecret = {
 };
 
 function encryptionKey() {
-  const raw = getConnectSecretKey();
+  const raw = process.env.CONNECT_SECRET_ENCRYPTION_KEY?.trim();
+  if (!raw) {
+    throw new Error(
+      "Direct OFX secret encryption is not configured. Set CONNECT_SECRET_ENCRYPTION_KEY."
+    );
+  }
   const key = /^[a-f0-9]{64}$/i.test(raw)
     ? Buffer.from(raw, "hex")
     : Buffer.from(raw, "base64");
