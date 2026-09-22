@@ -368,7 +368,7 @@ export default function FileImportWorkbench({
 
   return (
     <div className="connect-workbench">
-      <section className="card page-card connect-upload-card">
+      <section id="file-import" className="card page-card connect-upload-card">
         <div className="section-title-row">
           <div>
             <span className="card-kicker">
