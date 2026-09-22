@@ -67,7 +67,7 @@ export default function TransactionsExplorer({ transactions }: { transactions: T
             <span>{transaction.date}</span>
             <strong className="transaction-description">
               <span>{transaction.merchant}</span>
-              {transaction.source === "plaid" ? <em className="source-badge plaid-test">PLAID TEST</em> : null}
+              {transaction.source === "plaid" ? <em className="source-badge plaid-test">PLAID TEST</em> : transaction.source === "file" ? <em className="source-badge file-import">FILE IMPORT</em> : null}
             </strong>
             <span><span className="category-pill">{transaction.category}</span></span>
             <span>{transaction.account}</span>
