@@ -10,7 +10,8 @@ import {
 import { notFound } from "next/navigation";
 import PageHeader from "@/components/PageHeader";
 import { demoMoneyDataset } from "@/lib/demo-data";
-import { findHolding, getPortfolioMetrics, money } from "@/lib/finance";\nimport { requireMoneyDataset } from "@/lib/money-data";
+import { findHolding, getPortfolioMetrics, money } from "@/lib/finance";
+import { requireMoneyDataset } from "@/lib/money-data";
 import { formatResearchDate, loadResearchSnapshots } from "@/lib/research";
 
 export const dynamic = "force-dynamic";
