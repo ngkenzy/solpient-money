@@ -1,6 +1,6 @@
 {
   "name": "solpient-money",
-  "version": "0.9.0",
+  "version": "0.9.1",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -27,7 +27,8 @@
     "local:restore": "node scripts/local-restore.mjs",
     "test:local": "node scripts/test-local-postgres.mjs",
     "local:migrate-from-hosted": "node scripts/migrate-hosted-money-to-local.mjs",
-    "test:v09": "node scripts/test-v09-truth-engine.mjs"
+    "test:v09": "node scripts/test-v09-truth-engine.mjs",
+    "test:v091": "node scripts/test-v091-review-reconcile.mjs"
   },
   "dependencies": {
     "lucide-react": "^0.468.0",
