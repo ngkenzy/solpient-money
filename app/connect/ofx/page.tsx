@@ -50,8 +50,8 @@ export default async function DirectOfxPage() {
   return (
     <div className="page">
       <PageHeader
-        eyebrow="SOLPIENT CONNECT V1.3.2"
-        title="Direct OFX + Capability Diagnostics"
+        eyebrow="SOLPIENT CONNECT V1.3.3"
+        title="Direct OFX + Network Failover"
         description="Start from a curated institution capability profile, probe known OFX endpoints anonymously, then connect only when the institution supports a safe Direct Connect credential or token."
         action={
           <Link className="research-button" href="/connect">
