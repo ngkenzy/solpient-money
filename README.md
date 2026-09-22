@@ -482,3 +482,34 @@ Network failures are also staged:
 - `response` — HTTPS/TLS succeeded but the OFX server did not answer in time.
 
 The API returns the profile-probe stage and target host on failure. Solpient continues to use `APPID=SOLPIENT`; it does not impersonate Quicken.
+
+
+## Solpient Connect V1.3.3 — Multi-address OFX failover
+
+Solpient Money 0.6.8 hardens Direct OFX connectivity after the Vanguard profile servlet timed out during the TCP connect stage.
+
+The Direct OFX client now:
+
+- resolves every public IPv4/IPv6 address returned for the OFX hostname
+- rejects the entire resolution set if any answer points at a private/reserved address
+- de-duplicates addresses
+- prefers IPv4 first, then IPv6
+- attempts up to six validated public routes
+- pins TLS validation to the original financial-institution hostname on every route
+- uses stage-specific connect/TLS/response timeouts
+- stops immediately when one validated route succeeds
+- summarizes every failed route if none succeed
+
+This removes DNS answer ordering as a source of false Direct OFX failures while retaining the V1.3 SSRF and TLS protections.
+
+For Vanguard, V1.3.3 continues to use:
+
+```text
+Profile probe:
+https://vesnc.vanguard.com/us/OfxProfileServlet
+
+Account sync:
+https://vesnc.vanguard.com/us/OfxDirectConnectServlet
+```
+
+If every validated Vanguard route fails during the TCP connect stage, Solpient should treat that as evidence that the legacy endpoint is not generally reachable from the user's network/client path and stop before requesting credentials.
