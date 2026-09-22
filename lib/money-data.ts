@@ -7,8 +7,15 @@ import {
   type MoneyDataset,
   type Transaction,
 } from "@/lib/demo-data";
-import { isMoneySupabaseConfigured } from "@/lib/supabase/config";
-import { createClient } from "@/lib/supabase/server";
+import {
+  createLocalDbClient,
+  testLocalDatabase,
+} from "@/lib/local-db/client";
+import {
+  isLocalDatabaseConfigured,
+  LOCAL_USER_EMAIL,
+  LOCAL_USER_ID,
+} from "@/lib/local-db/config";
 
 export type MoneyHousehold = {
   id: string;
@@ -113,7 +120,7 @@ function buildAllocation(holdings: Holding[]) {
 }
 
 export async function getMoneyContext(): Promise<MoneyContext> {
-  if (!isMoneySupabaseConfigured()) {
+  if (!isLocalDatabaseConfigured()) {
     return {
       source: "demo-unconfigured",
       configured: false,
@@ -125,23 +132,10 @@ export async function getMoneyContext(): Promise<MoneyContext> {
     };
   }
 
-  const supabase = await createClient();
-  const { data: claimsData } = await supabase.auth.getClaims();
-  const claims = claimsData?.claims;
-  const userId = typeof claims?.sub === "string" ? claims.sub : null;
-  const email = typeof claims?.email === "string" ? claims.email : null;
-
-  if (!userId) {
-    return {
-      source: "database",
-      configured: true,
-      authenticated: false,
-      userId: null,
-      email: null,
-      household: null,
-      dataset: null,
-    };
-  }
+  await testLocalDatabase();
+  const supabase = await createLocalDbClient();
+  const userId = LOCAL_USER_ID;
+  const email = LOCAL_USER_EMAIL;
 
   const [{ data: pref }, { data: firstMembership }] = await Promise.all([
     supabase
