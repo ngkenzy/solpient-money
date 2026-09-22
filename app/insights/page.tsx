@@ -1,13 +1,12 @@
 import { CheckCircle2, TriangleAlert } from "lucide-react";
 import PageHeader from "@/components/PageHeader";
 import { holdings } from "@/lib/demo-data";
-import { getFinancialSummary, getPortfolioInsights, getPortfolioMetrics } from "@/lib/finance";
+import { getFinancialSummary, getPortfolioInsights } from "@/lib/finance";
 import { loadResearchSnapshots, summarizeResearchCoverage } from "@/lib/research";
 
 export const dynamic = "force-dynamic";
 
 export default async function InsightsPage() {
-  const portfolio = getPortfolioMetrics();
   const financial = getFinancialSummary();
   const tickers = holdings.filter((holding) => holding.kind === "stock").map((holding) => holding.ticker);
   const research = await loadResearchSnapshots(tickers);
