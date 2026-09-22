@@ -65,7 +65,10 @@ export default function TransactionsExplorer({ transactions }: { transactions: T
         {filtered.map((transaction) => (
           <div className="table-row" key={transaction.id}>
             <span>{transaction.date}</span>
-            <strong>{transaction.merchant}</strong>
+            <strong className="transaction-description">
+              <span>{transaction.merchant}</span>
+              {transaction.source === "plaid" ? <em className="source-badge plaid-test">PLAID TEST</em> : null}
+            </strong>
             <span><span className="category-pill">{transaction.category}</span></span>
             <span>{transaction.account}</span>
             <strong className={transaction.amount >= 0 ? "positive-text" : ""}>
