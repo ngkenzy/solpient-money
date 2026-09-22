@@ -2,13 +2,13 @@
 
 Solpient Money is the private household-finance side of the Solpient platform.
 
-## V0.6 status
+## V0.6.1 status
 
 **Money database + auth: live.**  
-**Plaid Sandbox architecture: built.**  
-**Plaid Sandbox credentials: add locally to activate Link/API calls.**
+**Plaid Sandbox architecture: live.**  
+**V0.6.1 hardening: automatic page-open refresh, repair mode, and persistent test-data provenance.**
 
-V0.6 keeps the V0.5 private household database and adds a Sandbox-only Plaid connection layer for banking transactions and investment holdings.
+V0.6.1 keeps the V0.5 private household database and V0.6 Plaid connection layer, then makes Sandbox state and connection health explicit throughout Money.
 
 ## What V0.6 adds
 
@@ -112,6 +112,16 @@ Anonymous users cannot read:
 - imported holdings
 - encrypted Plaid token data
 
+### V0.6.1 refresh, repair, and provenance
+
+- Connected Sandbox Items refresh automatically every five minutes while the Connections page is open.
+- A manual **Refresh now** action remains available.
+- `ITEM_LOGIN_REQUIRED` and related re-authentication states surface as **Repair required**.
+- **Repair** opens Plaid Link in update mode with the existing Item access token; the Item is synced again after successful repair.
+- Invalid or missing Item tokens are clearly classified as reconnect-required failures.
+- A persistent **PLAID SANDBOX · TEST DATA** badge remains visible across Money.
+- Plaid-imported accounts, transactions, and holdings are individually labeled **PLAID TEST**.
+
 ### Refresh and disconnect
 
 Each Sandbox Item can be manually refreshed from the Connections page.
@@ -178,6 +188,7 @@ npm run test:money
 npm run test:v04
 npm run test:v05
 npm run test:v06
+npm run test:v061
 npm run dev
 ```
 
@@ -196,9 +207,10 @@ Then sign in and open **Connections**.
 3. V0.3 — live Solpient Research integration ✅
 4. V0.4 — financial intelligence + Scenario Lab ✅
 5. V0.5 — auth + dedicated Money database + RLS + persistence ✅
-6. V0.6 — Plaid Sandbox bank/brokerage connection layer ✅ code / credentials required for live Sandbox calls
-7. V0.7 — personal Trial/Production test accounts
-8. V1.0 — personal Solpient Money
+6. V0.6 — Plaid Sandbox bank/brokerage connection layer ✅
+7. V0.6.1 — Sandbox provenance, automatic page-open refresh, and Item repair ✅
+8. V0.7 — personal Trial/Production test accounts
+9. V1.0 — personal Solpient Money
 
 ## Security principles
 
