@@ -23,13 +23,16 @@ function refresh() {
 export async function addAccount(formData: FormData) {
   const { supabase, householdId } = await requireActiveHousehold();
   const accountType = text(formData, "account_type");
+  const rawBalance = num(formData, "balance");
+  const normalizedBalance =
+    accountType === "debt" ? -Math.abs(rawBalance) : Math.abs(rawBalance);
 
   const { error } = await supabase.from("accounts").insert({
     household_id: householdId,
     name: text(formData, "name"),
     institution: text(formData, "institution") || "Manual",
     account_type: accountType,
-    balance_cents: cents(num(formData, "balance")),
+    balance_cents: cents(normalizedBalance),
     owner_scope: text(formData, "owner_scope") || "Household",
     last_four: text(formData, "last_four") || null,
     apr_pct: accountType === "debt" ? num(formData, "apr", 0) : null,
