@@ -1,36 +1,70 @@
+import Link from "next/link";
+import { ArrowRight, CircleDollarSign } from "lucide-react";
 import PageHeader from "@/components/PageHeader";
-import { accounts } from "@/lib/demo-data";
+import { getDebtPriority, getFinancialHealth } from "@/lib/intelligence";
 import { money } from "@/lib/finance";
 
 export default function DebtPage() {
-  const debts = accounts.filter((account) => account.type === "debt");
-  const total = Math.abs(debts.reduce((sum, account) => sum + account.balance, 0));
+  const debts = getDebtPriority();
+  const health = getFinancialHealth();
+  const total = debts.reduce((sum, debt) => sum + debt.balance, 0);
+  const annualizedInterest = debts.reduce((sum, debt) => sum + debt.annualizedInterest, 0);
 
   return (
     <div className="page">
       <PageHeader
         eyebrow="DEBT"
-        title="Track what you owe and how fast it is falling."
-        description="A simple liability view now; payoff sequencing and interest-cost modeling can be added after account synchronization."
+        title="Know the cost, not just the balance."
+        description="V0.4 adds APR-aware debt intelligence using synthetic demo balances. The ordering below shows a highest-APR-first calculation, not a personalized instruction."
+        action={<Link className="research-button" href="/scenario-lab">Open Scenario Lab <ArrowRight size={15} /></Link>}
       />
+
       <div className="metric-grid four">
         <div className="metric-card"><span>Total debt</span><strong>{money(total)}</strong><small>Demo liabilities</small></div>
-        <div className="metric-card"><span>Debt accounts</span><strong>{debts.length}</strong><small>Across the household</small></div>
-        <div className="metric-card"><span>Largest balance</span><strong>{money(Math.max(...debts.map((d) => Math.abs(d.balance))))}</strong><small>Mortgage</small></div>
-        <div className="metric-card"><span>Status</span><strong>Declining</strong><small>All demo balances below start of year</small></div>
+        <div className="metric-card"><span>Annualized interest</span><strong>{money(annualizedInterest)}</strong><small>If balances stayed unchanged for a year</small></div>
+        <div className="metric-card"><span>High-interest debt</span><strong>{money(health.metrics.highInterestDebt)}</strong><small>APR ≥ 8% demo review line</small></div>
+        <div className="metric-card"><span>Debt / assets</span><strong>{health.metrics.debtToAssetsPct.toFixed(1)}%</strong><small>Current demo balance sheet</small></div>
       </div>
-      <section className="card page-card">
-        <div className="data-table debt-table">
-          <div className="table-row table-head-row"><span>Account</span><span>Institution</span><span>Balance</span><span>YTD balance change</span></div>
-          {debts.map((debt) => (
-            <div className="table-row" key={debt.id}>
-              <strong>{debt.name}</strong>
-              <span>{debt.institution}</span>
-              <strong>{money(Math.abs(debt.balance))}</strong>
-              <span className="positive-text">{debt.changeYtd.toFixed(1)}%</span>
+
+      <section className="card page-card debt-priority-card">
+        <div className="section-title-row">
+          <div><span className="card-kicker">PAYOFF ANALYSIS</span><h2>Highest-APR-first demo sequence</h2></div>
+          <span className="small-muted">Interest-cost lens only</span>
+        </div>
+        <div className="debt-priority-list">
+          {debts.map((debt, index) => (
+            <div className="debt-priority-row" key={debt.id}>
+              <span className="debt-rank">{index + 1}</span>
+              <span className="debt-icon"><CircleDollarSign size={18} /></span>
+              <div className="debt-name">
+                <strong>{debt.name}</strong>
+                <span>{debt.apr.toFixed(2)}% APR · minimum {money(debt.minimumPayment)}/mo</span>
+              </div>
+              <div><span>Balance</span><strong>{money(debt.balance)}</strong></div>
+              <div><span>Annualized interest</span><strong>{money(debt.annualizedInterest)}</strong></div>
             </div>
           ))}
         </div>
+        <div className="formula-note">
+          <strong>Why this order?</strong>
+          <span>Balances are sorted by APR descending. The Scenario Lab applies required demo payments first, then sends any extra payment to the highest APR remaining balance.</span>
+        </div>
+      </section>
+
+      <section className="card page-card">
+        <div className="section-title-row">
+          <div><span className="card-kicker">EXPLAINABILITY</span><h2>Debt health calculation</h2></div>
+        </div>
+        {health.components.filter((component) => component.key === "debt").map((component) => (
+          <div className="debt-explain" key={component.key}>
+            <strong>{component.score.toFixed(0)} / {component.maxScore}</strong>
+            <div>
+              <p>{component.detail}</p>
+              <span>{component.calculation}</span>
+              <ul>{component.inputs.map((input) => <li key={input}>{input}</li>)}</ul>
+            </div>
+          </div>
+        ))}
       </section>
     </div>
   );
