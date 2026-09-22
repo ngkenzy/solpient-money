@@ -195,16 +195,14 @@ alter table public.accounts
   add column if not exists direct_ofx_connection_id uuid references public.direct_ofx_connections(id) on delete set null;
 
 create unique index if not exists accounts_direct_ofx_connection_unique
-  on public.accounts(direct_ofx_connection_id)
-  where direct_ofx_connection_id is not null;
+  on public.accounts(direct_ofx_connection_id);
 
 alter table public.transactions
   add column if not exists direct_ofx_connection_id uuid references public.direct_ofx_connections(id) on delete set null,
   add column if not exists ofx_fitid text;
 
 create unique index if not exists transactions_direct_ofx_external_unique
-  on public.transactions(direct_ofx_connection_id, ofx_fitid)
-  where direct_ofx_connection_id is not null and ofx_fitid is not null;
+  on public.transactions(direct_ofx_connection_id, ofx_fitid);
 
 create index if not exists transactions_direct_ofx_connection_idx
   on public.transactions(direct_ofx_connection_id);
@@ -214,8 +212,7 @@ alter table public.holdings
   add column if not exists ofx_security_id text;
 
 create unique index if not exists holdings_direct_ofx_ticker_unique
-  on public.holdings(direct_ofx_connection_id, ticker)
-  where direct_ofx_connection_id is not null;
+  on public.holdings(direct_ofx_connection_id, ticker);
 
 create index if not exists holdings_direct_ofx_connection_idx
   on public.holdings(direct_ofx_connection_id);
