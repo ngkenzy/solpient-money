@@ -75,7 +75,13 @@ export default async function AccountsPage() {
                 {items.map((account) => (
                   <div className="account-row" key={account.id}>
                     <span className="account-icon">{account.type === "cash" ? <Landmark size={18} /> : <WalletCards size={18} />}</span>
-                    <div className="account-main"><strong>{account.name}</strong><span>{account.institution} · •••• {account.lastFour}</span></div>
+                    <div className="account-main">
+                      <strong>{account.name}</strong>
+                      <span>
+                        {account.institution} · •••• {account.lastFour}
+                        {account.source === "plaid" ? <em className="source-badge plaid-test">PLAID TEST</em> : null}
+                      </span>
+                    </div>
                     <span className="account-owner">{account.owner}</span>
                     <div className="account-balance">
                       <strong>{money(Math.abs(account.balance))}</strong>
