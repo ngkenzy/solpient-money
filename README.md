@@ -19,6 +19,10 @@ PostgreSQL 17 in Docker
 
 Solpient Research remains a separate read-only online data source. Household Money data stays in the local PostgreSQL database unless a connector is explicitly used.
 
+### Historical migration folder note
+
+The repository still contains the original SQL history under `supabase/migrations/`. That directory name is historical only. Solpient Local does **not** start or depend on Supabase; `scripts/local-db-init.mjs` applies those SQL files directly to plain PostgreSQL 17 and records their checksums in `public.local_migrations`.
+
 ### First-time Mac setup
 
 Prerequisite: a Docker-compatible runtime such as Docker Desktop, OrbStack, or Colima must be running.
