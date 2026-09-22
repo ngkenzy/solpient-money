@@ -22,4 +22,5 @@ jobs:
       - run: npm run test:v05
       - run: npm run test:v06
       - run: npm run test:v061
+      - run: npm run test:connect
       - run: npm run build
