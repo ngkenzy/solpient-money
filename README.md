@@ -1,86 +1,130 @@
 # Solpient Money
 
-Solpient Money is the personal-finance side of the Solpient platform.
+Solpient Money is the private household-finance side of the Solpient platform.
 
-This repository currently contains **V0.4**. Household accounts, transactions, holdings, cash flow, debt, goals, and planning inputs remain deterministic demo data. **Company Research is live** from Solpient Research through the V0.3 read-only contract.
+## V0.5 status
 
-## Current V0.4
+**Application architecture: complete.**  
+**Dedicated Supabase project: pending an available free-project slot.**
 
-### Financial Intelligence Engine
+The Nexus Supabase organization currently has an older inactive project plus Solpient Research, and Supabase rejected creation of a third free project. V0.5 therefore remains in deterministic demo mode until the dedicated Money project can be created. No personal household data has been moved into Solpient Research.
 
-- Transparent 0–100 financial-health score
-- Liquidity / emergency-fund months
-- Six-month average savings rate
-- Debt-to-assets and high-interest-debt review
-- Portfolio concentration and cash-weight checks
-- Live Research coverage and evidence-confidence component
-- Goal-funding component
-- Every component exposes inputs and its calculation
+## What V0.5 adds
 
-### Attention Feed
+### Dedicated private Money data model
 
-Solpient now prioritizes household observations into:
+The committed migration creates:
 
-- Critical
-- Review
-- Opportunity
-- Healthy
+- profiles
+- households
+- household_members
+- accounts
+- transactions
+- holdings
+- goals
+- planning_assumptions
+- net_worth_snapshots
+- portfolio_snapshots
+- user_preferences
 
-Attention items explain **why they appeared**, the **inputs used**, and the **calculation** behind the flag.
+Every exposed Money table has Row Level Security enabled. Anonymous access is revoked. Household financial rows are authorized through household membership.
 
-### Research-change alerts
+### Authentication
 
-Owned direct-stock holdings are matched to live published Solpient Research. The feed surfaces:
+V0.5 uses the current Supabase SSR pattern:
 
-- Published Research changes
-- Thesis-health watch/monitor states
-- Low evidence-confidence flags
-- Research score separately from evidence confidence
+- `@supabase/ssr` pinned to `0.12.7`
+- `@supabase/supabase-js` pinned to `2.116.0`
+- request-scoped browser/server clients
+- Next.js 16 `proxy.ts`
+- `auth.getClaims()` for protected-route identity validation
+- password signup/sign-in
+- PKCE confirmation callback
+- sign-out route
 
-Synthetic Research scores and fair values are not allowed in Money.
+No service-role key is used by the application.
 
-### Scenario Lab
+### Household onboarding
 
-Interactive deterministic scenarios now allow changes to:
+After the dedicated project is connected, the first signed-in user can:
 
-- Cash deployed above the reserve target
-- Extra monthly savings
-- Extra monthly debt payments
-- One-time market shock
-- Target age
+1. Create a household.
+2. Become its owner through an atomic private database trigger.
+3. Load the existing synthetic demo model into the Money database.
+4. Use the same dashboard and V0.4 intelligence engine against persisted data.
 
-The model shows projected investments, debt remaining, bank cash, projected demo net worth, and change versus baseline. It explicitly shows its assumptions and does not claim to be a forecast or recommendation.
+### Persistence before Plaid
 
-### Debt intelligence
+The **Data** page supports manual creation of:
 
-- APR-aware debt table
-- Annualized interest estimate
-- High-interest debt flag
-- Highest-APR-first demo payoff sequence
-- Scenario Lab integration
+- accounts
+- transactions
+- holdings
+- goals
+- planning assumptions
 
-### Cash and balance-sheet intelligence
+This makes V0.5 usable before bank aggregation is added.
 
-- Household net worth
-- Invested assets
-- Property
-- Bank cash
-- Liabilities
-- Emergency-fund months
-- Explicit reserve target
-- Cash above the reserve target without automatically labeling it investable
+### One MoneyDataset path
 
-## Research integration contract
-
-Solpient Research exposes:
+The V0.4 deterministic engine no longer imports financial globals directly. Pages now request one `MoneyDataset`:
 
 ```
-public.money_research_snapshots_v1
+Dedicated Money Supabase
+        │
+        ▼
+ authenticated household
+        │
+        ▼
+    MoneyDataset
+        │
+        ├── Financial Health
+        ├── Cash Flow
+        ├── Debt Intelligence
+        ├── Portfolio
+        ├── Retirement
+        ├── Scenario Lab
+        └── Attention Feed
 ```
 
-Money reads only the latest **published** Research package for score, valuation, thesis, risks, and version changes. Current evidence confidence and coverage readiness remain separately timestamped.
+If the Money Supabase project is not configured, the same adapter intentionally returns the deterministic demo dataset.
 
-If Research is unavailable, Money shows it as unavailable rather than substituting synthetic values.
+### Research remains separate
+
+```
+PRIVATE MONEY DATABASE             SOLPIENT RESEARCH
+accounts                            companies
+transactions                        scores
+holdings                   ← read   valuation
+debt                                thesis
+goals                               evidence
+planning                            risks / changes
+```
+
+Research never receives household account, transaction, debt, goal, or authentication data.
+
+## Environment
+
+Copy `.env.example` to `.env.local`.
+
+The dedicated Money project will supply:
+
+```bash
+NEXT_PUBLIC_MONEY_SUPABASE_URL=...
+NEXT_PUBLIC_MONEY_SUPABASE_PUBLISHABLE_KEY=...
+```
+
+Never use a secret/service-role key in the browser or commit one to GitHub.
+
+## Database migration
+
+The V0.5 schema is committed at:
+
+```
+supabase/migrations/20260922050000_v05_money_schema.sql
+```
+
+It has **not** been applied to Solpient Research. Apply it only to the dedicated Solpient Money project.
 
 ## Run locally
 
@@ -90,6 +134,7 @@ cd solpient-money
 npm install
 npm run test:research
 npm run test:v04
+npm run test:v05
 npm run dev
 ```
 
@@ -102,14 +147,19 @@ http://localhost:3000
 ## Release sequence
 
 1. V0.1 — dashboard shell + deterministic demo data ✅
-2. V0.2 — functional navigation, portfolio engine, holdings, transactions, interactive charts ✅
+2. V0.2 — functional navigation, portfolio engine, holdings, transactions, charts ✅
 3. V0.3 — live Solpient Research read integration ✅
 4. V0.4 — financial intelligence, attention feed, Research alerts, Scenario Lab ✅
-5. V0.5 — dedicated Money Supabase auth/persistence
+5. V0.5 — auth, household schema, RLS, persistence adapter, onboarding, manual data entry ✅ code / ⏳ project slot
 6. V0.6 — Plaid Sandbox
 7. V0.7 — personal live-account testing
 8. V1.0 — personal Solpient Money
 
-## Security principle
+## Security principles
 
-Never commit bank credentials, Plaid secrets, Supabase secret/service-role keys, or personal financial exports. Personal financial data should remain isolated from the Research database.
+- Never commit bank credentials, Plaid secrets, Supabase secret/service-role keys, or personal financial exports.
+- Personal financial data stays in the dedicated Money database.
+- Solpient Research is read-only from Money.
+- Authenticated routes are dynamic and are not ISR-cached.
+- Household authorization is enforced in PostgreSQL RLS, not only in the UI.
+- Research score and evidence confidence remain separate signals.
