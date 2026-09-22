@@ -135,12 +135,12 @@ export default async function ConnectPage() {
   return (
     <div className="page">
       <PageHeader
-        eyebrow="SOLPIENT CONNECT V1.3"
+        eyebrow="SOLPIENT CONNECT V1.4"
         title="One connector layer. Every financial source."
-        description="Files, Plaid Sandbox, and Direct OFX now run through one Connector SDK. Direct OFX can sync supported institutions without an aggregator; FDX remains the next direct-API adapter."
+        description="Files, Plaid Sandbox, Direct OFX, and OAuth/FDX now share one Connector SDK. V1.4 validates OAuth consent and FDX-aligned sync in sandbox while keeping production FDX/FAPI behind institution onboarding."
         action={
           <span className="live-pill connected">
-            DIRECT OFX LIVE
+            OAUTH / FDX SANDBOX LIVE
           </span>
         }
       />
