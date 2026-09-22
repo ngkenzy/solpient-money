@@ -112,6 +112,7 @@ export async function postDirectOfx(
   const resolved = await resolvePublicAddress(url);
 
   return new Promise<string>((resolve, reject) => {
+    let stage: "connect" | "tls" | "response" = "connect";
     const request = httpsRequest(
       {
         protocol: "https:",
@@ -180,12 +181,35 @@ export async function postDirectOfx(
       }
     );
 
+    request.on("socket", (socket) => {
+      stage = "connect";
+      socket.once("connect", () => {
+        stage = "tls";
+      });
+      socket.once("secureConnect", () => {
+        stage = "response";
+      });
+    });
+
     request.setTimeout(REQUEST_TIMEOUT_MS, () => {
       request.destroy(
-        new Error("OFX endpoint timed out after 20 seconds.")
+        new Error(
+          `OFX endpoint timed out during ${stage} after 20 seconds.`
+        )
       );
     });
-    request.on("error", reject);
+    request.on("error", (error) => {
+      const code =
+        error && typeof error === "object" && "code" in error
+          ? String((error as { code?: unknown }).code ?? "")
+          : "";
+      const suffix = code ? ` [${code}]` : "";
+      reject(
+        new Error(
+          `OFX ${stage} failed${suffix}: ${error.message}`
+        )
+      );
+    });
     request.write(body);
     request.end();
   });
