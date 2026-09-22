@@ -1,4 +1,4 @@
-import type { SupabaseClient } from "@supabase/supabase-js";
+import type { SolpientDbClient } from "@/lib/local-db/client";
 import {
   decryptConnectorSecret,
   encryptConnectorSecret,
@@ -12,7 +12,7 @@ type SecretRow = {
 };
 
 export async function storeDirectOfxSecret(
-  supabase: SupabaseClient,
+  supabase: SolpientDbClient,
   connectionId: string,
   payload: DirectOfxSecretPayload
 ) {
@@ -31,7 +31,7 @@ export async function storeDirectOfxSecret(
 }
 
 export async function loadDirectOfxSecret(
-  supabase: SupabaseClient,
+  supabase: SolpientDbClient,
   connectionId: string
 ) {
   const { data, error } = await supabase.rpc(
@@ -59,7 +59,7 @@ export async function loadDirectOfxSecret(
 }
 
 export async function deleteDirectOfxSecret(
-  supabase: SupabaseClient,
+  supabase: SolpientDbClient,
   connectionId: string
 ) {
   const { error } = await supabase.rpc(
