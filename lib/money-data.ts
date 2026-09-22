@@ -43,8 +43,30 @@ function numberValue(value: unknown, fallback = 0) {
   return Number.isFinite(parsed) ? parsed : fallback;
 }
 
-function monthLabel(dateValue: string) {
-  const date = new Date(`${dateValue}T12:00:00Z`);
+function normalizeDate(value: unknown) {
+  if (value instanceof Date) {
+    return Number.isNaN(value.getTime())
+      ? ""
+      : value.toISOString().slice(0, 10);
+  }
+
+  const raw = String(value ?? "").trim();
+
+  if (/^\\d{4}-\\d{2}-\\d{2}$/.test(raw)) {
+    return raw;
+  }
+
+  const parsed = new Date(raw);
+  return Number.isNaN(parsed.getTime())
+    ? ""
+    : parsed.toISOString().slice(0, 10);
+}
+
+function monthLabel(dateValue: unknown) {
+  const normalized = normalizeDate(dateValue);
+  if (!normalized) return "—";
+
+  const date = new Date(`${normalized}T12:00:00Z`);
   return new Intl.DateTimeFormat("en-US", { month: "short" }).format(date);
 }
 
@@ -212,6 +234,7 @@ export async function getMoneyContext(): Promise<MoneyContext> {
       .from("transactions")
       .select("*,account:accounts(name)")
       .eq("household_id", householdId)
+      .is("duplicate_of_transaction_id", null)
       .order("posted_at", { ascending: false })
       .limit(500),
     supabase
@@ -286,12 +309,12 @@ export async function getMoneyContext(): Promise<MoneyContext> {
     const related = row.account as unknown as { name?: string } | null;
     return {
       id: String(row.id),
-      date: String(row.posted_at),
-      merchant: String(row.merchant),
+      date: normalizeDate(row.posted_at),
+      merchant: String(row.normalized_merchant ?? row.merchant),
       category: String(row.category ?? "Uncategorized"),
       account: related?.name ?? "Unassigned",
       amount: dollars(row.amount_cents),
-      type: row.transaction_type as Transaction["type"],
+      type: (row.detected_transfer ? "transfer" : row.transaction_type) as Transaction["type"],
       source: (row.source ?? "manual") as Transaction["source"],
     };
   });
@@ -334,7 +357,7 @@ export async function getMoneyContext(): Promise<MoneyContext> {
   };
 
   const netWorthSeries = (netWorthResult.data ?? []).map((row) => ({
-    label: monthLabel(String(row.snapshot_date)),
+    label: monthLabel(row.snapshot_date),
     value: dollars(row.net_worth_cents),
   }));
 
