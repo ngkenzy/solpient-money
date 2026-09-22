@@ -349,7 +349,17 @@ with check (
 create policy "user_preferences_own"
 on public.user_preferences for all to authenticated
 using ((select auth.uid()) = user_id)
-with check ((select auth.uid()) = user_id);
+with check (
+  (select auth.uid()) = user_id
+  and (
+    active_household_id is null
+    or exists (
+      select 1 from public.household_members hm
+      where hm.household_id = user_preferences.active_household_id
+        and hm.user_id = (select auth.uid())
+    )
+  )
+);
 
 revoke all on public.profiles from anon;
 revoke all on public.households from anon;
