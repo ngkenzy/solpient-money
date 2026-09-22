@@ -54,12 +54,12 @@ export const accounts: Account[] = [
 
 export const holdings: Holding[] = [
   { ticker: "VTI", name: "Vanguard Total Stock Market ETF", kind: "etf", shares: 820.5, price: 292.50, costBasis: 204100, value: 240000, dayChange: 0.6, ytdReturn: 11.8, sector: "Broad Market" },
-  { ticker: "ADBE", name: "Adobe", kind: "stock", shares: 372.2, price: 317.03, costBasis: 132500, value: 118000, dayChange: -0.8, ytdReturn: -10.9, sector: "Technology", researchScore: 88, fairValue: 402, thesis: "Watch" },
-  { ticker: "MSFT", name: "Microsoft", kind: "stock", shares: 190.4, price: 504.20, costBasis: 77100, value: 96000, dayChange: 0.4, ytdReturn: 24.5, sector: "Technology", researchScore: 92, fairValue: 525, thesis: "Strong" },
-  { ticker: "DECK", name: "Deckers Outdoor", kind: "stock", shares: 1187.1, price: 77.50, costBasis: 104300, value: 92000, dayChange: -1.2, ytdReturn: -11.8, sector: "Consumer Discretionary", researchScore: 91, fairValue: 101, thesis: "Strong" },
+  { ticker: "ADBE", name: "Adobe", kind: "stock", shares: 372.2, price: 317.03, costBasis: 132500, value: 118000, dayChange: -0.8, ytdReturn: -10.9, sector: "Technology" },
+  { ticker: "MSFT", name: "Microsoft", kind: "stock", shares: 190.4, price: 504.20, costBasis: 77100, value: 96000, dayChange: 0.4, ytdReturn: 24.5, sector: "Technology" },
+  { ticker: "DECK", name: "Deckers Outdoor", kind: "stock", shares: 1187.1, price: 77.50, costBasis: 104300, value: 92000, dayChange: -1.2, ytdReturn: -11.8, sector: "Consumer Discretionary" },
   { ticker: "VXUS", name: "Vanguard Total International Stock ETF", kind: "etf", shares: 1124.2, price: 76.50, costBasis: 75200, value: 86000, dayChange: 0.3, ytdReturn: 14.4, sector: "International" },
   { ticker: "BND", name: "Vanguard Total Bond Market ETF", kind: "bond", shares: 967.7, price: 74.40, costBasis: 73500, value: 72000, dayChange: 0.1, ytdReturn: 3.5, sector: "Fixed Income" },
-  { ticker: "PFE", name: "Pfizer", kind: "stock", shares: 2519.7, price: 25.40, costBasis: 70200, value: 64000, dayChange: 0.9, ytdReturn: 8.1, sector: "Health Care", researchScore: 76, fairValue: 31, thesis: "Watch" },
+  { ticker: "PFE", name: "Pfizer", kind: "stock", shares: 2519.7, price: 25.40, costBasis: 70200, value: 64000, dayChange: 0.9, ytdReturn: 8.1, sector: "Health Care" },
   { ticker: "CASH", name: "Money Market", kind: "cash", shares: 96000, price: 1, costBasis: 96000, value: 96000, dayChange: 0, ytdReturn: 4.2, sector: "Cash" },
 ];
 
