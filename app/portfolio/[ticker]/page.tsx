@@ -9,14 +9,14 @@ import {
 } from "lucide-react";
 import { notFound } from "next/navigation";
 import PageHeader from "@/components/PageHeader";
-import { holdings } from "@/lib/demo-data";
-import { findHolding, getPortfolioMetrics, money } from "@/lib/finance";
+import { demoMoneyDataset } from "@/lib/demo-data";
+import { findHolding, getPortfolioMetrics, money } from "@/lib/finance";\nimport { requireMoneyDataset } from "@/lib/money-data";
 import { formatResearchDate, loadResearchSnapshots } from "@/lib/research";
 
 export const dynamic = "force-dynamic";
 
 export function generateStaticParams() {
-  return holdings.map((holding) => ({ ticker: holding.ticker.toLowerCase() }));
+  return demoMoneyDataset.holdings.map((holding) => ({ ticker: holding.ticker.toLowerCase() }));
 }
 
 function score(value: number | null) {
@@ -32,7 +32,7 @@ export default async function HoldingPage({
   const holding = findHolding(ticker);
   if (!holding) notFound();
 
-  const metrics = getPortfolioMetrics();
+  const metrics = getPortfolioMetrics(data);
   const weight = (holding.value / metrics.total) * 100;
   const unrealized = holding.value - holding.costBasis;
   const totalReturn = holding.costBasis ? (unrealized / holding.costBasis) * 100 : 0;
@@ -48,8 +48,8 @@ export default async function HoldingPage({
         title={`${holding.ticker} · ${holding.name}`}
         description={
           snapshot
-            ? `Position data is demo-only. Research is live from published Solpient Research version ${snapshot.research_version}.`
-            : "Position data is demo-only. No published Solpient company Research package is available for this holding."
+            ? `Position data comes from ${context.source === "database" ? "the private Money database" : "demo mode"}. Research is live from published Solpient Research version ${snapshot.research_version}.`
+            : `Position data comes from ${context.source === "database" ? "the private Money database" : "demo mode"}. No published Solpient company Research package is available for this holding.`
         }
         action={
           <span className={"live-pill " + (snapshot ? "connected" : research.connected ? "neutral" : "disconnected")}>
@@ -59,9 +59,9 @@ export default async function HoldingPage({
       />
 
       <div className="metric-grid four">
-        <div className="metric-card"><span>Position value</span><strong>{money(holding.value)}</strong><small>{weight.toFixed(1)}% of demo portfolio</small></div>
-        <div className="metric-card"><span>Shares</span><strong>{holding.shares.toLocaleString("en-US", { maximumFractionDigits: 1 })}</strong><small>Demo position</small></div>
-        <div className="metric-card"><span>Unrealized P/L</span><strong className={unrealized >= 0 ? "positive-text" : "negative-text"}>{money(unrealized)}</strong><small>{totalReturn >= 0 ? "+" : ""}{totalReturn.toFixed(1)}% vs demo cost basis</small></div>
+        <div className="metric-card"><span>Position value</span><strong>{money(holding.value)}</strong><small>{weight.toFixed(1)}% of portfolio</small></div>
+        <div className="metric-card"><span>Shares</span><strong>{holding.shares.toLocaleString("en-US", { maximumFractionDigits: 1 })}</strong><small>{context.source === "database" ? "Persisted position" : "Demo position"}</small></div>
+        <div className="metric-card"><span>Unrealized P/L</span><strong className={unrealized >= 0 ? "positive-text" : "negative-text"}>{money(unrealized)}</strong><small>{totalReturn >= 0 ? "+" : ""}{totalReturn.toFixed(1)}% vs cost basis</small></div>
         <div className="metric-card"><span>YTD return</span><strong className={holding.ytdReturn >= 0 ? "positive-text" : "negative-text"}>{holding.ytdReturn >= 0 ? "+" : ""}{holding.ytdReturn.toFixed(1)}%</strong><small>Illustrative holding return</small></div>
       </div>
 
