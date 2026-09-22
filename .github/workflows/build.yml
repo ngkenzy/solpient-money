@@ -18,4 +18,5 @@ jobs:
       - run: npm run lint
       - run: npm run test:research
       - run: npm run test:v04
+      - run: npm run test:v05
       - run: npm run build
