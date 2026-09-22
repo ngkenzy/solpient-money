@@ -5332,3 +5332,190 @@ a {
     width: 100%;
   }
 }
+
+
+/* Solpient Connect V1.3.1 institution profiles */
+.direct-ofx-known-grid {
+  margin-top: 14px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.direct-ofx-known-card {
+  min-height: 250px;
+  padding: 14px;
+  border: 1px solid #dce5ee;
+  border-radius: 10px;
+  background: #fbfcfe;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.direct-ofx-known-card.candidate {
+  border-color: #cddfed;
+  background: linear-gradient(180deg, #fbfdff 0%, #f6faff 100%);
+}
+
+.direct-ofx-known-card.unsupported {
+  opacity: .8;
+  background: #fafafa;
+}
+
+.direct-ofx-known-head {
+  display: grid;
+  grid-template-columns: 36px 1fr;
+  gap: 9px;
+  align-items: center;
+}
+
+.direct-ofx-known-head > div {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+}
+
+.direct-ofx-known-head strong {
+  font-size: 11px;
+}
+
+.connector-sdk-icon.muted {
+  color: #7d8996;
+  background: #f0f2f4;
+}
+
+.direct-ofx-known-card > p {
+  margin: 0;
+  min-height: 56px;
+  color: #697d92;
+  font-size: 8px;
+  line-height: 1.55;
+}
+
+.direct-ofx-known-facts {
+  display: grid;
+  gap: 5px;
+  padding: 9px;
+  border: 1px solid #e1e8ef;
+  border-radius: 8px;
+  background: white;
+}
+
+.direct-ofx-known-facts span {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  color: #7a8da2;
+  font-size: 7px;
+}
+
+.direct-ofx-known-facts strong {
+  color: #294660;
+  font-size: 7px;
+  text-align: right;
+}
+
+.direct-ofx-known-actions {
+  margin-top: auto;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+}
+
+.direct-ofx-known-actions button {
+  min-height: 30px;
+  padding: 0 9px;
+  border: 1px solid #d3dfeb;
+  border-radius: 8px;
+  background: white;
+  color: #2d608f;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font: inherit;
+  font-size: 7px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.direct-ofx-known-actions button:disabled {
+  opacity: .55;
+  cursor: not-allowed;
+}
+
+.direct-ofx-known-actions > span {
+  color: #788a9d;
+  font-size: 7px;
+  font-weight: 750;
+}
+
+.direct-ofx-probe-result {
+  padding: 8px 9px;
+  border: 1px solid #dce5ed;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  background: white;
+}
+
+.direct-ofx-probe-result.ok {
+  border-color: #cde4d8;
+  background: #f5fbf8;
+}
+
+.direct-ofx-probe-result.attention {
+  border-color: #ead9ad;
+  background: #fffaf0;
+}
+
+.direct-ofx-probe-result strong {
+  font-size: 8px;
+}
+
+.direct-ofx-probe-result span {
+  color: #6d8094;
+  font-size: 7px;
+  line-height: 1.4;
+}
+
+.direct-ofx-evidence {
+  display: grid;
+  gap: 4px;
+}
+
+.direct-ofx-evidence a {
+  color: #4d7197;
+  font-size: 7px;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.direct-ofx-profile-note {
+  margin-top: 11px;
+  padding: 9px 10px;
+  border: 1px solid #d7e3ee;
+  border-radius: 8px;
+  background: #f7faff;
+  display: flex;
+  align-items: flex-start;
+  gap: 7px;
+  color: #5d7288;
+  font-size: 8px;
+  line-height: 1.45;
+}
+
+@media (max-width: 1050px) {
+  .direct-ofx-known-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 720px) {
+  .direct-ofx-known-grid {
+    grid-template-columns: 1fr;
+  }
+}
