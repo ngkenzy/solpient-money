@@ -1,8 +1,12 @@
 import type { Metadata } from "next";
+import AppShell from "@/components/AppShell";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Solpient Money",
+  title: {
+    default: "Solpient Money",
+    template: "%s | Solpient Money",
+  },
   description: "Your financial intelligence dashboard",
 };
 
@@ -13,7 +17,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body>
+        <AppShell>{children}</AppShell>
+      </body>
     </html>
   );
 }
