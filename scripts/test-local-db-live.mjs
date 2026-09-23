@@ -30,6 +30,9 @@ try {
       to_regclass('public.money_action_items') is not null as money_action_items,
       to_regclass('public.portfolio_position_snapshots') is not null as portfolio_position_snapshots,
       to_regclass('public.investment_decisions') is not null as investment_decisions,
+      to_regclass('public.tsp_profiles') is not null as tsp_profiles,
+      to_regclass('public.tsp_snapshots') is not null as tsp_snapshots,
+      to_regclass('public.tsp_fund_positions') is not null as tsp_fund_positions,
       to_regprocedure('public.merge_truth_accounts(uuid,uuid)') is not null as merge_truth_accounts,
       exists (
         select 1 from information_schema.columns
@@ -63,6 +66,9 @@ try {
     "money_action_items",
     "portfolio_position_snapshots",
     "investment_decisions",
+    "tsp_profiles",
+    "tsp_snapshots",
+    "tsp_fund_positions",
     "merge_truth_accounts",
     "truth_category",
     "truth_suppressed",
