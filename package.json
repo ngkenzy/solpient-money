@@ -1,9 +1,9 @@
 {
   "name": "solpient-money",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "node scripts/local-dev.mjs",
     "build": "next build",
     "start": "next start",
     "lint": "eslint .",
@@ -34,7 +34,12 @@
     "test:v094": "node scripts/test-v094-forecast-scenario-engine.mjs",
     "test:v10": "node scripts/test-v10-local-money-copilot.mjs",
     "test:v11": "node scripts/test-v11-financial-plan.mjs",
-    "test:v12": "node scripts/test-v12-plan-monitoring.mjs"
+    "test:v12": "node scripts/test-v12-plan-monitoring.mjs",
+    "dev:raw": "next dev",
+    "local:repair": "node scripts/local-setup.mjs",
+    "local:doctor": "node scripts/local-doctor.mjs",
+    "local:migrate-legacy": "node scripts/local-migrate-legacy.mjs",
+    "test:v121": "node scripts/test-v121-local-db-reliability.mjs"
   },
   "dependencies": {
     "lucide-react": "^0.468.0",
