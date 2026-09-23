@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 import PageHeader from "@/components/PageHeader";
 import { getTspStatementImports } from "@/lib/tsp-statement-imports";
+import { uploadTspStatement } from "./actions";
 
 export const dynamic = "force-dynamic";
 
@@ -39,6 +40,50 @@ export default async function TspStatementImportsPage() {
           </Link>
         }
       />
+
+      <section className="card page-card">
+        <div className="section-title-row">
+          <div>
+            <span className="card-kicker">
+              IMPORT STATEMENT
+            </span>
+            <h2>
+              Parse a TSP statement locally
+            </h2>
+          </div>
+          <Upload size={18} />
+        </div>
+
+        <form
+          action={uploadTspStatement}
+          className="tsp-import-upload"
+        >
+          <label>
+            <span>Statement file</span>
+            <input
+              type="file"
+              name="statementFile"
+              accept=".csv,.txt,text/csv,text/plain"
+              required
+            />
+          </label>
+
+          <div className="bottom-note">
+            <ShieldCheck size={15} />
+            <span>
+              CSV and structured text only in V1.8. The file is parsed in memory; raw statement content is not stored.
+            </span>
+          </div>
+
+          <button
+            className="research-button"
+            type="submit"
+          >
+            <FileSearch size={14} />
+            Parse statement
+          </button>
+        </form>
+      </section>
 
       <section className="card page-card">
         <div className="section-title-row">
@@ -86,7 +131,7 @@ export default async function TspStatementImportsPage() {
         <div className="bottom-note">
           <Upload size={15} />
           <span>
-            Statement upload/parser integration is intentionally separate from this workflow and will be connected after the deterministic parser is reviewed.
+            Parsed values remain candidates until you review and confirm them. Confirmation creates a new immutable TSP snapshot revision.
           </span>
         </div>
       </section>
