@@ -271,7 +271,7 @@ delete cleanEnv.DATABASE_URL;
 
 const repair = spawnSync(
   process.execPath,
-  ["scripts/local-setup.mjs"],
+  ["scripts/local-setup.mjs", "--container-only"],
   {
     stdio: "inherit",
     env: cleanEnv,
