@@ -6,7 +6,6 @@ const NEXT_ENV = ".env.local";
 const DOCKER_ENV = ".env.local-db";
 const EXPECTED = {
   host: "127.0.0.1",
-  port: "5432",
   database: "solpient",
   user: "solpient",
   container: "solpient-money-postgres",
@@ -28,6 +27,13 @@ function readKey(content, key) {
   return line ? line.slice(key.length + 1).trim() : null;
 }
 
+function parsePort(value) {
+  const parsed = Number.parseInt(String(value ?? ""), 10);
+  return Number.isInteger(parsed) && parsed > 1024 && parsed < 65536
+    ? parsed
+    : null;
+}
+
 function pass(label, detail = "") {
   console.log(`✓ ${label}${detail ? `: ${detail}` : ""}`);
 }
@@ -39,6 +45,24 @@ function warn(label, detail = "") {
 function fail(label, detail = "") {
   console.log(`✗ ${label}${detail ? `: ${detail}` : ""}`);
   failures.push(label);
+}
+
+function portOwner(port) {
+  const result = spawnSync(
+    "lsof",
+    ["-nP", `-iTCP:${port}`, "-sTCP:LISTEN"],
+    { encoding: "utf8" }
+  );
+
+  if (result.status === 0 && result.stdout.trim()) {
+    return result.stdout
+      .trim()
+      .split(/\r?\n/)
+      .slice(0, 4)
+      .join(" | ");
+  }
+
+  return null;
 }
 
 const failures = [];
@@ -59,26 +83,41 @@ if (docker.status !== 0) {
 }
 
 let dockerPassword = null;
+let dockerPort = null;
+
 if (!(await exists(DOCKER_ENV))) {
   fail(".env.local-db exists");
 } else {
   const dockerEnv = await readFile(DOCKER_ENV, "utf8");
   dockerPassword = readKey(dockerEnv, "POSTGRES_PASSWORD");
+  dockerPort = parsePort(readKey(dockerEnv, "SOLPIENT_DB_PORT"));
+
   if (dockerPassword) {
     pass(".env.local-db has POSTGRES_PASSWORD");
   } else {
     fail(".env.local-db has POSTGRES_PASSWORD");
   }
+
+  if (dockerPort) {
+    pass(".env.local-db has SOLPIENT_DB_PORT", String(dockerPort));
+  } else {
+    fail(
+      ".env.local-db has SOLPIENT_DB_PORT",
+      "run npm run local:repair to select a dedicated port"
+    );
+  }
 }
 
 let databaseUrl = null;
 let parsed = null;
+let nextPort = null;
 
 if (!(await exists(NEXT_ENV))) {
   fail(".env.local exists");
 } else {
   const nextEnv = await readFile(NEXT_ENV, "utf8");
   databaseUrl = readKey(nextEnv, "DATABASE_URL");
+  nextPort = parsePort(readKey(nextEnv, "SOLPIENT_DB_PORT"));
 
   if (!databaseUrl) {
     fail(".env.local has DATABASE_URL");
@@ -91,15 +130,19 @@ if (!(await exists(NEXT_ENV))) {
       if (parsed.hostname === EXPECTED.host) {
         pass("Database host", EXPECTED.host);
       } else {
-        fail("Database host", `expected ${EXPECTED.host}, found ${parsed.hostname}`);
+        fail(
+          "Database host",
+          `expected ${EXPECTED.host}, found ${parsed.hostname}`
+        );
       }
 
-      if ((parsed.port || "5432") === EXPECTED.port) {
-        pass("Database port", EXPECTED.port);
+      const urlPort = parsePort(parsed.port || "5432");
+      if (dockerPort && urlPort === dockerPort && nextPort === dockerPort) {
+        pass("Database port is synchronized", String(dockerPort));
       } else {
         fail(
-          "Database port",
-          `expected ${EXPECTED.port}, found ${parsed.port || "(default)"}`
+          "Database port is synchronized",
+          `.env.local-db=${dockerPort ?? "missing"}, .env.local=${nextPort ?? "missing"}, DATABASE_URL=${urlPort ?? "invalid"}`
         );
       }
 
@@ -107,7 +150,10 @@ if (!(await exists(NEXT_ENV))) {
       if (database === EXPECTED.database) {
         pass("Database name", EXPECTED.database);
       } else {
-        fail("Database name", `expected ${EXPECTED.database}, found ${database}`);
+        fail(
+          "Database name",
+          `expected ${EXPECTED.database}, found ${database}`
+        );
       }
 
       if (decodeURIComponent(parsed.username) === EXPECTED.user) {
@@ -141,7 +187,7 @@ if (process.env.DATABASE_URL?.trim()) {
   if (databaseUrl && process.env.DATABASE_URL.trim() !== databaseUrl) {
     warn(
       "Shell DATABASE_URL differs from .env.local",
-      "npm run dev will override it; run 'unset DATABASE_URL' to clean your shell"
+      "npm run dev overrides it; run 'unset DATABASE_URL' to clean your shell"
     );
   } else {
     pass("Shell DATABASE_URL does not conflict");
@@ -157,9 +203,10 @@ if (docker.status === 0) {
     { encoding: "utf8" }
   );
 
-  const containers = names.status === 0
-    ? names.stdout.split(/\r?\n/).filter(Boolean)
-    : [];
+  const containers =
+    names.status === 0
+      ? names.stdout.split(/\r?\n/).filter(Boolean)
+      : [];
 
   if (containers.includes(EXPECTED.container)) {
     const running = spawnSync(
@@ -168,7 +215,10 @@ if (docker.status === 0) {
       { encoding: "utf8" }
     );
 
-    if (running.status === 0 && running.stdout.trim() === "true") {
+    const isRunning =
+      running.status === 0 && running.stdout.trim() === "true";
+
+    if (isRunning) {
       pass("Canonical container running", EXPECTED.container);
     } else {
       fail("Canonical container running", EXPECTED.container);
@@ -181,16 +231,35 @@ if (docker.status === 0) {
     );
     const binding = port.stdout.trim();
 
-    if (port.status === 0 && binding.includes("127.0.0.1:5432")) {
+    if (
+      dockerPort &&
+      port.status === 0 &&
+      binding.includes(`127.0.0.1:${dockerPort}`)
+    ) {
       pass("Canonical port binding", binding);
     } else {
       fail(
         "Canonical port binding",
-        binding || "5432/tcp is not bound to 127.0.0.1:5432"
+        binding ||
+          `5432/tcp is not bound to 127.0.0.1:${dockerPort ?? "unknown"}`
       );
     }
   } else {
     fail("Canonical container exists", EXPECTED.container);
+
+    if (dockerPort) {
+      const owner = portOwner(dockerPort);
+      if (owner) {
+        warn(
+          `Configured host port ${dockerPort} is already in use`,
+          owner
+        );
+      } else {
+        pass(
+          `Configured host port ${dockerPort} appears available`
+        );
+      }
+    }
   }
 
   if (containers.includes("solpient-local-db-1")) {
@@ -228,14 +297,20 @@ if (databaseUrl && parsed && failures.length === 0) {
     ) {
       pass("TCP password authentication verified");
     } else {
-      fail("TCP password authentication verified", JSON.stringify(row));
+      fail(
+        "TCP password authentication verified",
+        JSON.stringify(row)
+      );
     }
 
     if (row?.migration_table === true) {
       const count = await client.query(
         "select count(*)::int as count from public.local_migrations"
       );
-      pass("Migration registry present", `${count.rows[0]?.count ?? 0} applied`);
+      pass(
+        "Migration registry present",
+        `${count.rows[0]?.count ?? 0} applied`
+      );
     } else {
       fail("Migration registry present");
     }
