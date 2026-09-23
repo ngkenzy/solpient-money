@@ -95,17 +95,16 @@ export async function POST(request: Request) {
               holding.ticker.toUpperCase()
           );
 
+      const questionTokens = new Set(
+        question
+          .toUpperCase()
+          .split(/[^A-Z0-9.-]+/)
+          .filter(Boolean)
+      );
       const explicitTicker =
         ownedTickers.find(
           (ticker) =>
-            new RegExp(
-              `\\b${ticker.replace(/[.*+?^$\{\}()|[\\]\\\\]/g, "\\    if (
-      /portfolio intelligence|which holdings need review|which stocks need review|portfolio risk|portfolio concentration|research conflict|thesis risk|valuation conflict/i.test(
-        question
-      )
-    ) {")}\\b`,
-              "i"
-            ).test(question)
+            questionTokens.has(ticker)
         ) ?? null;
 
       const decisions =
