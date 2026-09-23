@@ -55,7 +55,7 @@ create table if not exists public.tsp_statement_imports (
       )
     ),
 
-  confirmed_snapshot_id uuid references public.tsp_snapshots(id) on delete set null,
+  confirmed_snapshot_id uuid references public.tsp_snapshots(id) on delete cascade,
   confirmed_snapshot_revision integer
     check (
       confirmed_snapshot_revision is null
