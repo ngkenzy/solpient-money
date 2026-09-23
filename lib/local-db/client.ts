@@ -55,6 +55,8 @@ const TABLES = new Set([
   "financial_plan_snapshots",
   "money_autopilot_runs",
   "money_action_items",
+  "portfolio_position_snapshots",
+  "investment_decisions",
 ]);
 
 const DEFAULT_CONFLICTS: Record<string, string[]> = {
