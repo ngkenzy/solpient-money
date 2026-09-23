@@ -73,6 +73,56 @@ function scalarCount(container, table) {
   );
 }
 
+function ensureRestoreRoles() {
+  const result = spawnSync(
+    "docker",
+    [
+      "exec",
+      "-i",
+      TARGET,
+      "psql",
+      "-U",
+      USER,
+      "-d",
+      "postgres",
+      "-v",
+      "ON_ERROR_STOP=1",
+    ],
+    {
+      input: `
+        do $
+        begin
+          if not exists (
+            select 1 from pg_roles where rolname = 'anon'
+          ) then
+            create role anon nologin;
+          end if;
+
+          if not exists (
+            select 1 from pg_roles where rolname = 'authenticated'
+          ) then
+            create role authenticated nologin;
+          end if;
+
+          if not exists (
+            select 1 from pg_roles where rolname = 'service_role'
+          ) then
+            create role service_role nologin;
+          end if;
+        end
+        $;
+      `,
+      encoding: "utf8",
+    }
+  );
+
+  if (result.status !== 0) {
+    throw new Error(
+      `Unable to create local compatibility roles before restore: ${result.stderr || "unknown error"}`
+    );
+  }
+}
+
 function recreateEmptyCanonicalDatabase() {
   console.log(
     "Recreating the empty canonical database before legacy restore..."
@@ -328,6 +378,7 @@ try {
   // Recreate only the empty target DB, restore the old snapshot first,
   // then roll it forward using the current migration runner.
   recreateEmptyCanonicalDatabase();
+  ensureRestoreRoles();
 
   await restoreLegacyDumpFile(
     temporary.dumpPath
