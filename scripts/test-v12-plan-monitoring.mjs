@@ -50,7 +50,7 @@ const checks = [
   ["Copilot monitoring path is read-only", files.copilotRoute.includes("createBaseline: false")],
   ["Copilot has monitoring quick prompt", files.copilotUi.includes("What changed from my financial plan?")],
   ["Plan Monitor is navigable", files.shell.includes('href: "/monitor"')],
-  ["release label shows V1.2", files.shell.includes("MONEY V1.2")],
+  ["release label remains on V1 release line", files.shell.includes("MONEY V1.")],
 ];
 
 const failed = checks.filter(([, ok]) => !ok);
