@@ -54,6 +54,7 @@ const sections: Array<{ label?: string; items: NavItem[] }> = [
     label: "INVEST",
     items: [
       { href: "/portfolio", label: "Portfolio", icon: BriefcaseBusiness },
+      { href: "/portfolio-intelligence", label: "Portfolio Intelligence", icon: BrainCircuit },
       { href: "/performance", label: "Performance", icon: LineChart },
       { href: "/allocation", label: "Allocation", icon: BarChart3 },
     ],
@@ -142,7 +143,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
               <Link href="/research">Research</Link>
               <Link className={pathname === "/research" ? "" : "selected"} href="/">Money</Link>
             </div>
-            <span className="global-sandbox-badge">LOCAL POSTGRES · MONEY V1.4</span>
+            <span className="global-sandbox-badge">LOCAL POSTGRES · MONEY V1.5</span>
           </div>
 
           <div className="top-actions">
