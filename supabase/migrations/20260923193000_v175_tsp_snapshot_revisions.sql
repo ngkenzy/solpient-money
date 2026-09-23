@@ -5,7 +5,7 @@
 alter table public.tsp_snapshots
   add column if not exists revision integer,
   add column if not exists supersedes_id uuid
-    references public.tsp_snapshots(id) on delete restrict;
+    references public.tsp_snapshots(id) on delete set null;
 
 update public.tsp_snapshots
 set revision = 1
