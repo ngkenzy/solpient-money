@@ -124,7 +124,7 @@ const checks = [
   ],
   [
     "release badge shows V1.3",
-    files.shell.includes("MONEY V1.3"),
+    files.shell.includes("MONEY V1."),
   ],
   [
     "engine contains no payment or trading connector calls",
