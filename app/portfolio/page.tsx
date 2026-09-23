@@ -3,9 +3,10 @@ import { ArrowRight, CheckCircle2, TriangleAlert } from "lucide-react";
 import AllocationDonut from "@/components/AllocationDonut";
 import InteractiveLineChart from "@/components/InteractiveLineChart";
 import PageHeader from "@/components/PageHeader";
-import { getPortfolioInsights, getPortfolioMetrics, money } from "@/lib/finance";
+import { getPortfolioMetrics, money } from "@/lib/finance";
 import { requireMoneyDataset } from "@/lib/money-data";
 import { loadResearchSnapshots, summarizeResearchCoverage } from "@/lib/research";
+import { buildPortfolioIntelligence } from "@/lib/portfolio-intelligence";
 
 export const dynamic = "force-dynamic";
 
@@ -16,7 +17,7 @@ export default async function PortfolioPage() {
   const directTickers = data.holdings.filter((holding) => holding.kind === "stock").map((holding) => holding.ticker);
   const research = await loadResearchSnapshots(directTickers);
   const researchSummary = summarizeResearchCoverage(data.holdings, research.snapshots);
-  const insights = getPortfolioInsights(research.snapshots, data);
+  const portfolioIntelligence = buildPortfolioIntelligence(data, research);
 
   return (
     <div className="page">
@@ -101,14 +102,27 @@ export default async function PortfolioPage() {
 
       <section className="card page-card">
         <div className="section-title-row">
-          <div><span className="card-kicker">PORTFOLIO INTELLIGENCE</span><h2>What deserves attention</h2></div>
-          <Link className="text-button" href="/insights">All insights <ArrowRight size={15} /></Link>
+          <div><span className="card-kicker">V1.5 PORTFOLIO INTELLIGENCE</span><h2>Exposure + Research conflicts</h2></div>
+          <Link className="text-button" href="/portfolio-intelligence">Open intelligence <ArrowRight size={15} /></Link>
         </div>
         <div className="insight-grid">
-          {insights.map((insight) => (
-            <div className={"insight-item " + insight.level} key={insight.title}>
-              {insight.level === "good" ? <CheckCircle2 size={20} /> : <TriangleAlert size={20} />}
-              <div><strong>{insight.title}</strong><p>{insight.detail}</p></div>
+          {portfolioIntelligence.signals.slice(0, 4).map((signal) => (
+            <div
+              className={
+                "insight-item " +
+                (signal.level === "positive" ? "good" : "watch")
+              }
+              key={signal.id}
+            >
+              {signal.level === "positive" ? (
+                <CheckCircle2 size={20} />
+              ) : (
+                <TriangleAlert size={20} />
+              )}
+              <div>
+                <strong>{signal.title}</strong>
+                <p>{signal.detail}</p>
+              </div>
             </div>
           ))}
         </div>
