@@ -511,7 +511,7 @@ export function answerMoneyQuestion(
     matched: false,
     intent: "general",
     answer:
-      "I can explain net worth, cash flow, emergency reserves, debt, recurring bills, portfolio concentration, retirement progress, financial health, and the 12-month forecast from Solpient’s deterministic household data.",
+      "I can explain your V1.1 financial plan, net worth, cash flow, emergency reserves, debt, recurring bills, portfolio concentration, retirement progress, financial health, and the 12-month forecast from Solpient’s deterministic household data.",
     facts: [],
     calculation: null,
   };
