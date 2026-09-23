@@ -52,7 +52,7 @@ const checks = [
   ["legacy migration clears inherited DATABASE_URL", files.legacy.includes("delete cleanEnv.DATABASE_URL")],
   ["runtime config rejects non-canonical local DB", files.config.includes("SOLPIENT_DB_PORT") && files.config.includes("npm run local:repair")],
   ["runtime auth failure gives actionable repair command", files.client.includes("Solpient Local PostgreSQL credential mismatch")],
-  ["sidebar label remains on V1.2.x reliability line", files.shell.includes("MONEY V1.2.")],
+  ["sidebar label remains on V1 release line", files.shell.includes("MONEY V1.")],
 ];
 
 const failed = checks.filter(([, ok]) => !ok);
