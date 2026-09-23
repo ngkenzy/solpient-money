@@ -1,6 +1,7 @@
 import "server-only";
 
 import { requireActiveHousehold } from "@/lib/money-auth";
+import { localCalendarDateKey } from "@/lib/local-calendar-date";
 
 export const TSP_PRICE_SOURCE_URL =
   "https://www.tsp.gov/data/fund-price-history.csv";
@@ -413,9 +414,7 @@ export async function syncTspSharePrices(
    * Participant setup is required before Solpient downloads prices.
    * This keeps non-TSP households from generating unnecessary network traffic.
    */
-  const today = now
-    .toISOString()
-    .slice(0, 10);
+  const today = localCalendarDateKey(now);
 
   const snapshotDate =
     dateOnly(
