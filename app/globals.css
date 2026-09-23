@@ -10524,6 +10524,42 @@ a {
   flex-wrap: wrap;
 }
 
+.tsp-import-upload {
+  margin-top: 12px;
+  display: grid;
+  gap: 10px;
+  max-width: 720px;
+}
+
+.tsp-import-upload label {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.tsp-import-upload label > span {
+  color: #718399;
+  font-size: 6px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.tsp-import-upload input[type="file"] {
+  width: 100%;
+  min-height: 42px;
+  border: 1px solid #dbe5ed;
+  border-radius: 8px;
+  background: #fff;
+  color: #314b62;
+  padding: 8px;
+  font: inherit;
+  font-size: 8px;
+}
+
+.tsp-import-upload .research-button {
+  width: fit-content;
+}
+
 .tsp-import-principles {
   margin-top: 12px;
   display: grid;
