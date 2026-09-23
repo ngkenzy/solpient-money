@@ -9240,3 +9240,268 @@ a {
   }
 }
 
+/* Solpient Money V1.4 Action Center */
+.action-center-page {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.action-metric-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.action-metric {
+  min-height: 106px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.action-metric > svg {
+  color: #4b789c;
+  margin-bottom: 4px;
+}
+
+.action-metric span {
+  color: #718499;
+  font-size: 7px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.action-metric strong {
+  color: #29455d;
+  font-size: 19px;
+}
+
+.action-metric small {
+  margin-top: auto;
+  color: #8292a4;
+  font-size: 7px;
+}
+
+.action-center-card {
+  padding: 16px;
+}
+
+.action-count-pill {
+  min-width: 28px;
+  height: 24px;
+  border-radius: 999px;
+  background: #edf3f7;
+  color: #5a7188;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 7px;
+  font-weight: 900;
+}
+
+.action-item-list {
+  margin-top: 10px;
+}
+
+.action-item {
+  min-height: 92px;
+  border-top: 1px solid #e6edf3;
+  display: grid;
+  grid-template-columns: 38px minmax(0, 1fr) 150px;
+  gap: 11px;
+  align-items: start;
+  padding: 12px 0;
+}
+
+.action-severity-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 9px;
+  display: grid;
+  place-items: center;
+}
+
+.action-critical .action-severity-icon {
+  color: #964c56;
+  background: #fff1f3;
+}
+
+.action-watch .action-severity-icon {
+  color: #8d651f;
+  background: #fff8e9;
+}
+
+.action-item-copy {
+  min-width: 0;
+}
+
+.action-item-title-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.action-item-title-row strong {
+  color: #2e485f;
+  font-size: 9px;
+}
+
+.action-item-copy p {
+  margin: 5px 0 6px;
+  color: #6f8194;
+  font-size: 8px;
+  line-height: 1.5;
+}
+
+.action-item-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.action-item-meta span {
+  color: #8a98a7;
+  font-size: 6px;
+  text-transform: capitalize;
+}
+
+.action-status {
+  padding: 4px 6px;
+  border-radius: 999px;
+  font-size: 6px;
+  font-weight: 850;
+  text-transform: uppercase;
+}
+
+.action-status-new {
+  background: #fff0f1;
+  color: #97535b;
+}
+
+.action-status-reviewed {
+  background: #eef5fb;
+  color: #3d6c92;
+}
+
+.action-status-snoozed {
+  background: #fff7e9;
+  color: #93691f;
+}
+
+.action-status-resolved {
+  background: #eaf6f0;
+  color: #34705a;
+}
+
+.action-item-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.action-item-controls form {
+  margin: 0;
+}
+
+.action-item-controls button,
+.action-open-link {
+  width: 100%;
+  min-height: 30px;
+  border: 1px solid #dce5ed;
+  border-radius: 8px;
+  background: white;
+  color: #5d7388;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 0 8px;
+  text-decoration: none;
+  cursor: pointer;
+  font: inherit;
+  font-size: 7px;
+  font-weight: 800;
+}
+
+.action-item-controls button:hover,
+.action-open-link:hover {
+  background: #f7fafc;
+  border-color: #cfdce6;
+}
+
+.action-item-list.resolved .action-item {
+  opacity: .8;
+}
+
+.action-empty {
+  min-height: 140px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  color: #7890a5;
+  text-align: center;
+}
+
+.action-empty svg {
+  color: #3d7a62;
+}
+
+.action-empty strong {
+  color: #405b73;
+  font-size: 9px;
+}
+
+.action-empty span {
+  font-size: 7px;
+}
+
+@media (max-width: 1050px) {
+  .action-metric-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .action-item {
+    grid-template-columns: 38px minmax(0, 1fr);
+  }
+
+  .action-item-controls {
+    grid-column: 2;
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+
+  .action-item-controls button,
+  .action-open-link {
+    width: auto;
+  }
+}
+
+@media (max-width: 620px) {
+  .action-metric-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .action-item {
+    grid-template-columns: 1fr;
+  }
+
+  .action-severity-icon,
+  .action-item-controls {
+    grid-column: 1;
+  }
+
+  .action-item-controls {
+    flex-direction: column;
+  }
+
+  .action-item-controls button,
+  .action-open-link {
+    width: 100%;
+  }
+}
+
