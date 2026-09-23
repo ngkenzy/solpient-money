@@ -8963,3 +8963,280 @@ a {
     grid-template-columns: 1fr;
   }
 }
+
+/* Solpient Money V1.3 Money Autopilot */
+.autopilot-page {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.autopilot-hero {
+  padding: 18px;
+}
+
+.autopilot-hero h2 {
+  max-width: 880px;
+  margin: 4px 0 0;
+  font-size: 20px;
+  line-height: 1.35;
+}
+
+.autopilot-run-control {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+}
+
+.autopilot-run-control .attention-button {
+  width: auto;
+  min-width: 150px;
+}
+
+.autopilot-run-control button:disabled {
+  opacity: .55;
+  cursor: default;
+}
+
+.autopilot-error {
+  max-width: 260px;
+  margin: 0;
+  color: #98535c;
+  font-size: 7px;
+  line-height: 1.4;
+  text-align: right;
+}
+
+.spin {
+  animation: autopilotSpin .9s linear infinite;
+}
+
+@keyframes autopilotSpin {
+  to { transform: rotate(360deg); }
+}
+
+.autopilot-metrics {
+  margin-top: 16px;
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.autopilot-metrics > div {
+  min-height: 78px;
+  padding: 11px;
+  border: 1px solid #e2e9ef;
+  border-radius: 9px;
+  background: #fbfcfe;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.autopilot-metrics span {
+  color: #778a9c;
+  font-size: 6px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.autopilot-metrics strong {
+  color: #2d485f;
+  font-size: 16px;
+}
+
+.autopilot-grid {
+  grid-template-columns: 1fr 1fr;
+}
+
+.autopilot-change-list,
+.autopilot-source-list,
+.autopilot-alert-list {
+  margin-top: 10px;
+}
+
+.autopilot-change-row {
+  min-height: 48px;
+  border-top: 1px solid #e6edf3;
+  display: grid;
+  grid-template-columns: minmax(150px, 1fr) 100px 70px;
+  gap: 10px;
+  align-items: center;
+}
+
+.autopilot-change-row span {
+  color: #60768b;
+  font-size: 8px;
+}
+
+.autopilot-change-row strong {
+  color: #304960;
+  font-size: 9px;
+  text-align: right;
+}
+
+.autopilot-change-row em {
+  color: #8292a3;
+  font-size: 7px;
+  font-style: normal;
+  text-align: right;
+}
+
+.autopilot-empty {
+  min-height: 130px;
+  margin: 0;
+  display: grid;
+  place-items: center;
+  color: #7b8da0;
+  font-size: 8px;
+  line-height: 1.5;
+  text-align: center;
+}
+
+.autopilot-source-row {
+  min-height: 62px;
+  border-top: 1px solid #e6edf3;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: center;
+  padding: 7px 0;
+}
+
+.autopilot-source-row > div {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.autopilot-source-row strong {
+  color: #304960;
+  font-size: 8px;
+  text-transform: capitalize;
+}
+
+.autopilot-source-row span {
+  color: #8292a3;
+  font-size: 7px;
+}
+
+.autopilot-source-status {
+  min-width: 145px;
+  text-align: right;
+}
+
+.autopilot-alert {
+  min-height: 66px;
+  border-top: 1px solid #e6edf3;
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr) 58px 18px;
+  gap: 10px;
+  align-items: center;
+  padding: 9px 0;
+  text-decoration: none;
+}
+
+.autopilot-alert-icon {
+  width: 31px;
+  height: 31px;
+  border-radius: 8px;
+  display: grid;
+  place-items: center;
+  background: #f1f5f8;
+  color: #5b7890;
+}
+
+.autopilot-critical .autopilot-alert-icon {
+  color: #984f58;
+  background: #fff1f3;
+}
+
+.autopilot-watch .autopilot-alert-icon {
+  color: #8d651f;
+  background: #fff8e9;
+}
+
+.autopilot-positive .autopilot-alert-icon {
+  color: #34705a;
+  background: #eef8f4;
+}
+
+.autopilot-alert-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.autopilot-alert-copy strong {
+  color: #304960;
+  font-size: 8px;
+}
+
+.autopilot-alert-copy span {
+  color: #8191a2;
+  font-size: 7px;
+  line-height: 1.45;
+}
+
+.autopilot-alert-level {
+  padding: 4px 6px;
+  border-radius: 999px;
+  background: #f2f5f7;
+  color: #6d8093;
+  font-size: 6px;
+  font-weight: 850;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.autopilot-alert > svg {
+  color: #93a1ae;
+}
+
+@media (max-width: 1120px) {
+  .autopilot-metrics {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .autopilot-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 700px) {
+  .autopilot-metrics {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .autopilot-change-row {
+    grid-template-columns: 1fr auto;
+  }
+
+  .autopilot-change-row em {
+    grid-column: 2;
+  }
+
+  .autopilot-source-row {
+    grid-template-columns: 1fr;
+  }
+
+  .autopilot-source-status {
+    text-align: left;
+  }
+
+  .autopilot-alert {
+    grid-template-columns: 34px minmax(0, 1fr) 18px;
+  }
+
+  .autopilot-alert-level {
+    display: none;
+  }
+}
+
+@media (max-width: 520px) {
+  .autopilot-metrics {
+    grid-template-columns: 1fr;
+  }
+}
+
