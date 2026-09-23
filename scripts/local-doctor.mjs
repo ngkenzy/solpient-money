@@ -288,6 +288,8 @@ if (databaseUrl && parsed && failures.length === 0) {
         to_regclass('public.financial_plan_snapshots') is not null as v12_snapshots,
         to_regclass('public.money_autopilot_runs') is not null as autopilot_ledger,
         to_regclass('public.money_action_items') is not null as action_center,
+        to_regclass('public.portfolio_position_snapshots') is not null as portfolio_history,
+        to_regclass('public.investment_decisions') is not null as decision_journal,
         to_regclass('public.local_migrations') is not null as migration_table
     `);
 
@@ -333,6 +335,15 @@ if (databaseUrl && parsed && failures.length === 0) {
       pass("V1.4 Action Center present");
     } else {
       fail("V1.4 Action Center present");
+    }
+
+    if (
+      row?.portfolio_history === true &&
+      row?.decision_journal === true
+    ) {
+      pass("V1.6 portfolio history and Decision Journal present");
+    } else {
+      fail("V1.6 portfolio history and Decision Journal present");
     }
   } catch (error) {
     const code =
