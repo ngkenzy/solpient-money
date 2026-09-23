@@ -61,6 +61,7 @@ const TABLES = new Set([
   "tsp_snapshots",
   "tsp_fund_positions",
   "tsp_fund_prices",
+  "tsp_statement_imports",
 ]);
 
 const DEFAULT_CONFLICTS: Record<string, string[]> = {
