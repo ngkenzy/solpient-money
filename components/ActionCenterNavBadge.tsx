@@ -9,28 +9,39 @@ type Counts = {
 export default function ActionCenterNavBadge() {
   const [count, setCount] = useState(0);
 
-  async function refresh() {
-    try {
-      const response = await fetch("/api/action-center", {
-        cache: "no-store",
-      });
-      const body = (await response.json()) as {
-        ok?: boolean;
-        counts?: Counts;
-      };
-      if (response.ok && body.ok) {
-        setCount(Number(body.counts?.totalOpen ?? 0));
-      }
-    } catch {
-      // A missing badge must never block navigation.
-    }
-  }
-
   useEffect(() => {
-    void refresh();
+    let cancelled = false;
+
+    async function loadCount() {
+      try {
+        const response = await fetch("/api/action-center", {
+          cache: "no-store",
+        });
+        const body = (await response.json()) as {
+          ok?: boolean;
+          counts?: Counts;
+        };
+
+        if (
+          !cancelled &&
+          response.ok &&
+          body.ok
+        ) {
+          setCount(
+            Number(body.counts?.totalOpen ?? 0)
+          );
+        }
+      } catch {
+        // A missing badge must never block navigation.
+      }
+    }
+
+    const timer = window.setTimeout(() => {
+      void loadCount();
+    }, 0);
 
     function onAutopilotComplete() {
-      void refresh();
+      void loadCount();
     }
 
     window.addEventListener(
@@ -39,6 +50,8 @@ export default function ActionCenterNavBadge() {
     );
 
     return () => {
+      cancelled = true;
+      window.clearTimeout(timer);
       window.removeEventListener(
         "solpient:autopilot-complete",
         onAutopilotComplete
