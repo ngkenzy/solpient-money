@@ -2,6 +2,7 @@ import "server-only";
 
 import { getCashFlowIntelligence } from "@/lib/cash-flow-intelligence";
 import { buildFinancialHealthEngine } from "@/lib/financial-health-engine";
+import { buildHouseholdFinancialPlan } from "@/lib/financial-plan-engine";
 import {
   runForecast,
   type ForecastInputs,
@@ -70,6 +71,16 @@ export type MoneyCopilotContext = {
     kind: string;
     monthlyEquivalent: number;
   }>;
+  monthlyPlan: Array<{
+    title: string;
+    kind: string;
+    monthlyAllocation: number;
+    why: string;
+  }>;
+  planAllocatedMonthly: number;
+  planFlexibleMonthly: number;
+  planDebtInterestSaved: number;
+  planRetirementRequiredMonthly: number;
 };
 
 function average(values: number[]) {
@@ -95,6 +106,7 @@ export async function getMoneyCopilotContext(): Promise<MoneyCopilotContext> {
   const data = context.dataset;
   const cashFlow = await getCashFlowIntelligence();
   const health = buildFinancialHealthEngine(data, cashFlow);
+  const householdPlan = buildHouseholdFinancialPlan(data, cashFlow);
   const debts = getDebtPriority(data);
 
   const monthlyIncome = average(
@@ -184,6 +196,17 @@ export async function getMoneyCopilotContext(): Promise<MoneyCopilotContext> {
       kind: item.kind,
       monthlyEquivalent: item.monthlyEquivalent,
     })),
+    monthlyPlan: householdPlan.planLines.map((line) => ({
+      title: line.title,
+      kind: line.kind,
+      monthlyAllocation: line.monthlyAllocation,
+      why: line.why,
+    })),
+    planAllocatedMonthly: householdPlan.allocatedMonthly,
+    planFlexibleMonthly: householdPlan.flexibleMonthly,
+    planDebtInterestSaved: householdPlan.debtInterestSaved,
+    planRetirementRequiredMonthly:
+      householdPlan.retirementRequiredMonthly,
   };
 }
 
@@ -192,6 +215,32 @@ export function answerMoneyQuestion(
   context: MoneyCopilotContext
 ): DeterministicCopilotAnswer {
   const q = question.toLowerCase();
+
+  if (
+    /financial plan|monthly plan|next dollar|allocate|allocation plan|why.*(debt|reserve|retire|goal)|what should.*surplus/.test(q)
+  ) {
+    const funded = context.monthlyPlan.filter(
+      (line) => line.monthlyAllocation > 0
+    );
+
+    return {
+      matched: true,
+      intent: "financial_plan",
+      answer: `The V1.1 plan starts with an observed monthly surplus of ${money(
+        context.monthlySurplus
+      )}. It assigns ${money(
+        context.planAllocatedMonthly
+      )} to measurable priorities and leaves ${money(
+        context.planFlexibleMonthly
+      )} flexible. Each dollar is allocated once through the priority waterfall.`,
+      facts: funded.slice(0, 6).map((line) => ({
+        label: line.title,
+        value: `${money(line.monthlyAllocation)}/mo`,
+      })),
+      calculation:
+        "Observed monthly surplus → reserve catch-up → high-interest debt → dated goals → retirement requirement → flexible remainder",
+    };
+  }
 
   if (/net worth|assets|liabilit/.test(q)) {
     return {
