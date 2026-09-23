@@ -18,8 +18,20 @@ const files = {
 
 const pkg = JSON.parse(files.packageJson);
 
+function atLeast061(version) {
+  const [major = 0, minor = 0, patch = 0] = String(version)
+    .split(".")
+    .map((value) => Number.parseInt(value, 10) || 0);
+
+  if (major > 0) return true;
+  if (major < 0) return false;
+  if (minor > 6) return true;
+  if (minor < 6) return false;
+  return patch >= 1;
+}
+
 const checks = [
-  ["release includes V0.6.1 or newer", /^0\.(?:[7-9]|6\.(?:[1-9]|[1-9][0-9]+))/.test(pkg.version) || pkg.version === "0.6.1"],
+  ["release includes V0.6.1 or newer", atLeast061(pkg.version)],
   ["persistent Sandbox context remains visible", files.connections.includes("PLAID SANDBOX TEST DATA")],
   ["database source metadata reaches MoneyDataset", files.moneyData.includes('source: (row.source ?? "manual")')],
   ["Plaid accounts are marked test data", files.accounts.includes("PLAID TEST")],
