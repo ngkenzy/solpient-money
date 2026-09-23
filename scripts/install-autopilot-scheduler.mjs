@@ -60,6 +60,14 @@ const minute = Number.parseInt(
   arg("minute", "0"),
   10
 );
+const tspHour = Number.parseInt(
+  arg("tsp-hour", "20"),
+  10
+);
+const tspMinute = Number.parseInt(
+  arg("tsp-minute", "30"),
+  10
+);
 
 if (
   !Number.isInteger(hour) ||
@@ -67,10 +75,16 @@ if (
   hour > 23 ||
   !Number.isInteger(minute) ||
   minute < 0 ||
-  minute > 59
+  minute > 59 ||
+  !Number.isInteger(tspHour) ||
+  tspHour < 0 ||
+  tspHour > 23 ||
+  !Number.isInteger(tspMinute) ||
+  tspMinute < 0 ||
+  tspMinute > 59
 ) {
   throw new Error(
-    "Scheduler time must use --hour=0..23 and --minute=0..59."
+    "Scheduler times must use --hour/--tsp-hour=0..23 and --minute/--tsp-minute=0..59."
   );
 }
 
@@ -175,12 +189,20 @@ const autopilot = `<?xml version="1.0" encoding="UTF-8"?>
   <key>WorkingDirectory</key>
   <string>${xml(repo)}</string>
   <key>StartCalendarInterval</key>
-  <dict>
-    <key>Hour</key>
-    <integer>${hour}</integer>
-    <key>Minute</key>
-    <integer>${minute}</integer>
-  </dict>
+  <array>
+    <dict>
+      <key>Hour</key>
+      <integer>${hour}</integer>
+      <key>Minute</key>
+      <integer>${minute}</integer>
+    </dict>
+    <dict>
+      <key>Hour</key>
+      <integer>${tspHour}</integer>
+      <key>Minute</key>
+      <integer>${tspMinute}</integer>
+    </dict>
+  </array>
   <key>ProcessType</key>
   <string>Background</string>
   <key>StandardOutPath</key>
@@ -245,7 +267,10 @@ console.log(
   "✓ Solpient background server installed on 127.0.0.1:3210"
 );
 console.log(
-  `✓ Daily Money Autopilot scheduled for ${String(hour).padStart(2, "0")}:${String(minute).padStart(2, "0")}`
+  `✓ Money Autopilot scheduled for ${String(hour).padStart(2, "0")}:${String(minute).padStart(2, "0")}`
+);
+console.log(
+  `✓ Second daily refresh scheduled for ${String(tspHour).padStart(2, "0")}:${String(tspMinute).padStart(2, "0")} (captures later TSP price publications)`
 );
 console.log(
   "✓ Logs: ~/Library/Logs/SolpientMoney"

@@ -129,8 +129,8 @@ const checks = [
     files.doctor.includes("V1.7.1 TSP daily price cache present"),
   ],
   [
-    "release badge shows V1.7.1",
-    files.shell.includes("MONEY V1.7.1"),
+    "release badge matches current package version",
+    files.shell.includes(`MONEY V${pkg.version}`),
   ],
   [
     "GitHub Build remains manual-only",
