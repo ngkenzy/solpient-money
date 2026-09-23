@@ -800,3 +800,24 @@ V1.1 also adds:
 
 The plan does not move money or execute payments. It is a read/modeling layer over reconciled Solpient Money data. Household assumptions are user-editable; V1.1 system policies such as the 12-month reserve catch-up and high-interest payoff horizon are displayed separately so the logic remains inspectable.
 
+## V1.2 Continuous Plan Monitoring
+
+The V1.2 Plan Monitor at `/monitor` closes the loop between the V1.1 household plan and what actually happens during the month.
+
+On the first visit in a new month, Solpient stores one monthly V1.1 baseline in `financial_plan_snapshots`. Ordinary transaction updates never rewrite that baseline. If the household intentionally changes a goal or planning policy, the baseline can be reset explicitly from the Monitor page.
+
+V1.2 continuously compares:
+
+- month-to-date income, spending, and surplus against the saved monthly baseline;
+- projected month-end spending and surplus against plan;
+- current debt payoff timing against the saved payoff horizon;
+- dated-goal monthly requirements against their saved baseline;
+- retirement contribution requirements against baseline;
+- reserve, debt, goal, retirement, and flexible allocation changes.
+
+Monitoring signals use materiality thresholds to suppress small fluctuations. Cash-flow pace is ignored until at least 20% of the month has elapsed. The Plan Alignment score starts at 100; watch signals subtract 10 points and critical signals subtract 22.
+
+Money Copilot can answer questions such as `What changed from my financial plan?` using the saved baseline. The Copilot remains read-only and will never create or reset a monitoring baseline.
+
+The full encrypted PostgreSQL backup already includes the V1.2 snapshot history because local backups use a complete `pg_dump`.
+
