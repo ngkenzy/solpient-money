@@ -28,7 +28,7 @@ const checks = [
   ["legacy migration uses container-only repair", files.legacy.includes('"--container-only"')],
   ["legacy restore no longer uses --clean", !files.legacy.includes('"--clean"')],
   ["legacy restore recreates only empty canonical DB", files.legacy.includes("drop database if exists") && files.legacy.includes("create database")],
-  ["legacy restore checks canonical households before reset", files.legacy.indexOf("targetHouseholds > 0") < files.legacy.indexOf("recreateEmptyCanonicalDatabase()")],
+  ["legacy restore checks canonical households before reset", files.legacy.indexOf("targetHouseholds > 0") < files.legacy.lastIndexOf("recreateEmptyCanonicalDatabase();")],
   ["legacy dump is staged to a temporary file", files.legacy.includes("mkdtemp") && files.legacy.includes("legacy.sql")],
   ["legacy restore uses stream pipeline safely", files.legacy.includes("pipeline(createReadStream(dumpPath), restore.stdin)")],
   ["legacy dump excludes owner and privileges", files.legacy.includes("--no-owner") && files.legacy.includes("--no-privileges")],
