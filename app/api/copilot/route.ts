@@ -6,6 +6,7 @@ import {
 } from "@/lib/money-copilot";
 import { getOllamaStatus, runOllamaChat } from "@/lib/ollama";
 import { getPlanMonitoring } from "@/lib/plan-monitor-engine";
+import { getMoneyAutopilotBriefing } from "@/lib/money-autopilot";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -70,6 +71,52 @@ export async function POST(request: Request) {
         { error: "Ask a financial question first." },
         { status: 400 }
       );
+    }
+
+    if (
+      /daily briefing|money autopilot|autopilot|what changed since yesterday|what changed today|since yesterday|overnight financial|what needs my attention today/i.test(
+        question
+      )
+    ) {
+      const briefing =
+        await getMoneyAutopilotBriefing();
+
+      const currency = (value: number) =>
+        new Intl.NumberFormat("en-US", {
+          style: "currency",
+          currency: "USD",
+          maximumFractionDigits: 0,
+        }).format(value);
+
+      const top = briefing.alerts[0];
+
+      return NextResponse.json({
+        answer:
+          `${briefing.summary} ${top?.title ?? ""} ${top?.detail ?? ""}`.trim(),
+        facts: [
+          {
+            label: "Net worth",
+            value: currency(briefing.snapshot.netWorth),
+          },
+          {
+            label: "Financial health",
+            value: `${briefing.snapshot.healthScore}/100`,
+          },
+          {
+            label: "Plan alignment",
+            value: `${briefing.snapshot.planAlignment}/100`,
+          },
+          {
+            label: "New transactions",
+            value: String(briefing.newTransactionCount),
+          },
+        ],
+        calculation:
+          "Persisted daily Money Autopilot snapshot compared with the prior daily snapshot, plus connector freshness, deterministic cash-flow anomaly checks, and V1.2 plan drift.",
+        intent: "money_autopilot",
+        engine: "deterministic",
+        model: null,
+      });
     }
 
     if (
