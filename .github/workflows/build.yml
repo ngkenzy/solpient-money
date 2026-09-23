@@ -59,4 +59,5 @@ jobs:
       - run: npm run test:v093
       - run: npm run test:v094
       - run: npm run test:v10
+      - run: npm run test:v11
       - run: npm run build
