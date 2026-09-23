@@ -38,6 +38,7 @@ export type PortfolioPositionIntelligence = {
   costBasis: number;
   unrealizedPct: number | null;
   researchCovered: boolean;
+  researchVersion: number | null;
   researchScore: number | null;
   evidenceConfidence: number | null;
   decisionReadiness: number | null;
@@ -235,6 +236,7 @@ function positionIntelligence(
       costBasis: holding.costBasis,
       unrealizedPct,
       researchCovered: false,
+      researchVersion: null,
       researchScore: null,
       evidenceConfidence: null,
       decisionReadiness: null,
@@ -350,6 +352,7 @@ function positionIntelligence(
     costBasis: holding.costBasis,
     unrealizedPct,
     researchCovered: true,
+    researchVersion: snapshot.research_version,
     researchScore:
       snapshot.overall_score,
     evidenceConfidence:
