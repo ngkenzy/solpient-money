@@ -1,12 +1,26 @@
 import { readFile } from "node:fs/promises";
 
 const files = {
+  packageJson: await readFile("package.json", "utf8"),
   engine: await readFile("lib/forecast-scenario-engine.ts", "utf8"),
   component: await readFile("components/ScenarioLab.tsx", "utf8"),
   page: await readFile("app/scenario-lab/page.tsx", "utf8"),
   chart: await readFile("components/InteractiveLineChart.tsx", "utf8"),
   shell: await readFile("components/AppShell.tsx", "utf8"),
 };
+
+const pkg = JSON.parse(files.packageJson);
+
+function atLeast094(version) {
+  const [major = 0, minor = 0, patch = 0] = String(version)
+    .split(".")
+    .map((value) => Number.parseInt(value, 10) || 0);
+
+  if (major > 0) return true;
+  if (minor > 9) return true;
+  if (minor < 9) return false;
+  return patch >= 4;
+}
 
 const checks = [
   ["forecast engine exists", files.engine.includes("runForecast")],
@@ -26,7 +40,7 @@ const checks = [
   ["scenario page uses reconciled cash flow", files.page.includes("getCashFlowIntelligence")],
   ["scenario page uses V0.9.3 health metrics", files.page.includes("buildFinancialHealthEngine")],
   ["three chart paths supported", files.chart.includes("#2f8d68")],
-  ["release label updated", files.shell.includes("MONEY V0.9.4")],
+  ["release includes V0.9.4 or newer", atLeast094(pkg.version)],
 ];
 
 const failed = checks.filter(([, ok]) => !ok);
