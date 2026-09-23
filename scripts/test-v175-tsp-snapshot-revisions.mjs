@@ -15,6 +15,10 @@ const files = {
     "supabase/migrations/20260923193000_v175_tsp_snapshot_revisions.sql",
     "utf8"
   ),
+  rpcMigration: await readFile(
+    "supabase/migrations/20260923194500_v175_tsp_atomic_revision_rpc.sql",
+    "utf8"
+  ),
   actions: await readFile("app/tsp/actions.ts", "utf8"),
   tracker: await readFile("lib/tsp-tracker.ts", "utf8"),
   prices: await readFile("lib/tsp-prices.ts", "utf8"),
@@ -43,27 +47,27 @@ const checks = [
   ],
   [
     "atomic revision RPC uses transaction-scoped advisory lock",
-    files.migration.includes(
+    files.rpcMigration.includes(
       "create or replace function public.insert_tsp_snapshot_revision"
     ) &&
-      files.migration.includes("pg_advisory_xact_lock") &&
-      files.migration.includes("security invoker"),
+      files.rpcMigration.includes("pg_advisory_xact_lock") &&
+      files.rpcMigration.includes("security invoker"),
   ],
   [
     "bounded retry only handles revision-number conflicts",
-    files.migration.includes("v_attempt >= 3") &&
-      files.migration.includes("get stacked diagnostics") &&
-      files.migration.includes(
+    files.rpcMigration.includes("v_attempt >= 3") &&
+      files.rpcMigration.includes("get stacked diagnostics") &&
+      files.rpcMigration.includes(
         "tsp_snapshots_household_date_revision_uidx"
       ),
   ],
   [
     "RPC execution is restricted",
-    files.migration.includes(
+    files.rpcMigration.includes(
       "revoke execute on function public.insert_tsp_snapshot_revision"
     ) &&
-      files.migration.includes("from public, anon") &&
-      files.migration.includes("to authenticated"),
+      files.rpcMigration.includes("from public, anon") &&
+      files.rpcMigration.includes("to authenticated"),
   ],
   [
     "confirmed snapshot facts are no longer broadly updateable",
