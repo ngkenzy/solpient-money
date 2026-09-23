@@ -1,8 +1,20 @@
+import {
+  createReadStream,
+  createWriteStream,
+} from "node:fs";
+import {
+  mkdtemp,
+  rm,
+} from "node:fs/promises";
+import { tmpdir } from "node:os";
+import path from "node:path";
 import { spawn, spawnSync } from "node:child_process";
-import pg from "pg";
+import { pipeline } from "node:stream/promises";
 
 const LEGACY = "solpient-local-db-1";
 const TARGET = "solpient-money-postgres";
+const DATABASE = "solpient";
+const USER = "solpient";
 
 function containerExists(name) {
   const result = spawnSync(
@@ -18,7 +30,11 @@ function containerExists(name) {
   };
 }
 
-function queryContainer(container, sql) {
+function queryContainer(
+  container,
+  sql,
+  database = DATABASE
+) {
   const result = spawnSync(
     "docker",
     [
@@ -27,9 +43,9 @@ function queryContainer(container, sql) {
       container,
       "psql",
       "-U",
-      "solpient",
+      USER,
       "-d",
-      "solpient",
+      database,
       "-At",
       "-v",
       "ON_ERROR_STOP=1",
@@ -41,14 +57,72 @@ function queryContainer(container, sql) {
 
   if (result.status !== 0) {
     throw new Error(
-      `Query failed in ${container}: ${result.stderr || "unknown error"}`
+      `Query failed in ${container}/${database}: ${result.stderr || "unknown error"}`
     );
   }
 
   return result.stdout.trim();
 }
 
-async function pipeLegacyDump() {
+function scalarCount(container, table) {
+  return Number(
+    queryContainer(
+      container,
+      `select case when to_regclass('public.${table}') is null then 0 else (select count(*) from public.${table}) end;`
+    ) || 0
+  );
+}
+
+function recreateEmptyCanonicalDatabase() {
+  console.log(
+    "Recreating the empty canonical database before legacy restore..."
+  );
+
+  const terminate = spawnSync(
+    "docker",
+    [
+      "exec",
+      "-i",
+      TARGET,
+      "psql",
+      "-U",
+      USER,
+      "-d",
+      "postgres",
+      "-v",
+      "ON_ERROR_STOP=1",
+    ],
+    {
+      input: `
+        select pg_terminate_backend(pid)
+        from pg_stat_activity
+        where datname = '${DATABASE}'
+          and pid <> pg_backend_pid();
+
+        drop database if exists ${DATABASE};
+        create database ${DATABASE} owner ${USER};
+      `,
+      encoding: "utf8",
+    }
+  );
+
+  if (terminate.status !== 0) {
+    throw new Error(
+      `Unable to recreate the empty canonical database: ${terminate.stderr || "unknown error"}`
+    );
+  }
+}
+
+async function createLegacyDumpFile() {
+  const dir = await mkdtemp(
+    path.join(tmpdir(), "solpient-legacy-")
+  );
+  const dumpPath = path.join(dir, "legacy.sql");
+
+  console.log(
+    "Creating a temporary legacy PostgreSQL dump..."
+  );
+
   const dump = spawn(
     "docker",
     [
@@ -57,17 +131,50 @@ async function pipeLegacyDump() {
       LEGACY,
       "pg_dump",
       "-U",
-      "solpient",
+      USER,
       "-d",
-      "solpient",
-      "--clean",
-      "--if-exists",
+      DATABASE,
       "--no-owner",
       "--no-privileges",
     ],
     {
       stdio: ["ignore", "pipe", "pipe"],
     }
+  );
+
+  let stderr = "";
+  dump.stderr.on("data", (chunk) => {
+    stderr += chunk.toString();
+  });
+
+  const dumpDone = new Promise((resolve, reject) => {
+    dump.on("error", reject);
+    dump.on("close", (code) => {
+      if (code === 0) resolve();
+      else {
+        reject(
+          new Error(
+            `Legacy pg_dump failed: ${stderr || `exit code ${code}`}`
+          )
+        );
+      }
+    });
+  });
+
+  await Promise.all([
+    pipeline(dump.stdout, createWriteStream(dumpPath)),
+    dumpDone,
+  ]);
+
+  return {
+    dir,
+    dumpPath,
+  };
+}
+
+async function restoreLegacyDumpFile(dumpPath) {
+  console.log(
+    "Restoring legacy data into the fresh canonical database..."
   );
 
   const restore = spawn(
@@ -78,43 +185,48 @@ async function pipeLegacyDump() {
       TARGET,
       "psql",
       "-U",
-      "solpient",
+      USER,
       "-d",
-      "solpient",
+      DATABASE,
       "-v",
       "ON_ERROR_STOP=1",
     ],
     {
-      stdio: ["pipe", "inherit", "inherit"],
+      stdio: ["pipe", "inherit", "pipe"],
     }
   );
 
-  let dumpError = "";
-  dump.stderr.on("data", (chunk) => {
-    dumpError += chunk.toString();
+  let stderr = "";
+  restore.stderr.on("data", (chunk) => {
+    const text = chunk.toString();
+    stderr += text;
+    process.stderr.write(text);
   });
 
-  dump.stdout.pipe(restore.stdin);
+  const restoreDone = new Promise((resolve, reject) => {
+    restore.on("error", reject);
+    restore.on("close", (code) => {
+      if (code === 0) resolve();
+      else {
+        reject(
+          new Error(
+            `Legacy restore failed: ${stderr || `exit code ${code}`}`
+          )
+        );
+      }
+    });
+  });
 
-  const [dumpCode, restoreCode] = await Promise.all([
-    new Promise((resolve) =>
-      dump.on("close", (code) => resolve(code ?? 1))
-    ),
-    new Promise((resolve) =>
-      restore.on("close", (code) => resolve(code ?? 1))
-    ),
-  ]);
-
-  if (dumpCode !== 0) {
-    throw new Error(
-      `Legacy pg_dump failed: ${dumpError || "unknown error"}`
-    );
-  }
-
-  if (restoreCode !== 0) {
-    throw new Error(
-      "Restore into canonical PostgreSQL failed. The legacy container was not modified."
-    );
+  try {
+    await Promise.all([
+      pipeline(createReadStream(dumpPath), restore.stdin),
+      restoreDone,
+    ]);
+  } catch (error) {
+    if (!restore.killed) {
+      restore.kill("SIGTERM");
+    }
+    throw error;
   }
 }
 
@@ -123,7 +235,7 @@ if (!process.argv.includes("--confirm")) {
     "This command copies the legacy Solpient database into the canonical local database."
   );
   console.log(
-    "It does NOT delete or modify solpient-local-db-1."
+    `It does NOT delete or modify ${LEGACY}.`
   );
   console.log("");
   console.log(
@@ -179,18 +291,21 @@ if (!target.running) {
   );
 }
 
-const legacyHouseholds = Number(
-  queryContainer(
-    LEGACY,
-    "select case when to_regclass('public.households') is null then 0 else (select count(*) from public.households) end;"
-  ) || 0
+const legacyHouseholds = scalarCount(
+  LEGACY,
+  "households"
 );
-
-const targetHouseholds = Number(
-  queryContainer(
-    TARGET,
-    "select case when to_regclass('public.households') is null then 0 else (select count(*) from public.households) end;"
-  ) || 0
+const legacyAccounts = scalarCount(
+  LEGACY,
+  "accounts"
+);
+const legacyTransactions = scalarCount(
+  LEGACY,
+  "transactions"
+);
+const targetHouseholds = scalarCount(
+  TARGET,
+  "households"
 );
 
 if (targetHouseholds > 0) {
@@ -200,70 +315,98 @@ if (targetHouseholds > 0) {
 }
 
 console.log(
-  `Legacy database contains ${legacyHouseholds} household row(s).`
-);
-console.log(
-  "Copying legacy PostgreSQL database into canonical local PostgreSQL..."
+  `Legacy database contains ${legacyHouseholds} household row(s), ${legacyAccounts} account row(s), and ${legacyTransactions} transaction row(s).`
 );
 
-await pipeLegacyDump();
+let temporary = null;
 
-console.log("Applying any migrations added after the legacy database snapshot...");
+try {
+  temporary = await createLegacyDumpFile();
 
-const migrate = spawnSync(
-  process.execPath,
-  ["scripts/local-db-init.mjs"],
-  {
-    stdio: "inherit",
-    env: cleanEnv,
+  // The canonical DB currently contains the newest schema. Restoring an
+  // older --clean dump into it can fail when newer FK dependencies exist.
+  // Recreate only the empty target DB, restore the old snapshot first,
+  // then roll it forward using the current migration runner.
+  recreateEmptyCanonicalDatabase();
+
+  await restoreLegacyDumpFile(
+    temporary.dumpPath
+  );
+
+  console.log(
+    "Applying migrations added after the legacy database snapshot..."
+  );
+
+  const migrate = spawnSync(
+    process.execPath,
+    ["scripts/local-db-init.mjs"],
+    {
+      stdio: "inherit",
+      env: cleanEnv,
+    }
+  );
+
+  if (migrate.status !== 0) {
+    throw new Error(
+      "Legacy data restored, but current migrations did not complete. The legacy source remains untouched."
+    );
   }
-);
 
-if (migrate.status !== 0) {
-  throw new Error(
-    "Legacy data restored, but current migrations did not complete. The legacy source remains untouched."
-  );
-}
-
-const finalHouseholds = Number(
-  queryContainer(
+  const finalHouseholds = scalarCount(
     TARGET,
-    "select count(*) from public.households;"
-  ) || 0
-);
-
-if (finalHouseholds !== legacyHouseholds) {
-  throw new Error(
-    `Household verification mismatch after migration: legacy=${legacyHouseholds}, canonical=${finalHouseholds}. The legacy source remains untouched.`
+    "households"
   );
-}
-
-const legacyAccounts = Number(
-  queryContainer(
-    LEGACY,
-    "select case when to_regclass('public.accounts') is null then 0 else (select count(*) from public.accounts) end;"
-  ) || 0
-);
-const finalAccounts = Number(
-  queryContainer(
+  const finalAccounts = scalarCount(
     TARGET,
-    "select count(*) from public.accounts;"
-  ) || 0
-);
-
-if (legacyAccounts !== finalAccounts) {
-  throw new Error(
-    `Account verification mismatch after migration: legacy=${legacyAccounts}, canonical=${finalAccounts}. The legacy source remains untouched.`
+    "accounts"
   );
-}
+  const finalTransactions = scalarCount(
+    TARGET,
+    "transactions"
+  );
 
-console.log("");
-console.log("✓ Legacy data copied to canonical PostgreSQL");
-console.log(`✓ Household rows verified: ${finalHouseholds}`);
-console.log(`✓ Account rows verified: ${finalAccounts}`);
-console.log("✓ Current migrations applied");
-console.log(`✓ Legacy container preserved: ${LEGACY}`);
-console.log("");
-console.log(
-  "Run 'npm run local:doctor'. If everything is healthy, use 'npm run dev'."
-);
+  if (finalHouseholds !== legacyHouseholds) {
+    throw new Error(
+      `Household verification mismatch after migration: legacy=${legacyHouseholds}, canonical=${finalHouseholds}. The legacy source remains untouched.`
+    );
+  }
+
+  if (finalAccounts !== legacyAccounts) {
+    throw new Error(
+      `Account verification mismatch after migration: legacy=${legacyAccounts}, canonical=${finalAccounts}. The legacy source remains untouched.`
+    );
+  }
+
+  if (finalTransactions !== legacyTransactions) {
+    throw new Error(
+      `Transaction verification mismatch after migration: legacy=${legacyTransactions}, canonical=${finalTransactions}. The legacy source remains untouched.`
+    );
+  }
+
+  console.log("");
+  console.log("✓ Legacy data copied to canonical PostgreSQL");
+  console.log(
+    `✓ Household rows verified: ${finalHouseholds}`
+  );
+  console.log(
+    `✓ Account rows verified: ${finalAccounts}`
+  );
+  console.log(
+    `✓ Transaction rows verified: ${finalTransactions}`
+  );
+  console.log("✓ Current migrations applied");
+  console.log(
+    `✓ Legacy container preserved: ${LEGACY}`
+  );
+  console.log("");
+  console.log(
+    "Run 'npm run local:doctor'. If everything is healthy, use 'npm run dev'."
+  );
+} finally {
+  if (temporary?.dir) {
+    await rm(temporary.dir, {
+      recursive: true,
+      force: true,
+    });
+  }
+}
