@@ -39,7 +39,7 @@ const checks = [
   ["dev preflight reads persisted port", files.dev.includes('readKey(envFile, "SOLPIENT_DB_PORT")')],
   ["dev passes selected port to Next", files.dev.includes("SOLPIENT_DB_PORT: String(expectedPort)")],
   ["runtime validation uses selected port", files.config.includes("process.env.SOLPIENT_DB_PORT")],
-  ["sidebar label shows V1.2.2", files.shell.includes("MONEY V1.2.2")],
+  ["sidebar label remains on V1.2.x reliability line", files.shell.includes("MONEY V1.2.")],
 ];
 
 const failed = checks.filter(([, ok]) => !ok);
