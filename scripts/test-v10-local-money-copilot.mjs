@@ -16,11 +16,14 @@ const copilotPath = [
   files.route,
   files.ollama,
 ].join("\n");
+const postRoute = files.route.slice(
+  files.route.indexOf("export async function POST")
+);
 
 const checks = [
   ["deterministic context exists", files.copilot.includes("getMoneyCopilotContext")],
   ["deterministic answers exist", files.copilot.includes("answerMoneyQuestion")],
-  ["common answers do not require Ollama", files.route.indexOf("deterministic.matched") < files.route.indexOf("status.available")],
+  ["common answers do not require Ollama", postRoute.indexOf("deterministic.matched") < postRoute.indexOf("const status = await getOllamaStatus()")],
   ["Ollama defaults to localhost", files.ollama.includes("http://127.0.0.1:11434")],
   ["Ollama is optional", files.route.includes("localModelAvailable: false")],
   ["Copilot route has no financial writes", !writeTokens.some((token) => copilotPath.includes(token))],
