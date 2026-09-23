@@ -5,6 +5,7 @@ import {
   getMoneyCopilotContext,
 } from "@/lib/money-copilot";
 import { getOllamaStatus, runOllamaChat } from "@/lib/ollama";
+import { getPlanMonitoring } from "@/lib/plan-monitor-engine";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -69,6 +70,50 @@ export async function POST(request: Request) {
         { error: "Ask a financial question first." },
         { status: 400 }
       );
+    }
+
+    if (
+      /what changed|plan drift|plan monitor|off plan|on track with.*plan|deviation|behind plan|ahead of plan/i.test(
+        question
+      )
+    ) {
+      const monitor = await getPlanMonitoring(new Date(), {
+        createBaseline: false,
+      });
+      const top = monitor.signals[0];
+      const currency = (value: number) =>
+        new Intl.NumberFormat("en-US", {
+          style: "currency",
+          currency: "USD",
+          maximumFractionDigits: 0,
+        }).format(value);
+
+      return NextResponse.json({
+        answer: monitor.baselinePersisted
+          ? monitor.materialSignalCount > 0
+            ? `V1.2 currently shows ${monitor.materialSignalCount} material plan change(s). ${top?.title ?? "Open Plan Monitor for the full comparison."} ${top?.detail ?? ""}`
+            : "V1.2 does not detect material drift from the saved monthly plan baseline."
+          : "There is no saved V1.2 monthly baseline yet. Open Plan Monitor once to capture the current monthly reference point; Copilot will not create or reset it because the Copilot remains read-only.",
+        facts: [
+          {
+            label: "Plan alignment",
+            value: `${monitor.alignmentScore}/100`,
+          },
+          {
+            label: "Projected spending",
+            value: currency(monitor.pace.spending.projectedMonthEnd),
+          },
+          {
+            label: "Projected surplus",
+            value: currency(monitor.pace.surplus.projectedMonthEnd),
+          },
+        ],
+        calculation:
+          "Saved monthly V1.1 baseline compared with reconciled month-to-date cash flow and current plan timing.",
+        intent: "plan_monitoring",
+        engine: "deterministic",
+        model: null,
+      });
     }
 
     const context = await getMoneyCopilotContext();
