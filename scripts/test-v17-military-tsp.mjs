@@ -114,7 +114,11 @@ const checks = [
     "TSP tracker is in navigation",
     files.shell.includes('href: "/tsp"') &&
       files.shell.includes("Military TSP") &&
-      files.shell.includes("MONEY V1.7"),
+      files.shell.includes(`MONEY V${pkg.version}`) &&
+      files.shell.indexOf('label: "INVEST"') <
+        files.shell.indexOf('href: "/tsp"') &&
+      files.shell.indexOf('href: "/tsp"') <
+        files.shell.indexOf('label: "PLAN"'),
   ],
   [
     "Autopilot carries TSP material signals only after setup",
