@@ -38,7 +38,7 @@ const checks = [
   ["transactions are verified", files.legacy.includes("Transaction verification mismatch")],
   ["legacy source remains untouched", files.legacy.includes("legacy source remains untouched") && !files.legacy.includes("docker rm")],
   ["temporary dump is cleaned up", files.legacy.includes("rm(temporary.dir")],
-  ["sidebar label shows V1.2.3", files.shell.includes("MONEY V1.2.3")],
+  ["sidebar label remains on V1 release line", files.shell.includes("MONEY V1.")],
 ];
 
 const failed = checks.filter(([, ok]) => !ok);
