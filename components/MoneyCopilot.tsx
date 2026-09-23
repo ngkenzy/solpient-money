@@ -37,6 +37,7 @@ type Status = {
 };
 
 const QUICK_PROMPTS = [
+  "How should I allocate my monthly surplus?",
   "What is my net worth?",
   "How strong is my emergency fund?",
   "Where is my money going?",
