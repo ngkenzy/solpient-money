@@ -3,11 +3,130 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireActiveHousehold } from "@/lib/money-auth";
+import { parseTspStatement } from "@/lib/tsp-statement-parser";
 import {
   reconcileTspStatementReview,
+  stageTspStatementImport,
   type TspStatementFundInput,
   type TspStatementReviewValues,
 } from "@/lib/tsp-statement-imports";
+
+const MAX_TSP_STATEMENT_BYTES = 2 * 1024 * 1024;
+
+export async function uploadTspStatement(
+  formData: FormData
+) {
+  const upload =
+    formData.get("statementFile");
+
+  if (!(upload instanceof File)) {
+    throw new Error(
+      "Choose a TSP statement file."
+    );
+  }
+
+  if (upload.size <= 0) {
+    throw new Error(
+      "The selected TSP statement is empty."
+    );
+  }
+
+  if (
+    upload.size >
+    MAX_TSP_STATEMENT_BYTES
+  ) {
+    throw new Error(
+      "TSP statement files must be 2 MB or smaller."
+    );
+  }
+
+  const filename =
+    upload.name.trim() ||
+    "tsp-statement.txt";
+  const extension =
+    filename
+      .toLowerCase()
+      .split(".")
+      .at(-1) ?? "";
+
+  if (
+    extension !== "csv" &&
+    extension !== "txt"
+  ) {
+    throw new Error(
+      "V1.8 accepts CSV or structured-text TSP statements. PDF import is not enabled yet."
+    );
+  }
+
+  const source = await upload.text();
+  const parsed =
+    parseTspStatement(
+      source,
+      filename
+    );
+
+  const candidate =
+    parsed.candidate;
+
+  const staged =
+    await stageTspStatementImport({
+      sourceKind:
+        parsed.sourceKind,
+      sourceFilename: filename,
+      sourceContent: source,
+      parserVersion:
+        parsed.parserVersion,
+      parsedStatementDate:
+        candidate.statementDate,
+      parsedCandidate: {
+        candidate,
+        reconciliation:
+          parsed.reconciliation,
+        unknownFields:
+          parsed.unknownFields,
+      },
+      parserWarnings:
+        parsed.warnings,
+      parserErrors:
+        parsed.errors,
+      review: {
+        statementDate:
+          candidate.statementDate,
+        traditionalBalanceCents:
+          candidate.traditionalBalanceCents,
+        rothBalanceCents:
+          candidate.rothBalanceCents,
+        reportedTotalBalanceCents:
+          candidate.totalBalanceCents,
+        outstandingLoanCents:
+          candidate.outstandingLoanCents,
+        employeeContribYtdCents:
+          candidate.employeeContribYtdCents,
+        serviceAutoYtdCents:
+          candidate.serviceAutoYtdCents,
+        serviceMatchYtdCents:
+          candidate.serviceMatchYtdCents,
+        funds:
+          candidate.funds.map(
+            (fund) => ({
+              fundCode:
+                fund.fundCode,
+              fundName:
+                fund.fundName ??
+                fund.fundCode,
+              balanceCents:
+                fund.balanceCents,
+            })
+          ),
+      },
+    });
+
+  revalidatePath("/tsp/import");
+
+  redirect(
+    `/tsp/import/${staged.record.id}`
+  );
+}
 
 function optionalDollarsToCents(
   value: FormDataEntryValue | null
