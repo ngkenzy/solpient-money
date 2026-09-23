@@ -9,6 +9,7 @@ import {
   BarChart3,
   Bell,
   BellRing,
+  BookOpenCheck,
   Bot,
   BrainCircuit,
   BriefcaseBusiness,
@@ -55,6 +56,7 @@ const sections: Array<{ label?: string; items: NavItem[] }> = [
     items: [
       { href: "/portfolio", label: "Portfolio", icon: BriefcaseBusiness },
       { href: "/portfolio-intelligence", label: "Portfolio Intelligence", icon: BrainCircuit },
+      { href: "/decision-journal", label: "Decision Journal", icon: BookOpenCheck },
       { href: "/performance", label: "Performance", icon: LineChart },
       { href: "/allocation", label: "Allocation", icon: BarChart3 },
     ],
@@ -143,7 +145,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
               <Link href="/research">Research</Link>
               <Link className={pathname === "/research" ? "" : "selected"} href="/">Money</Link>
             </div>
-            <span className="global-sandbox-badge">LOCAL POSTGRES · MONEY V1.5</span>
+            <span className="global-sandbox-badge">LOCAL POSTGRES · MONEY V1.6</span>
           </div>
 
           <div className="top-actions">
