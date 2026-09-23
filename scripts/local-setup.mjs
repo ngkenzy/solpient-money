@@ -4,6 +4,7 @@ import {
   readFile,
   writeFile,
 } from "node:fs/promises";
+import { createServer } from "node:net";
 import { spawnSync } from "node:child_process";
 import pg from "pg";
 
@@ -11,9 +12,11 @@ const dockerEnvPath = ".env.local-db";
 const nextEnvPath = ".env.local";
 
 const HOST = "127.0.0.1";
-const PORT = "5432";
+const DEFAULT_PORT = 55433;
+const MAX_PORT = 55449;
 const DATABASE = "solpient";
 const USER = "solpient";
+const CONTAINER = "solpient-money-postgres";
 
 async function exists(file) {
   try {
@@ -46,10 +49,17 @@ function upsertEnv(content, key, value) {
   );
 }
 
-function canonicalUrl(password) {
+function parsePort(value) {
+  const parsed = Number.parseInt(String(value ?? ""), 10);
+  return Number.isInteger(parsed) && parsed > 1024 && parsed < 65536
+    ? parsed
+    : null;
+}
+
+function canonicalUrl(password, port) {
   return `postgresql://${USER}:${encodeURIComponent(
     password
-  )}@${HOST}:${PORT}/${DATABASE}`;
+  )}@${HOST}:${port}/${DATABASE}`;
 }
 
 function composeArgs(...args) {
@@ -66,6 +76,101 @@ function composeArgs(...args) {
 function shellDatabaseUrlDiffers(expected) {
   const inherited = process.env.DATABASE_URL?.trim();
   return Boolean(inherited && inherited !== expected);
+}
+
+function inspectCanonicalContainer() {
+  const state = spawnSync(
+    "docker",
+    ["inspect", "-f", "{{.State.Running}}", CONTAINER],
+    { encoding: "utf8" }
+  );
+
+  if (state.status !== 0) {
+    return {
+      exists: false,
+      running: false,
+      hostPort: null,
+    };
+  }
+
+  const port = spawnSync(
+    "docker",
+    [
+      "inspect",
+      "-f",
+      '{{(index (index .HostConfig.PortBindings "5432/tcp") 0).HostPort}}',
+      CONTAINER,
+    ],
+    { encoding: "utf8" }
+  );
+
+  return {
+    exists: true,
+    running: state.stdout.trim() === "true",
+    hostPort:
+      port.status === 0 ? parsePort(port.stdout.trim()) : null,
+  };
+}
+
+async function isPortAvailable(port) {
+  return new Promise((resolve) => {
+    const server = createServer();
+
+    server.once("error", () => resolve(false));
+    server.once("listening", () => {
+      server.close(() => resolve(true));
+    });
+
+    server.listen({
+      host: HOST,
+      port,
+      exclusive: true,
+    });
+  });
+}
+
+async function chooseCanonicalPort({
+  preferredPort,
+  container,
+}) {
+  if (
+    container.exists &&
+    container.running &&
+    container.hostPort
+  ) {
+    return {
+      port: container.hostPort,
+      reason: "running canonical container",
+    };
+  }
+
+  const candidates = [];
+  if (preferredPort) candidates.push(preferredPort);
+  if (!candidates.includes(DEFAULT_PORT)) {
+    candidates.push(DEFAULT_PORT);
+  }
+
+  for (let port = DEFAULT_PORT; port <= MAX_PORT; port += 1) {
+    if (!candidates.includes(port)) candidates.push(port);
+  }
+
+  for (const port of candidates) {
+    if (await isPortAvailable(port)) {
+      return {
+        port,
+        reason:
+          port === preferredPort
+            ? "existing Solpient preference"
+            : port === DEFAULT_PORT
+              ? "Solpient default"
+              : "next available Solpient port",
+      };
+    }
+  }
+
+  throw new Error(
+    `No free Solpient local PostgreSQL port was found between ${DEFAULT_PORT} and ${MAX_PORT}. Run npm run local:doctor for port diagnostics.`
+  );
 }
 
 async function verifyTcp(databaseUrl) {
@@ -113,10 +218,25 @@ if (!password) {
   password = randomBytes(32).toString("hex");
 }
 
+const container = inspectCanonicalContainer();
+const preferredPort = parsePort(
+  readKey(dockerEnv, "SOLPIENT_DB_PORT")
+);
+const selected = await chooseCanonicalPort({
+  preferredPort,
+  container,
+});
+const port = selected.port;
+
 dockerEnv = upsertEnv(
   dockerEnv,
   "POSTGRES_PASSWORD",
   password
+);
+dockerEnv = upsertEnv(
+  dockerEnv,
+  "SOLPIENT_DB_PORT",
+  String(port)
 );
 
 await writeFile(dockerEnvPath, dockerEnv, {
@@ -127,9 +247,14 @@ let nextEnv = (await exists(nextEnvPath))
   ? await readFile(nextEnvPath, "utf8")
   : "";
 
-const databaseUrl = canonicalUrl(password);
+const databaseUrl = canonicalUrl(password, port);
 
 nextEnv = upsertEnv(nextEnv, "DATABASE_URL", databaseUrl);
+nextEnv = upsertEnv(
+  nextEnv,
+  "SOLPIENT_DB_PORT",
+  String(port)
+);
 nextEnv = upsertEnv(nextEnv, "SOLPIENT_LOCAL_MODE", "true");
 
 if (!readKey(nextEnv, "CONNECT_SECRET_ENCRYPTION_KEY")) {
@@ -153,16 +278,19 @@ await writeFile(nextEnvPath, nextEnv, {
 });
 
 console.log("Starting canonical Solpient PostgreSQL...");
+console.log(
+  `Selected host port ${port} (${selected.reason}); PostgreSQL remains 5432 inside Docker.`
+);
 
 const up = spawnSync(
   "docker",
-  composeArgs("up", "-d"),
+  composeArgs("up", "-d", "--force-recreate"),
   { stdio: "inherit" }
 );
 
 if (up.status !== 0) {
   throw new Error(
-    "Unable to start the canonical local PostgreSQL container on 127.0.0.1:5432. Run npm run local:doctor for diagnostics."
+    `Unable to start the canonical local PostgreSQL container on ${HOST}:${port}. Run npm run local:doctor for diagnostics.`
   );
 }
 
@@ -243,6 +371,7 @@ const migrate = spawnSync(
     env: {
       ...process.env,
       DATABASE_URL: databaseUrl,
+      SOLPIENT_DB_PORT: String(port),
       CONNECT_SECRET_ENCRYPTION_KEY:
         readKey(nextEnv, "CONNECT_SECRET_ENCRYPTION_KEY") ?? "",
     },
@@ -256,9 +385,10 @@ if (migrate.status !== 0) {
 await verifyTcp(databaseUrl);
 
 console.log("");
-console.log("✓ Canonical PostgreSQL container: solpient-money-postgres");
-console.log("✓ PostgreSQL endpoint: 127.0.0.1:5432");
+console.log(`✓ Canonical PostgreSQL container: ${CONTAINER}`);
+console.log(`✓ PostgreSQL endpoint: ${HOST}:${port}`);
 console.log("✓ .env.local and .env.local-db use the same password");
+console.log("✓ .env.local and .env.local-db use the same host port");
 console.log("✓ Actual PostgreSQL role password synchronized");
 console.log("✓ TCP authentication verified");
 console.log("✓ Solpient migrations current");
@@ -266,7 +396,7 @@ console.log("✓ Solpient migrations current");
 if (shellDatabaseUrlDiffers(databaseUrl)) {
   console.log("");
   console.warn(
-    "WARNING: your shell has a different exported DATABASE_URL. npm run dev now overrides stale shell values with .env.local, but run 'unset DATABASE_URL' to clean the shell."
+    "WARNING: your shell has a different exported DATABASE_URL. npm run dev overrides stale shell values with .env.local, but run 'unset DATABASE_URL' to clean the shell."
   );
 }
 
