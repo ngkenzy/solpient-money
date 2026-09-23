@@ -1,6 +1,10 @@
 "use client";
 
 import { useEffect } from "react";
+import {
+  usePathname,
+  useRouter,
+} from "next/navigation";
 
 const STORAGE_KEY = "solpient-money-autopilot-last-run";
 
@@ -9,6 +13,9 @@ function todayKey() {
 }
 
 export default function AutopilotDailyRunner() {
+  const pathname = usePathname();
+  const router = useRouter();
+
   useEffect(() => {
     const today = todayKey();
 
@@ -46,6 +53,10 @@ export default function AutopilotDailyRunner() {
           } catch {
             // The server-side daily idempotency gate remains authoritative.
           }
+
+          if (pathname === "/autopilot") {
+            router.refresh();
+          }
         }
       })
       .catch(() => {
@@ -54,7 +65,7 @@ export default function AutopilotDailyRunner() {
       });
 
     return () => controller.abort();
-  }, []);
+  }, [pathname, router]);
 
   return null;
 }
