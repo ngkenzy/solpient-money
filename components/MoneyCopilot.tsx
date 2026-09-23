@@ -37,6 +37,8 @@ type Status = {
 };
 
 const QUICK_PROMPTS = [
+  "Give me my daily briefing",
+  "What changed since yesterday?",
   "What changed from my financial plan?",
   "How should I allocate my monthly surplus?",
   "What is my net worth?",
