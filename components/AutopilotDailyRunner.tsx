@@ -54,7 +54,14 @@ export default function AutopilotDailyRunner() {
             // The server-side daily idempotency gate remains authoritative.
           }
 
-          if (pathname === "/autopilot") {
+          window.dispatchEvent(
+            new Event("solpient:autopilot-complete")
+          );
+
+          if (
+            pathname === "/autopilot" ||
+            pathname === "/action-center"
+          ) {
             router.refresh();
           }
         }
