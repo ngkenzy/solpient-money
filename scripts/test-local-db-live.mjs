@@ -33,6 +33,7 @@ try {
       to_regclass('public.tsp_profiles') is not null as tsp_profiles,
       to_regclass('public.tsp_snapshots') is not null as tsp_snapshots,
       to_regclass('public.tsp_fund_positions') is not null as tsp_fund_positions,
+      to_regclass('public.tsp_fund_prices') is not null as tsp_fund_prices,
       to_regprocedure('public.merge_truth_accounts(uuid,uuid)') is not null as merge_truth_accounts,
       exists (
         select 1 from information_schema.columns
@@ -69,6 +70,7 @@ try {
     "tsp_profiles",
     "tsp_snapshots",
     "tsp_fund_positions",
+    "tsp_fund_prices",
     "merge_truth_accounts",
     "truth_category",
     "truth_suppressed",
