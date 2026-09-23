@@ -29,7 +29,15 @@ function dollars(cents: number | null) {
 function signedMoney(cents: number | null) {
   if (cents == null) return "—";
   const sign = cents > 0 ? "+" : "";
-  return `${sign}$${(cents / 100).toFixed(2)}`;
+  return `${sign}${(cents / 100).toFixed(2)}`;
+}
+
+function issueText(
+  issues: Array<{ code: string; message: string }>
+) {
+  return issues
+    .map((issue) => issue.message || issue.code)
+    .join(" · ");
 }
 
 export default async function TspStatementReviewPage({
@@ -120,8 +128,8 @@ export default async function TspStatementReviewPage({
             <div>
               <strong>Parser warnings</strong>
               <span>
-                {record.parserWarnings.join(
-                  " · "
+                {issueText(
+                  record.parserWarnings
                 )}
               </span>
             </div>
@@ -134,8 +142,8 @@ export default async function TspStatementReviewPage({
             <div>
               <strong>Parser errors retained for provenance</strong>
               <span>
-                {record.parserErrors.join(
-                  " · "
+                {issueText(
+                  record.parserErrors
                 )}
               </span>
             </div>
