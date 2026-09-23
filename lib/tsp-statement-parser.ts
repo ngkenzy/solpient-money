@@ -139,10 +139,43 @@ function parseDate(raw: string): string | null {
     : null;
 }
 
-function detectSourceKind(text: string): TspStatementSourceKind {
-  const first = text.split(/\r?\n/).find((line) => line.trim());
+function detectSourceKind(
+  text: string,
+  filename: string
+): TspStatementSourceKind {
+  const lowerFilename =
+    filename.trim().toLowerCase();
+
+  if (lowerFilename.endsWith(".csv")) {
+    return "csv";
+  }
+
+  if (
+    lowerFilename.endsWith(".txt") ||
+    lowerFilename.endsWith(".text")
+  ) {
+    return "structured_text";
+  }
+
+  const first = text
+    .split(/\r?\n/)
+    .find((line) => line.trim());
+
   if (!first) return "structured_text";
-  return first.includes(",") ? "csv" : "structured_text";
+
+  const colonIndex = first.indexOf(":");
+  const commaIndex = first.indexOf(",");
+
+  if (
+    colonIndex >= 0 &&
+    (commaIndex < 0 || colonIndex < commaIndex)
+  ) {
+    return "structured_text";
+  }
+
+  return commaIndex >= 0
+    ? "csv"
+    : "structured_text";
 }
 
 function parseCsvLine(line: string) {
@@ -283,7 +316,10 @@ export function parseTspStatement(
     });
   }
 
-  const sourceKind = detectSourceKind(text);
+  const sourceKind = detectSourceKind(
+    text,
+    filename
+  );
   const records =
     sourceKind === "csv"
       ? parseCsvRecords(text)
@@ -408,7 +444,6 @@ export function parseTspStatement(
     }
   }
 
-  void filename;
 
   return {
     parserVersion: TSP_STATEMENT_PARSER_VERSION,
