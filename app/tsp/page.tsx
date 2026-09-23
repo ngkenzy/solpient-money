@@ -64,7 +64,7 @@ export default async function TspPage() {
   return (
     <div className="page tsp-page">
       <PageHeader
-        eyebrow="V1.7.2 · MILITARY TSP TRACKER"
+        eyebrow="V1.7.3 · MILITARY TSP TRACKER"
         title="Track the TSP the way a service member actually needs it."
         description="Monitor Traditional and Roth balances, G/F/C/S/I/L allocation, annual IRS limits, outside-plan deferrals, BRS matching, and whether your current contribution pace is likely to max too early."
         action={
