@@ -15,6 +15,7 @@ import { buildFinancialHealthEngine } from "@/lib/financial-health-engine";
 import { requireActiveHousehold } from "@/lib/money-auth";
 import { requireMoneyDataset } from "@/lib/money-data";
 import { getPlanMonitoring } from "@/lib/plan-monitor-engine";
+import { syncActionCenterFromAlerts } from "@/lib/money-action-center";
 
 export type AutopilotLevel =
   | "critical"
@@ -814,6 +815,11 @@ export async function runMoneyAutopilot({
       `Unable to save Money Autopilot daily run: ${error.message}`
     );
   }
+
+  await syncActionCenterFromAlerts(
+    briefing.alerts,
+    briefing.observedAt
+  );
 
   return briefing;
 }
