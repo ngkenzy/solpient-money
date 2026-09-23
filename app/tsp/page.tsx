@@ -92,7 +92,7 @@ export default async function TspPage() {
           </strong>
           <small>
             {snapshot
-              ? `Account snapshot · ${snapshot.date}`
+              ? `Account snapshot · ${snapshot.date} · rev ${snapshot.revision}`
               : "Traditional + Roth"}
           </small>
         </div>
@@ -170,7 +170,9 @@ export default async function TspPage() {
             <div>
               <span>Official snapshot</span>
               <strong>{money(snapshot.totalBalance)}</strong>
-              <small>{snapshot.date}</small>
+              <small>
+                {snapshot.date} · revision {snapshot.revision}
+              </small>
             </div>
             <div>
               <span>Estimated current value</span>
