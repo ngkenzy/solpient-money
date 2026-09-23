@@ -12,6 +12,7 @@ import {
   CircleDollarSign,
   CreditCard,
   Goal,
+  Gauge,
   Home,
   LineChart,
   PlugZap,
@@ -62,6 +63,7 @@ const sections: Array<{ label?: string; items: NavItem[] }> = [
   {
     label: "INTELLIGENCE",
     items: [
+      { href: "/health", label: "Financial Health", icon: Gauge },
       { href: "/insights", label: "Insights", icon: BrainCircuit, badge: "3" },
       { href: "/research", label: "Research", icon: Building2 },
       { href: "/data-health", label: "Data Health", icon: ShieldCheck },
@@ -127,7 +129,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
               <Link href="/research">Research</Link>
               <Link className={pathname === "/research" ? "" : "selected"} href="/">Money</Link>
             </div>
-            <span className="global-sandbox-badge">LOCAL POSTGRES · MONEY V0.9.2</span>
+            <span className="global-sandbox-badge">LOCAL POSTGRES · MONEY V0.9.3</span>
           </div>
 
           <div className="top-actions">
