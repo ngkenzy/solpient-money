@@ -983,3 +983,93 @@ It cannot:
 
 Daily runs are household-isolated with PostgreSQL RLS. The local database remains the system of record.
 
+## V1.4 Action Center + Local Scheduler
+
+V1.4 turns V1.3 Autopilot findings into a persistent human-review workflow and adds an opt-in macOS background scheduler.
+
+### Action Center
+
+Material `critical` and `watch` Autopilot findings become durable Action Center items at:
+
+```text
+/action-center
+```
+
+Each item has one of four workflow states:
+
+```text
+new → reviewed → resolved
+  ↘ snoozed
+```
+
+Action Center behavior:
+
+- critical/watch findings persist until handled;
+- positive/info Autopilot findings remain informational and do not create tasks;
+- snoozed items can be deferred without deleting the underlying condition;
+- if an underlying Autopilot condition disappears, the item automatically resolves with `condition_cleared`;
+- if a previously resolved condition returns, it reopens as `new`;
+- the sidebar badge shows unresolved Action Center count;
+- the top-right bell opens Action Center.
+
+Status changes are workflow acknowledgements only. They never execute the financial recommendation.
+
+### macOS local scheduler
+
+Install the scheduler:
+
+```bash
+npm run local:scheduler:install
+```
+
+Default behavior:
+
+- builds the current production app;
+- installs a macOS LaunchAgent background Solpient server on `127.0.0.1:3210`;
+- keeps that background service alive independently from the browser;
+- installs a second LaunchAgent that runs Money Autopilot every day at 08:00 local time;
+- retries the local service when needed;
+- creates a macOS desktop notification only when critical/watch findings exist;
+- writes logs under `~/Library/Logs/SolpientMoney`.
+
+Custom schedule example:
+
+```bash
+npm run local:scheduler:install -- --hour=7 --minute=30
+```
+
+Check scheduler status:
+
+```bash
+npm run local:scheduler:status
+```
+
+Remove only the scheduler:
+
+```bash
+npm run local:scheduler:uninstall
+```
+
+Uninstalling the scheduler does not delete PostgreSQL data, Action Center history, or scheduler logs.
+
+The normal development app can still use port `3000`; the scheduler service uses dedicated port `3210`.
+
+### Safety boundary
+
+V1.4 can:
+
+- refresh configured read-only connectors through Autopilot;
+- write deterministic daily Autopilot snapshots;
+- write Action Center workflow state;
+- mark items reviewed, snoozed, resolved, or automatically cleared;
+- raise local notifications for material findings.
+
+V1.4 cannot:
+
+- transfer funds;
+- pay bills;
+- submit trades;
+- modify goals;
+- modify planning assumptions;
+- reset the V1.2 plan baseline.
+
