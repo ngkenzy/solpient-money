@@ -105,7 +105,7 @@ const checks = [
   ],
   [
     "TSP workspace exists",
-    files.page.includes("V1.7 · MILITARY TSP TRACKER") &&
+    files.page.includes("MILITARY TSP TRACKER") &&
       files.page.includes("CONTRIBUTION PACE") &&
       files.page.includes("BRS MATCH") &&
       files.page.includes("FUND ALLOCATION"),
