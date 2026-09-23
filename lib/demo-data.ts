@@ -150,9 +150,9 @@ export const householdPlan: HouseholdPlan = {
 };
 
 export const householdGoals = [
-  { id: "reserve", name: "Emergency reserve", current: 82000, target: 60000 },
-  { id: "travel", name: "Annual travel", current: 7000, target: 12000 },
-  { id: "home", name: "Home projects", current: 18000, target: 30000 },
+  { id: "reserve", name: "Emergency reserve", current: 82000, target: 60000, targetDate: null, priority: 10 },
+  { id: "travel", name: "Annual travel", current: 7000, target: 12000, targetDate: "2027-06-01", priority: 20 },
+  { id: "home", name: "Home projects", current: 18000, target: 30000, targetDate: "2028-06-01", priority: 30 },
 ] as const;
 
 
@@ -165,7 +165,14 @@ export type MoneyDataset = {
   portfolioPerformance: Array<{ label: string; portfolio: number; benchmark: number }>;
   allocation: Array<{ label: string; value: number; tone: string }>;
   householdPlan: HouseholdPlan;
-  householdGoals: Array<{ id: string; name: string; current: number; target: number }>;
+  householdGoals: Array<{
+    id: string;
+    name: string;
+    current: number;
+    target: number;
+    targetDate: string | null;
+    priority: number;
+  }>;
 };
 
 export const demoMoneyDataset: MoneyDataset = {
