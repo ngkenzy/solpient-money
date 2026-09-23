@@ -15,6 +15,17 @@ const files = {
   shell: await readFile("components/AppShell.tsx", "utf8"),
 };
 
+const refreshStart = files.actions.indexOf(
+  "export async function refreshPlanMonitoring"
+);
+const resetStart = files.actions.indexOf(
+  "export async function resetPlanMonitoringBaseline"
+);
+const refreshBlock = files.actions.slice(
+  refreshStart,
+  resetStart > refreshStart ? resetStart : undefined
+);
+
 const checks = [
   ["V1.2 monitoring table migration exists", files.migration.includes("financial_plan_snapshots")],
   ["monthly baseline is unique per household", files.migration.includes("unique (household_id, plan_month)")],
@@ -25,7 +36,7 @@ const checks = [
   ["normal monitoring preserves an existing baseline", files.engine.includes("if (!snapshot && options.createBaseline !== false)")],
   ["read-only monitoring can avoid baseline creation", files.engine.includes("createBaseline?: boolean")],
   ["explicit reset is the overwrite path", files.actions.includes("overwrite: true")],
-  ["ordinary refresh does not overwrite baseline", !files.actions.match(/refreshPlanMonitoring[\s\S]{0,250}overwrite:\s*true/)],
+  ["ordinary refresh does not overwrite baseline", !refreshBlock.includes("overwrite: true")],
   ["current-month pace waits for material progress", files.engine.includes("progressPct >= 20")],
   ["spending materiality uses dollars and percentage", files.engine.includes("projectedVariance > 100") && files.engine.includes("projectedVariancePct")],
   ["debt payoff drift is detected", files.engine.includes("debtPayoffDeltaMonths")],
