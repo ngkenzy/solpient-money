@@ -290,6 +290,9 @@ if (databaseUrl && parsed && failures.length === 0) {
         to_regclass('public.money_action_items') is not null as action_center,
         to_regclass('public.portfolio_position_snapshots') is not null as portfolio_history,
         to_regclass('public.investment_decisions') is not null as decision_journal,
+        to_regclass('public.tsp_profiles') is not null as tsp_profile,
+        to_regclass('public.tsp_snapshots') is not null as tsp_snapshots,
+        to_regclass('public.tsp_fund_positions') is not null as tsp_funds,
         to_regclass('public.local_migrations') is not null as migration_table
     `);
 
@@ -344,6 +347,16 @@ if (databaseUrl && parsed && failures.length === 0) {
       pass("V1.6 portfolio history and Decision Journal present");
     } else {
       fail("V1.6 portfolio history and Decision Journal present");
+    }
+
+    if (
+      row?.tsp_profile === true &&
+      row?.tsp_snapshots === true &&
+      row?.tsp_funds === true
+    ) {
+      pass("V1.7 Military TSP Tracker present");
+    } else {
+      fail("V1.7 Military TSP Tracker present");
     }
   } catch (error) {
     const code =
