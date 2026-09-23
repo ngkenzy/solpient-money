@@ -698,7 +698,13 @@ export async function runMoneyAutopilot({
 
   if (existing && !force) {
     const stored = rowToBriefing(existing, true);
-    if (stored) return stored;
+    if (stored) {
+      await syncActionCenterFromAlerts(
+        stored.alerts,
+        stored.observedAt
+      );
+      return stored;
+    }
   }
 
   const previous = await previousRun(
