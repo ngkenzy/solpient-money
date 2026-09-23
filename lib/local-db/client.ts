@@ -856,12 +856,27 @@ export async function createLocalDbClient() {
 }
 
 export async function testLocalDatabase() {
-  const result = await pool().query(
-    "select current_database() as database, version() as version"
-  );
+  try {
+    const result = await pool().query(
+      "select current_database() as database, version() as version"
+    );
 
-  return result.rows[0] as {
-    database: string;
-    version: string;
-  };
+    return result.rows[0] as {
+      database: string;
+      version: string;
+    };
+  } catch (error) {
+    const code =
+      error && typeof error === "object" && "code" in error
+        ? String(error.code)
+        : "";
+
+    if (code === "28P01") {
+      throw new Error(
+        "Solpient Local PostgreSQL credential mismatch. Run 'npm run local:repair' and then 'npm run local:doctor'."
+      );
+    }
+
+    throw error;
+  }
 }
