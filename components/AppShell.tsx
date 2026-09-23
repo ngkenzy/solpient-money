@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import AutopilotDailyRunner from "@/components/AutopilotDailyRunner";
 import { usePathname } from "next/navigation";
 import {
   Activity,
@@ -21,6 +22,7 @@ import {
   PlugZap,
   List,
   PiggyBank,
+  Radar,
   Search,
   Settings,
   ShieldCheck,
@@ -68,6 +70,7 @@ const sections: Array<{ label?: string; items: NavItem[] }> = [
   {
     label: "INTELLIGENCE",
     items: [
+      { href: "/autopilot", label: "Autopilot", icon: Radar },
       { href: "/copilot", label: "Money Copilot", icon: Bot },
       { href: "/health", label: "Financial Health", icon: Gauge },
       { href: "/insights", label: "Insights", icon: BrainCircuit, badge: "3" },
@@ -129,13 +132,14 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
       </aside>
 
       <section className="workspace">
+        <AutopilotDailyRunner />
         <header className="topbar">
           <div className="topbar-product-group">
             <div className="product-switch">
               <Link href="/research">Research</Link>
               <Link className={pathname === "/research" ? "" : "selected"} href="/">Money</Link>
             </div>
-            <span className="global-sandbox-badge">LOCAL POSTGRES · MONEY V1.2.3</span>
+            <span className="global-sandbox-badge">LOCAL POSTGRES · MONEY V1.3</span>
           </div>
 
           <div className="top-actions">
