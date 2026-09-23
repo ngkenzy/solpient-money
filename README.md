@@ -872,3 +872,32 @@ The migration:
 
 Do not delete the legacy container until `npm run local:doctor` passes and the expected accounts/transactions are visible in the canonical app.
 
+## V1.2.2 Dynamic Local Database Port
+
+V1.2.2 removes the assumption that host port `5432` is available.
+
+Solpient Local now uses a dedicated configurable host port:
+
+```text
+Host:      127.0.0.1
+Host port: auto-selected, default 55433
+Container: solpient-money-postgres
+Container PostgreSQL port: 5432
+```
+
+`npm run local:repair` now:
+
+- reuses the published port of a running canonical Solpient container;
+- otherwise prefers the persisted `SOLPIENT_DB_PORT`;
+- otherwise tries the Solpient default `55433`;
+- if occupied, scans `55434` through `55449` for the next free loopback port;
+- stores the selected port in both `.env.local-db` and `.env.local`;
+- rewrites `DATABASE_URL` with that selected port;
+- recreates the canonical container when the port mapping changes;
+- synchronizes the real PostgreSQL role password;
+- verifies TCP authentication before migrations and again afterward.
+
+`npm run local:doctor` verifies that the Docker env port, Next env port, DATABASE_URL port, and actual Docker binding all match. On macOS it can also report which process is listening on a configured port when Solpient cannot bind it.
+
+This allows Homebrew PostgreSQL, another Docker database, or another application to keep using host port `5432` without blocking Solpient.
+
