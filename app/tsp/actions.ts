@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { requireActiveHousehold } from "@/lib/money-auth";
+import { syncTspSharePrices } from "@/lib/tsp-prices";
 
 function dollarsToCents(value: FormDataEntryValue | null) {
   const parsed = Number(String(value ?? "").replaceAll(",", ""));
@@ -215,4 +216,22 @@ export async function saveTspSnapshot(formData: FormData) {
   }
 
   revalidatePath("/tsp");
+}
+
+
+export async function syncTspPricesNow() {
+  const result = await syncTspSharePrices(
+    new Date()
+  );
+
+  if (!result.ok) {
+    throw new Error(
+      result.warning ??
+        "Unable to sync official TSP share prices."
+    );
+  }
+
+  revalidatePath("/tsp");
+  revalidatePath("/autopilot");
+  revalidatePath("/action-center");
 }
