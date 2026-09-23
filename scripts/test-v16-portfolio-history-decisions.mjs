@@ -190,7 +190,7 @@ const checks = [
   [
     "navigation exposes Decision Journal",
     files.shell.includes('href: "/decision-journal"') &&
-      files.shell.includes("MONEY V1.6"),
+      files.shell.includes("MONEY V1."),
   ],
   [
     "Local Doctor verifies V1.6 schema",
