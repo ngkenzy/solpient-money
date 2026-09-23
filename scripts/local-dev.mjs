@@ -9,21 +9,31 @@ function readKey(content, key) {
   return line ? line.slice(key.length + 1).trim() : null;
 }
 
+function parsePort(value) {
+  const parsed = Number.parseInt(String(value ?? ""), 10);
+  return Number.isInteger(parsed) && parsed > 1024 && parsed < 65536
+    ? parsed
+    : null;
+}
+
 const envFile = await readFile(".env.local", "utf8");
 const databaseUrl = readKey(envFile, "DATABASE_URL");
+const expectedPort = parsePort(
+  readKey(envFile, "SOLPIENT_DB_PORT")
+);
 
-if (!databaseUrl) {
+if (!databaseUrl || !expectedPort) {
   throw new Error(
-    "DATABASE_URL is missing from .env.local. Run npm run local:repair."
+    "Canonical local database settings are missing from .env.local. Run npm run local:repair."
   );
 }
 
 const parsed = new URL(databaseUrl);
-const port = parsed.port || "5432";
+const actualPort = parsePort(parsed.port || "5432");
 
 if (
   parsed.hostname !== "127.0.0.1" ||
-  port !== "5432" ||
+  actualPort !== expectedPort ||
   parsed.pathname !== "/solpient" ||
   decodeURIComponent(parsed.username) !== "solpient"
 ) {
@@ -40,6 +50,7 @@ const doctor = spawnSync(
     env: {
       ...process.env,
       DATABASE_URL: databaseUrl,
+      SOLPIENT_DB_PORT: String(expectedPort),
     },
   }
 );
@@ -82,6 +93,7 @@ const next = spawnSync(
     env: {
       ...process.env,
       DATABASE_URL: databaseUrl,
+      SOLPIENT_DB_PORT: String(expectedPort),
       SOLPIENT_LOCAL_MODE: "true",
     },
   }
