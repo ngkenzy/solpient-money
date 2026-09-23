@@ -2,6 +2,7 @@ import "server-only";
 
 import { createHash } from "node:crypto";
 import { requireActiveHousehold } from "@/lib/money-auth";
+import type { TspStatementIssue } from "@/lib/tsp-statement-types";
 
 export type TspStatementFundInput = {
   fundCode: string;
@@ -28,8 +29,8 @@ export type StageTspStatementImportInput = {
   parserVersion: string;
   parsedStatementDate?: string | null;
   parsedCandidate: unknown;
-  parserWarnings?: string[];
-  parserErrors?: string[];
+  parserWarnings?: TspStatementIssue[];
+  parserErrors?: TspStatementIssue[];
   review: TspStatementReviewValues;
 };
 
@@ -42,8 +43,8 @@ export type TspStatementImportRecord = {
   parserVersion: string;
   parsedStatementDate: string | null;
   parsedCandidate: unknown;
-  parserWarnings: string[];
-  parserErrors: string[];
+  parserWarnings: TspStatementIssue[];
+  parserErrors: TspStatementIssue[];
   review: TspStatementReviewValues;
   balanceReconciliationDeltaCents: number | null;
   fundReconciliationDeltaCents: number | null;
@@ -86,11 +87,37 @@ function jsonValue(value: unknown, fallback: unknown) {
   }
 }
 
-function stringArray(value: unknown) {
+function issueArray(value: unknown): TspStatementIssue[] {
   const parsed = jsonValue(value, []);
-  return Array.isArray(parsed)
-    ? parsed.map((item) => String(item))
-    : [];
+
+  if (!Array.isArray(parsed)) return [];
+
+  return parsed.map((item) => {
+    if (
+      item &&
+      typeof item === "object"
+    ) {
+      const row =
+        item as Record<string, unknown>;
+
+      return {
+        code: String(row.code ?? "unknown"),
+        field:
+          row.field == null
+            ? null
+            : String(row.field),
+        message: String(
+          row.message ?? row.code ?? "Unknown parser issue"
+        ),
+      };
+    }
+
+    return {
+      code: "legacy_issue",
+      field: null,
+      message: String(item),
+    };
+  });
 }
 
 function normalizeFunds(value: unknown): TspStatementFundInput[] {
@@ -209,10 +236,10 @@ function recordFromRow(row: Row): TspStatementImportRecord {
       row.parsed_candidate,
       {}
     ),
-    parserWarnings: stringArray(
+    parserWarnings: issueArray(
       row.parser_warnings
     ),
-    parserErrors: stringArray(
+    parserErrors: issueArray(
       row.parser_errors
     ),
     review: {
