@@ -293,6 +293,7 @@ if (databaseUrl && parsed && failures.length === 0) {
         to_regclass('public.tsp_profiles') is not null as tsp_profile,
         to_regclass('public.tsp_snapshots') is not null as tsp_snapshots,
         to_regclass('public.tsp_fund_positions') is not null as tsp_funds,
+        to_regclass('public.tsp_fund_prices') is not null as tsp_price_cache,
         to_regclass('public.local_migrations') is not null as migration_table
     `);
 
@@ -357,6 +358,12 @@ if (databaseUrl && parsed && failures.length === 0) {
       pass("V1.7 Military TSP Tracker present");
     } else {
       fail("V1.7 Military TSP Tracker present");
+    }
+
+    if (row?.tsp_price_cache === true) {
+      pass("V1.7.1 TSP daily price cache present");
+    } else {
+      fail("V1.7.1 TSP daily price cache present");
     }
   } catch (error) {
     const code =
