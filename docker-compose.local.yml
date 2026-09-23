@@ -8,7 +8,7 @@ services:
       POSTGRES_USER: solpient
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     ports:
-      - "127.0.0.1:5432:5432"
+      - "127.0.0.1:${SOLPIENT_DB_PORT:-55433}:5432"
     volumes:
       - solpient_postgres_data:/var/lib/postgresql/data
     healthcheck:
