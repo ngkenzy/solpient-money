@@ -79,9 +79,14 @@ export default async function PlanPage() {
         title="Give the next dollar a job."
         description="Solpient converts the observed monthly surplus into a transparent household plan: reserve catch-up, high-interest debt, dated goals, retirement funding, then flexible cash. Each dollar is allocated once."
         action={
-          <Link className="research-button" href="/copilot">
-            Ask why <ArrowRight size={14} />
-          </Link>
+          <div className="plan-header-actions">
+            <Link className="research-button" href="/monitor">
+              Monitor plan <ArrowRight size={14} />
+            </Link>
+            <Link className="research-button" href="/copilot">
+              Ask why <ArrowRight size={14} />
+            </Link>
+          </div>
         }
       />
 
