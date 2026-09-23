@@ -5,6 +5,8 @@ const files = {
   healthPage: await readFile("app/health/page.tsx", "utf8"),
   home: await readFile("app/page.tsx", "utf8"),
   insights: await readFile("app/insights/page.tsx", "utf8"),
+  debt: await readFile("app/debt/page.tsx", "utf8"),
+  retirement: await readFile("app/retirement/page.tsx", "utf8"),
   shell: await readFile("components/AppShell.tsx", "utf8"),
 };
 
@@ -26,6 +28,8 @@ const checks = [
   ["health dashboard explains score", files.healthPage.includes("Show calculation")],
   ["home uses new health engine", files.home.includes("buildFinancialHealthEngine")],
   ["insights uses new health engine", files.insights.includes("buildFinancialHealthEngine")],
+  ["debt detail uses new health engine", files.debt.includes("buildFinancialHealthEngine")],
+  ["retirement detail uses new health engine", files.retirement.includes("buildFinancialHealthEngine")],
   ["financial health navigation", files.shell.includes('href: "/health"')],
 ];
 
