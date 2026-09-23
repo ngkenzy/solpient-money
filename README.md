@@ -1073,3 +1073,70 @@ V1.4 cannot:
 - modify planning assumptions;
 - reset the V1.2 plan baseline.
 
+## V1.5 Portfolio Intelligence
+
+V1.5 combines private Solpient Money holdings with the existing read-only published Solpient Research contract to prioritize portfolio review.
+
+The workspace is available at:
+
+```text
+/portfolio-intelligence
+```
+
+V1.5 evaluates each owned direct-stock position using:
+
+- position weight as a percentage of invested assets;
+- household single-stock and top-three concentration review thresholds;
+- latest published Research score;
+- current holding price versus published Research base value;
+- thesis health and weakened tracked thesis conditions;
+- material weakened items from published What Changed history;
+- evidence confidence;
+- decision readiness;
+- age of the latest Research evidence;
+- presence or absence of published Research coverage.
+
+The resulting `reviewPriority` is an attention-ranking mechanism, not a buy/sell score.
+
+Material V1.5 signals are fed into the existing V1.3 Autopilot and V1.4 Action Center. Examples include:
+
+- a large position with thesis deterioration;
+- a material holding whose price is substantially above published Research base value;
+- portfolio exposure that is large relative to Research evidence confidence;
+- stale Research evidence for a material holding;
+- a material holding with no published Research coverage;
+- top-three concentration above the household review threshold.
+
+If the Research service itself is unavailable, Solpient emits one Research-connection warning rather than incorrectly treating every holding as uncovered.
+
+Money Copilot now answers deterministic questions such as:
+
+```text
+Which holdings need review?
+How concentrated is my portfolio?
+Where do portfolio exposure and Research conflict?
+```
+
+### Local release verification
+
+GitHub Actions remain manual-only. Normal pushes do not run CI.
+
+Use the Mac as the default release gate:
+
+```bash
+npm run local:verify-release
+```
+
+That command runs:
+
+- Local Doctor;
+- ESLint;
+- Research connection invariants;
+- Money connection invariants;
+- V1.3 Autopilot invariants;
+- V1.4 Action Center/scheduler invariants;
+- V1.5 Portfolio Intelligence invariants;
+- the production Next.js build.
+
+V1.5 remains decision-support only. It cannot place trades, transfer funds, pay bills, or modify household goals/planning assumptions.
+
