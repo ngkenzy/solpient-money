@@ -19,6 +19,7 @@ import { syncActionCenterFromAlerts } from "@/lib/money-action-center";
 import { buildPortfolioIntelligence } from "@/lib/portfolio-intelligence";
 import { loadResearchSnapshots } from "@/lib/research";
 import { capturePortfolioHistory } from "@/lib/portfolio-history";
+import { getTspTracker } from "@/lib/tsp-tracker";
 
 export type AutopilotLevel =
   | "critical"
@@ -35,7 +36,8 @@ export type AutopilotAlert = {
     | "plan"
     | "change"
     | "data"
-    | "portfolio";
+    | "portfolio"
+    | "tsp";
   title: string;
   detail: string;
   href: string;
@@ -98,6 +100,7 @@ export type MoneyAutopilotBriefing = {
   version: "1.3";
   portfolioIntelligenceVersion: "1.5";
   decisionHistoryVersion: "1.6";
+  tspTrackerVersion: "1.7";
   runDate: string;
   observedAt: string;
   persisted: boolean;
@@ -247,6 +250,7 @@ function buildAlerts({
   cashFlowAlerts,
   planSignals,
   portfolioSignals,
+  tspSignals,
   changes,
   previous,
   newTransactionCount,
@@ -271,6 +275,12 @@ function buildAlerts({
     title: string;
     detail: string;
     href: string;
+  }>;
+  tspSignals: Array<{
+    id: string;
+    level: "critical" | "watch" | "positive" | "info";
+    title: string;
+    detail: string;
   }>;
   changes: AutopilotMetricChange[];
   previous: AutopilotMetricSnapshot | null;
@@ -334,6 +344,18 @@ function buildAlerts({
       title: signal.title,
       detail: signal.detail,
       href: signal.href,
+    });
+  }
+
+  for (const signal of tspSignals) {
+    if (signal.level === "info") continue;
+    alerts.push({
+      id: signal.id,
+      level: signal.level,
+      category: "tsp",
+      title: signal.title,
+      detail: signal.detail,
+      href: "/tsp",
     });
   }
 
@@ -514,6 +536,7 @@ async function observeCurrentState(now: Date) {
     cashFlow,
     plan,
     auth,
+    tsp,
   ] = await Promise.all([
     requireMoneyDataset(),
     getCashFlowIntelligence(),
@@ -521,6 +544,7 @@ async function observeCurrentState(now: Date) {
       createBaseline: false,
     }),
     requireActiveHousehold(),
+    getTspTracker(now),
   ]);
 
   const directTickers = context.dataset.holdings
@@ -565,6 +589,7 @@ async function observeCurrentState(now: Date) {
     cashFlow,
     plan,
     portfolioIntelligence,
+    tsp,
     snapshot,
   };
 }
@@ -631,7 +656,8 @@ function rowToBriefing(
   if (
     stored.version !== "1.3" ||
     stored.portfolioIntelligenceVersion !== "1.5" ||
-    stored.decisionHistoryVersion !== "1.6"
+    stored.decisionHistoryVersion !== "1.6" ||
+    stored.tspTrackerVersion !== "1.7"
   ) {
     return null;
   }
@@ -689,6 +715,10 @@ export async function getMoneyAutopilotBriefing(
     planSignals: observation.plan.signals,
     portfolioSignals:
       observation.portfolioIntelligence.signals,
+    tspSignals:
+      observation.tsp.profile
+        ? observation.tsp.signals
+        : [],
     changes,
     previous: previousSnapshot,
     newTransactionCount,
@@ -698,6 +728,7 @@ export async function getMoneyAutopilotBriefing(
     version: "1.3",
     portfolioIntelligenceVersion: "1.5",
     decisionHistoryVersion: "1.6",
+    tspTrackerVersion: "1.7",
     runDate,
     observedAt: now.toISOString(),
     persisted: false,
@@ -806,6 +837,10 @@ export async function runMoneyAutopilot({
     planSignals: observation.plan.signals,
     portfolioSignals:
       observation.portfolioIntelligence.signals,
+    tspSignals:
+      observation.tsp.profile
+        ? observation.tsp.signals
+        : [],
     changes,
     previous: previousSnapshot,
     newTransactionCount,
@@ -815,6 +850,7 @@ export async function runMoneyAutopilot({
     version: "1.3",
     portfolioIntelligenceVersion: "1.5",
     decisionHistoryVersion: "1.6",
+    tspTrackerVersion: "1.7",
     runDate,
     observedAt: now.toISOString(),
     persisted: true,
