@@ -52,7 +52,15 @@ function signedMoney(value: number) {
   )}`;
 }
 
-export default async function DecisionJournalPage() {
+export default async function DecisionJournalPage({
+  searchParams,
+}: {
+  searchParams: Promise<{
+    ticker?: string;
+    actionItemId?: string;
+  }>;
+}) {
+  const query = await searchParams;
   const context =
     await requireMoneyDataset();
   const stockHoldings =
@@ -72,6 +80,20 @@ export default async function DecisionJournalPage() {
       context.dataset,
       research
     );
+
+  const requestedTicker = String(
+    query.ticker ?? ""
+  )
+    .trim()
+    .toUpperCase();
+  const selectedTicker =
+    report.positions.some(
+      (position) =>
+        position.ticker ===
+        requestedTicker
+    )
+      ? requestedTicker
+      : "";
 
   const [decisions, attribution] =
     await Promise.all([
@@ -111,12 +133,19 @@ export default async function DecisionJournalPage() {
             recordInvestmentDecision
           }
         >
+          <input
+            type="hidden"
+            name="actionItemId"
+            value={String(
+              query.actionItemId ?? ""
+            )}
+          />
           <label>
             <span>Holding</span>
             <select
               name="ticker"
               required
-              defaultValue=""
+              defaultValue={selectedTicker}
             >
               <option
                 value=""
