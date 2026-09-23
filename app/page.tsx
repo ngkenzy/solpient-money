@@ -229,14 +229,14 @@ export default async function HomePage() {
         <span className="ask-icon"><Sparkles size={19} /></span>
         <div className="ask-copy">
           <strong>Ask Solpient about your finances...</strong>
-          <span>Financial calculations stay deterministic; Research facts come from the live published Research system.</span>
+          <span>Deterministic household calculations first; optional local AI for broader explanations.</span>
         </div>
         <div className="ask-prompts">
-          <Link href="/retirement">Can I retire at 50?</Link>
-          <Link href="/insights">What deserves attention?</Link>
-          <Link href="/portfolio">How concentrated is my portfolio?</Link>
+          <Link href="/copilot">Can I retire at 50?</Link>
+          <Link href="/copilot">What deserves attention?</Link>
+          <Link href="/copilot">How concentrated is my portfolio?</Link>
         </div>
-        <Link className="ask-send" aria-label="Open Solpient Intelligence" href="/insights"><ArrowRight size={18} /></Link>
+        <Link className="ask-send" aria-label="Open Money Copilot" href="/copilot"><ArrowRight size={18} /></Link>
       </section>
 
       <div className="bottom-note">
