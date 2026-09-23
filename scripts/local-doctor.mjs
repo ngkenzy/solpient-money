@@ -287,6 +287,7 @@ if (databaseUrl && parsed && failures.length === 0) {
         current_user as "user",
         to_regclass('public.financial_plan_snapshots') is not null as v12_snapshots,
         to_regclass('public.money_autopilot_runs') is not null as autopilot_ledger,
+        to_regclass('public.money_action_items') is not null as action_center,
         to_regclass('public.local_migrations') is not null as migration_table
     `);
 
@@ -326,6 +327,12 @@ if (databaseUrl && parsed && failures.length === 0) {
       pass("V1.3 Autopilot ledger present");
     } else {
       fail("V1.3 Autopilot ledger present");
+    }
+
+    if (row?.action_center === true) {
+      pass("V1.4 Action Center present");
+    } else {
+      fail("V1.4 Action Center present");
     }
   } catch (error) {
     const code =
