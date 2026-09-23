@@ -11,6 +11,7 @@ import { buildPortfolioIntelligence } from "@/lib/portfolio-intelligence";
 import { requireMoneyDataset } from "@/lib/money-data";
 import { loadResearchSnapshots } from "@/lib/research";
 import { getDecisionChange, getDecisionJournal } from "@/lib/portfolio-history";
+import { getTspTracker } from "@/lib/tsp-tracker";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -75,6 +76,92 @@ export async function POST(request: Request) {
         { error: "Ask a financial question first." },
         { status: 400 }
       );
+    }
+
+    if (
+      /\btsp\b|thrift savings|brs match|max.*tsp|tsp.*max|g fund|c fund|s fund|i fund|f fund/i.test(
+        question
+      )
+    ) {
+      const tracker =
+        await getTspTracker();
+
+      if (!tracker.profile) {
+        return NextResponse.json({
+          answer:
+            "Military TSP Tracker is available, but the local TSP profile is not configured yet. Open Military TSP and enter retirement system, service entry date, basic pay, and your Traditional/Roth contribution percentages.",
+          facts: [],
+          calculation:
+            "V1.7 uses dated 2026 IRS contribution limits and BRS contribution rules against your locally entered TSP profile and snapshots.",
+          intent: "tsp_tracker",
+          engine: "deterministic",
+          model: null,
+        });
+      }
+
+      const top = tracker.signals.find(
+        (signal) =>
+          signal.level === "critical" ||
+          signal.level === "watch"
+      );
+
+      return NextResponse.json({
+        answer: top
+          ? `${top.title}. ${top.detail}`
+          : "V1.7 does not detect a material issue in the current TSP contribution pace, BRS match threshold, annual limit, or saved fund allocation.",
+        facts: [
+          {
+            label: "TSP balance",
+            value:
+              tracker.snapshot == null
+                ? "—"
+                : new Intl.NumberFormat("en-US", {
+                    style: "currency",
+                    currency: "USD",
+                    maximumFractionDigits: 0,
+                  }).format(
+                    tracker.snapshot.totalBalance
+                  ),
+          },
+          {
+            label: "Member contribution",
+            value: `${tracker.totalContributionPct.toFixed(
+              1
+            )}% of basic pay`,
+          },
+          {
+            label: "2026 employee limit",
+            value: new Intl.NumberFormat("en-US", {
+              style: "currency",
+              currency: "USD",
+              maximumFractionDigits: 0,
+            }).format(
+              tracker.employeeAnnualLimit
+            ),
+          },
+          {
+            label: "Remaining employee limit",
+            value: new Intl.NumberFormat("en-US", {
+              style: "currency",
+              currency: "USD",
+              maximumFractionDigits: 0,
+            }).format(
+              tracker.remainingEmployeeLimit
+            ),
+          },
+          {
+            label: "BRS service contribution",
+            value: `${tracker.brsGovernmentPct.toFixed(
+              1
+            )}% of basic pay`,
+          },
+        ],
+        calculation:
+          "Traditional + Roth basic-pay election, year-to-date TSP employee contributions, entered outside-plan elective deferrals, 2026 IRS limit/catch-up rules, and BRS automatic/matching eligibility.",
+        intent: "tsp_tracker",
+        engine: "deterministic",
+        model: null,
+      });
     }
 
     if (
