@@ -16,6 +16,8 @@ import { requireActiveHousehold } from "@/lib/money-auth";
 import { requireMoneyDataset } from "@/lib/money-data";
 import { getPlanMonitoring } from "@/lib/plan-monitor-engine";
 import { syncActionCenterFromAlerts } from "@/lib/money-action-center";
+import { buildPortfolioIntelligence } from "@/lib/portfolio-intelligence";
+import { loadResearchSnapshots } from "@/lib/research";
 
 export type AutopilotLevel =
   | "critical"
@@ -31,7 +33,8 @@ export type AutopilotAlert = {
     | "cash_flow"
     | "plan"
     | "change"
-    | "data";
+    | "data"
+    | "portfolio";
   title: string;
   detail: string;
   href: string;
@@ -92,6 +95,7 @@ export type AutopilotConnectorSummary = {
 
 export type MoneyAutopilotBriefing = {
   version: "1.3";
+  portfolioIntelligenceVersion: "1.5";
   runDate: string;
   observedAt: string;
   persisted: boolean;
@@ -240,6 +244,7 @@ function buildAlerts({
   connectors,
   cashFlowAlerts,
   planSignals,
+  portfolioSignals,
   changes,
   previous,
   newTransactionCount,
@@ -252,6 +257,13 @@ function buildAlerts({
     detail: string;
   }>;
   planSignals: Array<{
+    id: string;
+    level: "critical" | "watch" | "positive" | "info";
+    title: string;
+    detail: string;
+    href: string;
+  }>;
+  portfolioSignals: Array<{
     id: string;
     level: "critical" | "watch" | "positive" | "info";
     title: string;
@@ -305,6 +317,18 @@ function buildAlerts({
       id: `plan:${signal.id}`,
       level: signal.level,
       category: "plan",
+      title: signal.title,
+      detail: signal.detail,
+      href: signal.href,
+    });
+  }
+
+  for (const signal of portfolioSignals) {
+    if (signal.level === "info") continue;
+    alerts.push({
+      id: `portfolio:${signal.id}`,
+      level: signal.level,
+      category: "portfolio",
       title: signal.title,
       detail: signal.detail,
       href: signal.href,
@@ -497,6 +521,16 @@ async function observeCurrentState(now: Date) {
     requireActiveHousehold(),
   ]);
 
+  const directTickers = context.dataset.holdings
+    .filter((holding) => holding.kind === "stock")
+    .map((holding) => holding.ticker);
+  const research = await loadResearchSnapshots(directTickers);
+  const portfolioIntelligence =
+    buildPortfolioIntelligence(
+      context.dataset,
+      research
+    );
+
   const summary = getFinancialSummary(context.dataset);
   const portfolio = getPortfolioMetrics(context.dataset);
   const health = buildFinancialHealthEngine(
@@ -528,6 +562,7 @@ async function observeCurrentState(now: Date) {
     context,
     cashFlow,
     plan,
+    portfolioIntelligence,
     snapshot,
   };
 }
@@ -591,7 +626,12 @@ function rowToBriefing(
     return null;
   }
   const stored = row.briefing as MoneyAutopilotBriefing;
-  if (stored.version !== "1.3") return null;
+  if (
+    stored.version !== "1.3" ||
+    stored.portfolioIntelligenceVersion !== "1.5"
+  ) {
+    return null;
+  }
 
   return {
     ...stored,
@@ -644,6 +684,8 @@ export async function getMoneyAutopilotBriefing(
     connectors: connectors.summaries,
     cashFlowAlerts: observation.cashFlow.alerts,
     planSignals: observation.plan.signals,
+    portfolioSignals:
+      observation.portfolioIntelligence.signals,
     changes,
     previous: previousSnapshot,
     newTransactionCount,
@@ -651,6 +693,7 @@ export async function getMoneyAutopilotBriefing(
 
   return {
     version: "1.3",
+    portfolioIntelligenceVersion: "1.5",
     runDate,
     observedAt: now.toISOString(),
     persisted: false,
@@ -757,6 +800,8 @@ export async function runMoneyAutopilot({
     cashFlowAlerts:
       observation.cashFlow.alerts,
     planSignals: observation.plan.signals,
+    portfolioSignals:
+      observation.portfolioIntelligence.signals,
     changes,
     previous: previousSnapshot,
     newTransactionCount,
@@ -764,6 +809,7 @@ export async function runMoneyAutopilot({
 
   const briefing: MoneyAutopilotBriefing = {
     version: "1.3",
+    portfolioIntelligenceVersion: "1.5",
     runDate,
     observedAt: now.toISOString(),
     persisted: true,
