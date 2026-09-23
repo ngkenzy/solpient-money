@@ -9,6 +9,9 @@ const files = {
   engine: await readFile("lib/tsp-tracker.ts", "utf8"),
   actions: await readFile("app/tsp/actions.ts", "utf8"),
   page: await readFile("app/tsp/page.tsx", "utf8"),
+  autopilot: await readFile("lib/money-autopilot.ts", "utf8"),
+  copilotApi: await readFile("app/api/copilot/route.ts", "utf8"),
+  copilotUi: await readFile("components/MoneyCopilot.tsx", "utf8"),
   shell: await readFile("components/AppShell.tsx", "utf8"),
   client: await readFile("lib/local-db/client.ts", "utf8"),
   doctor: await readFile("scripts/local-doctor.mjs", "utf8"),
@@ -112,6 +115,19 @@ const checks = [
     files.shell.includes('href: "/tsp"') &&
       files.shell.includes("Military TSP") &&
       files.shell.includes("MONEY V1.7"),
+  ],
+  [
+    "Autopilot carries TSP material signals only after setup",
+    files.autopilot.includes('tspTrackerVersion: "1.7"') &&
+      files.autopilot.includes('category: "tsp"') &&
+      files.autopilot.includes("observation.tsp.profile"),
+  ],
+  [
+    "Copilot supports TSP pace and BRS questions",
+    files.copilotApi.includes('intent: "tsp_tracker"') &&
+      files.copilotApi.includes("getTspTracker") &&
+      files.copilotUi.includes("Am I on pace to max my TSP?") &&
+      files.copilotUi.includes("Am I getting the full BRS match?"),
   ],
   [
     "Local Doctor verifies V1.7 TSP schema",
