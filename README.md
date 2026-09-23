@@ -1140,3 +1140,101 @@ That command runs:
 
 V1.5 remains decision-support only. It cannot place trades, transfer funds, pay bills, or modify household goals/planning assumptions.
 
+## V1.6 Portfolio History + Decision Journal
+
+V1.6 adds a durable local history of what the household owned, what published Research said at the time, what the user decided, and what changed afterward.
+
+### Daily position + Research history
+
+Completed Autopilot runs now upsert one row per owned direct stock per local day into:
+
+```text
+portfolio_position_snapshots
+```
+
+Each snapshot preserves:
+
+- exact shares;
+- holding price;
+- market value and cost basis;
+- portfolio weight;
+- unrealized return;
+- published Research version and score;
+- published base fair value and valuation gap;
+- thesis health and weakened-condition count;
+- evidence confidence;
+- decision readiness;
+- Research evidence age;
+- V1.5 review priority and review reasons.
+
+History starts when V1.6 is installed. Solpient does not fabricate prior daily observations.
+
+### Decision Journal
+
+The journal is available at:
+
+```text
+/decision-journal
+```
+
+A user can record one of these human-authored labels:
+
+- Hold
+- Add later
+- Reduce later
+- Watch
+- No action
+
+Before saving a decision, Solpient captures the current V1.6 portfolio/Research state and links the journal entry to that snapshot. The optional note records the user's own reasoning or uncertainty.
+
+Portfolio Action Center items include a **Record decision** path that preselects the affected ticker and links the journal record back to the Action Center item after household ownership validation.
+
+### What changed since my last decision?
+
+Owned-company pages now show V1.6 history:
+
+- holding price versus published Research base value;
+- portfolio weight versus evidence confidence;
+- last journal decision;
+- price change since that decision;
+- portfolio-weight change;
+- evidence-confidence change;
+- review-priority change;
+- thesis-state change.
+
+Money Copilot also supports:
+
+```text
+What changed since my last decision?
+What changed since my last decision on ADBE?
+```
+
+When no ticker is supplied, Copilot uses the most recent journal decision.
+
+### Portfolio attribution
+
+Decision Journal includes deterministic observed-value attribution based on the first and latest available V1.6 daily snapshots for each position. This shows which holdings contributed most to the observed change in portfolio value during the captured history window.
+
+The attribution is not a performance-return decomposition and does not infer causality; deposits, withdrawals, trades performed outside Solpient, and price changes can all affect position value.
+
+### Safety boundary
+
+V1.6 records evidence and human decisions. It does not execute them.
+
+It cannot:
+
+- place or submit trades;
+- transfer funds;
+- pay bills;
+- automatically buy, sell, or rebalance;
+- modify goals or household planning assumptions.
+
+GitHub Actions remain manual-only. Use:
+
+```bash
+npm run local:repair
+npm run local:verify-release
+```
+
+to apply migrations and run the V1.6 release gate locally.
+
