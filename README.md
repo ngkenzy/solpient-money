@@ -1335,3 +1335,88 @@ npm run local:repair
 npm run local:verify-release
 ```
 
+## V1.7.1 TSP Daily Price Sync
+
+V1.7.1 adds daily TSP share-price updating without logging into TSP.gov.
+
+Primary source:
+
+```text
+https://www.tsp.gov/data/fund-price-history.csv
+```
+
+Solpient first requests a recent date window from the official TSP CSV. If TSP rejects the filtered request, it retries the same official CSV without filters. It does not silently substitute a third-party price feed.
+
+### Official balance vs estimated value
+
+Solpient intentionally maintains two different values:
+
+```text
+Official TSP snapshot
+= participant-entered/imported TSP account balance
+
+Estimated current value
+= inferred fund shares × latest published TSP share price
+```
+
+The price sync never overwrites the official participant snapshot.
+
+For each saved fund balance, Solpient finds the latest official TSP share price on or before the snapshot date and infers:
+
+```text
+shares = saved fund balance / snapshot-date share price
+```
+
+Future daily estimates then use:
+
+```text
+estimated fund value = inferred shares × latest published share price
+```
+
+The UI displays both the snapshot-price date and latest-price date so weekends, holidays, and stale feeds are visible rather than described as live.
+
+### Automatic and manual refresh
+
+A user can click:
+
+```text
+Sync prices now
+```
+
+on `/tsp`.
+
+The existing local Money Autopilot also runs the TSP share-price sync before generating its daily briefing. Therefore the macOS local scheduler can refresh TSP prices without GitHub Actions or a TSP login.
+
+### Price cache
+
+V1.7.1 adds:
+
+```text
+tsp_fund_prices
+```
+
+and augments `tsp_fund_positions` with:
+
+- inferred shares;
+- snapshot share price;
+- snapshot price date.
+
+The price cache is market data only and is not added independently to household net worth. This prevents double counting when TSP is already represented by an existing retirement account.
+
+### Freshness behavior
+
+If prices have never synced, or if the newest cached TSP share-price date becomes stale, the tracker creates a review signal instead of silently carrying the value forward as current.
+
+GitHub Actions remain manual-only. Validate locally with:
+
+```bash
+npm run local:repair
+npm run local:verify-release
+```
+
+After updating the production code, reinstall the local scheduler so its dedicated port-3210 production build includes V1.7.1:
+
+```bash
+npm run local:scheduler:install
+```
+
