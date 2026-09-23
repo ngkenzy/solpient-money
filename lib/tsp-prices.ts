@@ -674,6 +674,9 @@ export async function getTspEstimatedCurrentValue() {
         null,
       estimatedChangePct:
         null,
+      mixedPriceDates: false,
+      newestPriceDate: null,
+      oldestPriceDate: null,
       positions:
         [] as TspEstimatedFundValue[],
     };
@@ -825,6 +828,29 @@ export async function getTspEstimatedCurrentValue() {
       snapshot.roth_balance_cents
     );
 
+  const priceDates = Array.from(
+    new Set(
+      values
+        .map(
+          (position) =>
+            position.latestPriceDate
+        )
+        .filter(
+          (
+            value
+          ): value is string =>
+            Boolean(value)
+        )
+    )
+  ).sort();
+
+  const mixedPriceDates =
+    priceDates.length > 1;
+  const oldestPriceDate =
+    priceDates.at(0) ?? null;
+  const newestPriceDate =
+    priceDates.at(-1) ?? null;
+
   const complete =
     values.length > 0 &&
     values.every(
@@ -834,7 +860,7 @@ export async function getTspEstimatedCurrentValue() {
     );
 
   const estimatedCurrentValue =
-    complete
+    complete && !mixedPriceDates
       ? values.reduce(
           (sum, position) =>
             sum +
@@ -862,19 +888,9 @@ export async function getTspEstimatedCurrentValue() {
         100;
 
   const priceDate =
-    values
-      .map(
-        (position) =>
-          position.latestPriceDate
-      )
-      .filter(
-        (
-          value
-        ): value is string =>
-          Boolean(value)
-      )
-      .sort()
-      .at(-1) ?? null;
+    mixedPriceDates
+      ? null
+      : newestPriceDate;
 
   return {
     priceDate,
@@ -886,6 +902,9 @@ export async function getTspEstimatedCurrentValue() {
     estimatedCurrentValue,
     estimatedChange,
     estimatedChangePct,
+    mixedPriceDates,
+    newestPriceDate,
+    oldestPriceDate,
     positions: values,
   };
 }
