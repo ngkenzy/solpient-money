@@ -28,8 +28,20 @@ const files = {
 
 const pkg = JSON.parse(files.packageJson);
 
+function atLeast175(version) {
+  const [major = 0, minor = 0, patch = 0] = String(version)
+    .split(".")
+    .map((value) => Number.parseInt(value, 10) || 0);
+
+  return (
+    major > 1 ||
+    (major === 1 &&
+      (minor > 7 || (minor === 7 && patch >= 5)))
+  );
+}
+
 const checks = [
-  ["release is V1.7.5", pkg.version === "1.7.5"],
+  ["release includes V1.7.5 or newer", atLeast175(pkg.version)],
   [
     "snapshot revisions and supersedes link exist",
     files.migration.includes("add column if not exists revision integer") &&
