@@ -937,3 +937,49 @@ npm run local:migrate-legacy -- --confirm
 
 The command still refuses to overwrite a canonical database that already contains household data.
 
+## V1.3 Money Autopilot
+
+V1.3 turns Solpient Money from a passive dashboard into a local, read-only daily financial monitoring layer.
+
+When the local app is opened, Autopilot runs at most once per local day. It:
+
+- refreshes only connectors that explicitly support automatic sync;
+- leaves manual/file sources untouched and reports them as stale when appropriate;
+- stores one deterministic daily household snapshot in `money_autopilot_runs`;
+- compares the current snapshot with the prior daily run;
+- reports changes in net worth, assets, liabilities, cash, investments, month-to-date income/spending/surplus, financial health, plan alignment, and transaction count;
+- reuses the existing Cash-Flow Intelligence anomaly engine;
+- reuses V1.2 Plan Monitor with `createBaseline: false`;
+- surfaces connector freshness, repair-required states, and stale sources;
+- gives Money Copilot deterministic answers to questions such as `Give me my daily briefing` and `What changed since yesterday?`.
+
+The Autopilot workspace is available at:
+
+```text
+/autopilot
+```
+
+A manual **Run Autopilot now** control is also available. Manual runs refresh the current day's persisted observation instead of creating duplicate daily rows.
+
+### Safety boundary
+
+Autopilot is intentionally read-only with respect to financial decisions and execution.
+
+It can:
+
+- refresh configured data connectors;
+- read reconciled household data;
+- write derived daily monitoring snapshots;
+- calculate changes, anomalies, freshness, and plan drift.
+
+It cannot:
+
+- transfer funds;
+- pay bills;
+- submit trades;
+- change goals;
+- change planning assumptions;
+- reset the V1.2 plan baseline.
+
+Daily runs are household-isolated with PostgreSQL RLS. The local database remains the system of record.
+
