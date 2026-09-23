@@ -58,7 +58,22 @@ export async function uploadTspStatement(
     );
   }
 
-  const source = await upload.text();
+  const sourceBytes = new Uint8Array(
+    await upload.arrayBuffer()
+  );
+
+  let source: string;
+  try {
+    source = new TextDecoder(
+      "utf-8",
+      { fatal: true }
+    ).decode(sourceBytes);
+  } catch {
+    throw new Error(
+      "The TSP statement must be valid UTF-8 text."
+    );
+  }
+
   const parsed =
     parseTspStatement(
       source,
@@ -73,7 +88,7 @@ export async function uploadTspStatement(
       sourceKind:
         parsed.sourceKind,
       sourceFilename: filename,
-      sourceContent: source,
+      sourceContent: sourceBytes,
       parserVersion:
         parsed.parserVersion,
       parsedStatementDate:
