@@ -83,10 +83,10 @@ const checks = [
   [
     "Postgres binds only to loopback",
     compose.includes(
-      '"127.0.0.1:5432:5432"'
+      '"127.0.0.1:${SOLPIENT_DB_PORT:-55433}:5432"'
     ) &&
       !compose.includes(
-        '"0.0.0.0:5432:5432"'
+        '"0.0.0.0:'
       ),
   ],
   [
