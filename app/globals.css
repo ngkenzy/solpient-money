@@ -10355,3 +10355,104 @@ a {
   }
 }
 
+/* Solpient Money V1.7.1 TSP Daily Price Sync */
+.tsp-live-estimate-card {
+  padding: 16px;
+}
+
+.tsp-estimate-summary {
+  margin-top: 12px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 9px;
+}
+
+.tsp-estimate-summary > div {
+  min-height: 86px;
+  border: 1px solid #e2e9ef;
+  border-radius: 9px;
+  background: #fbfcfe;
+  padding: 11px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.tsp-estimate-summary span {
+  color: #7d8ea0;
+  font-size: 6px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.tsp-estimate-summary strong {
+  color: #304960;
+  font-size: 15px;
+}
+
+.tsp-estimate-summary small {
+  color: #8493a2;
+  font-size: 7px;
+}
+
+.tsp-live-fund-list {
+  margin-top: 12px;
+}
+
+.tsp-live-fund-row {
+  min-height: 66px;
+  border-top: 1px solid #e6edf3;
+  display: grid;
+  grid-template-columns: 48px minmax(180px, 1fr) 112px 112px 120px;
+  gap: 10px;
+  align-items: center;
+  padding: 9px 0;
+}
+
+.tsp-live-fund-row > div {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.tsp-live-fund-row > div strong {
+  color: #304960;
+  font-size: 8px;
+}
+
+.tsp-live-fund-row > div span,
+.tsp-live-fund-row > div small {
+  color: #7c8d9e;
+  font-size: 7px;
+}
+
+.tsp-price-note {
+  margin-top: 10px;
+}
+
+@media (max-width: 980px) {
+  .tsp-estimate-summary {
+    grid-template-columns: 1fr;
+  }
+
+  .tsp-live-fund-row {
+    grid-template-columns: 48px minmax(0, 1fr) 100px;
+  }
+
+  .tsp-live-fund-row > div:nth-child(4),
+  .tsp-live-fund-row > div:nth-child(5) {
+    grid-column: 2 / -1;
+  }
+}
+
+@media (max-width: 620px) {
+  .tsp-live-fund-row {
+    grid-template-columns: 48px minmax(0, 1fr);
+  }
+
+  .tsp-live-fund-row > div:nth-child(n+3) {
+    grid-column: 2;
+  }
+}
+
