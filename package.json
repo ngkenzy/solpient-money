@@ -1,6 +1,6 @@
 {
   "name": "solpient-money",
-  "version": "0.9.2",
+  "version": "0.9.3",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -29,7 +29,8 @@
     "local:migrate-from-hosted": "node scripts/migrate-hosted-money-to-local.mjs",
     "test:v09": "node scripts/test-v09-truth-engine.mjs",
     "test:v091": "node scripts/test-v091-review-reconcile.mjs",
-    "test:v092": "node scripts/test-v092-cash-flow-intelligence.mjs"
+    "test:v092": "node scripts/test-v092-cash-flow-intelligence.mjs",
+    "test:v093": "node scripts/test-v093-financial-health-engine.mjs"
   },
   "dependencies": {
     "lucide-react": "^0.468.0",
