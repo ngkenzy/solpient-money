@@ -1,7 +1,5 @@
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
-import Link from "next/link";
-import { ArrowRight } from "lucide-react";
 import PageHeader from "@/components/PageHeader";
 import { getCashFlowIntelligence } from "@/lib/cash-flow-intelligence";
 import { buildFinancialHealthEngine } from "@/lib/financial-health-engine";
