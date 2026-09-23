@@ -326,7 +326,7 @@ function buildAlerts({
   for (const signal of portfolioSignals) {
     if (signal.level === "info") continue;
     alerts.push({
-      id: `portfolio:${signal.id}`,
+      id: signal.id,
       level: signal.level,
       category: "portfolio",
       title: signal.title,
