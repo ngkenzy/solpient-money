@@ -21,6 +21,8 @@ import { loadResearchSnapshots } from "@/lib/research";
 import { capturePortfolioHistory } from "@/lib/portfolio-history";
 import { getTspTracker } from "@/lib/tsp-tracker";
 import { syncTspSharePrices } from "@/lib/tsp-prices";
+import type { TspPriceSyncResult } from "@/lib/tsp-prices";
+import { localCalendarDateKey } from "@/lib/local-calendar-date";
 
 export type AutopilotLevel =
   | "critical"
@@ -114,6 +116,7 @@ export type MoneyAutopilotBriefing = {
   alerts: AutopilotAlert[];
   connectors: AutopilotConnectorSummary[];
   syncResults: ConnectorSyncResult[];
+  tspPriceSync: TspPriceSyncResult | null;
   newTransactionCount: number;
   criticalCount: number;
   watchCount: number;
@@ -134,7 +137,7 @@ type AutopilotRunRow = {
 };
 
 function dayKey(date: Date) {
-  return date.toISOString().slice(0, 10);
+  return localCalendarDateKey(date);
 }
 
 function iso(value: unknown) {
@@ -752,6 +755,7 @@ export async function getMoneyAutopilotBriefing(
     alerts,
     connectors: connectors.summaries,
     syncResults: [],
+    tspPriceSync: null,
     newTransactionCount,
     criticalCount: alerts.filter(
       (alert) => alert.level === "critical"
@@ -777,13 +781,21 @@ export async function runMoneyAutopilot({
   // TSP share prices are independent market data. Refresh them even when
   // today's Money Autopilot briefing already exists, so a morning briefing
   // cannot prevent a later official TSP price publication from being cached.
+  let tspPriceSync: TspPriceSyncResult | null = null;
   try {
-    await syncTspSharePrices(now);
+    tspPriceSync = await syncTspSharePrices(now);
   } catch (error) {
-    console.warn(
-      "Automatic TSP share-price refresh failed:",
-      error instanceof Error ? error.message : error
-    );
+    tspPriceSync = {
+      ok: false,
+      fetchedRows: 0,
+      persistedRows: 0,
+      latestPriceDate: null,
+      sourceUrl: "https://www.tsp.gov/data/fund-price-history.csv",
+      warning:
+        error instanceof Error
+          ? error.message
+          : "Automatic TSP share-price refresh failed.",
+    };
   }
 
   const existing = await todayRun(
@@ -798,7 +810,10 @@ export async function runMoneyAutopilot({
         stored.alerts,
         stored.observedAt
       );
-      return stored;
+      return {
+        ...stored,
+        tspPriceSync,
+      };
     }
   }
 
@@ -888,6 +903,7 @@ export async function runMoneyAutopilot({
     alerts,
     connectors,
     syncResults,
+    tspPriceSync,
     newTransactionCount,
     criticalCount: alerts.filter(
       (alert) => alert.level === "critical"
