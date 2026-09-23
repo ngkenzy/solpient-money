@@ -68,7 +68,11 @@ create table if not exists public.tsp_statement_imports (
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
 
-  unique (household_id, source_content_sha256)
+  unique (
+    household_id,
+    source_content_sha256,
+    parser_version
+  )
 );
 
 create index if not exists tsp_statement_imports_household_state_idx
