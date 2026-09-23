@@ -6731,3 +6731,418 @@ a {
     text-align: left;
   }
 }
+
+
+/* Solpient Money V0.9.3 Financial Health Engine */
+.health-engine-hero {
+  margin-bottom: 12px;
+  padding: 18px;
+  display: grid;
+  grid-template-columns: 92px minmax(0, 1fr) auto;
+  gap: 16px;
+  align-items: center;
+}
+
+.health-engine-score {
+  width: 84px;
+  height: 84px;
+  border-radius: 50%;
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 2px;
+  padding-top: 23px;
+  border: 7px solid #d9e5ec;
+  background: #fbfdfe;
+}
+
+.health-engine-score strong {
+  font-size: 28px;
+  line-height: 1;
+}
+
+.health-engine-score span {
+  color: #77899c;
+  font-size: 9px;
+}
+
+.health-engine-score.healthy {
+  border-color: #bcdccd;
+  color: #2f7058;
+}
+
+.health-engine-score.review {
+  border-color: #ead7a9;
+  color: #8b641f;
+}
+
+.health-engine-score.critical {
+  border-color: #e8c6cc;
+  color: #944b55;
+}
+
+.health-engine-copy h2 {
+  margin: 3px 0 4px;
+  font-size: 22px;
+}
+
+.health-engine-copy p {
+  max-width: 760px;
+  margin: 0;
+  color: #718399;
+  font-size: 8px;
+  line-height: 1.5;
+}
+
+.health-engine-networth {
+  min-width: 180px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  text-align: right;
+}
+
+.health-engine-networth span,
+.health-engine-networth small {
+  color: #8191a2;
+  font-size: 7px;
+}
+
+.health-engine-networth strong {
+  color: #29465d;
+  font-size: 21px;
+}
+
+.health-engine-metrics {
+  margin-bottom: 12px;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.health-engine-metric {
+  min-height: 112px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.health-engine-metric > svg {
+  margin-bottom: 6px;
+  color: #4b789c;
+}
+
+.health-engine-metric span {
+  color: #718499;
+  font-size: 7px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+}
+
+.health-engine-metric strong {
+  color: #263f57;
+  font-size: 20px;
+}
+
+.health-engine-metric small {
+  margin-top: auto;
+  color: #8292a4;
+  font-size: 7px;
+}
+
+.health-engine-component-grid {
+  margin-bottom: 12px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.health-engine-component {
+  min-height: 270px;
+  padding: 15px;
+  display: flex;
+  flex-direction: column;
+}
+
+.health-engine-component-head {
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr) auto;
+  gap: 9px;
+  align-items: center;
+}
+
+.health-engine-component-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 9px;
+  display: grid;
+  place-items: center;
+}
+
+.health-engine-component-icon.healthy {
+  color: #34705a;
+  background: #eef8f4;
+}
+
+.health-engine-component-icon.review {
+  color: #8b641f;
+  background: #fff8e9;
+}
+
+.health-engine-component-icon.critical {
+  color: #944b55;
+  background: #fff1f3;
+}
+
+.health-engine-component-head > div {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.health-engine-component-head > div span {
+  color: #74879a;
+  font-size: 7px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.health-engine-component-head > div strong {
+  color: #2a455d;
+  font-size: 11px;
+}
+
+.health-engine-status {
+  padding: 5px 7px;
+  border-radius: 999px;
+  font-size: 6px;
+  font-weight: 850;
+  text-transform: uppercase;
+}
+
+.health-engine-status.healthy {
+  color: #34705a;
+  background: #eef8f4;
+}
+
+.health-engine-status.review {
+  color: #8b641f;
+  background: #fff8e9;
+}
+
+.health-engine-status.critical {
+  color: #944b55;
+  background: #fff1f3;
+}
+
+.health-engine-bar {
+  height: 6px;
+  margin: 12px 0 11px;
+  border-radius: 999px;
+  background: #edf2f6;
+  overflow: hidden;
+}
+
+.health-engine-bar span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+}
+
+.health-engine-bar span.healthy {
+  background: #4d9277;
+}
+
+.health-engine-bar span.review {
+  background: #c79b43;
+}
+
+.health-engine-bar span.critical {
+  background: #bd6873;
+}
+
+.health-engine-component > p {
+  margin: 0 0 10px;
+  color: #708297;
+  font-size: 8px;
+  line-height: 1.55;
+}
+
+.health-engine-details {
+  margin-top: auto;
+  border-top: 1px solid #e6edf3;
+  padding-top: 9px;
+}
+
+.health-engine-details summary {
+  color: #4e7191;
+  cursor: pointer;
+  font-size: 7px;
+  font-weight: 800;
+}
+
+.health-engine-details div {
+  margin-top: 8px;
+}
+
+.health-engine-details div span {
+  color: #8795a4;
+  font-size: 6px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.health-engine-details p,
+.health-engine-details li {
+  color: #6f8295;
+  font-size: 7px;
+  line-height: 1.45;
+}
+
+.health-engine-details ul {
+  margin: 7px 0 0;
+  padding-left: 16px;
+}
+
+.health-engine-link {
+  margin-top: 10px;
+  color: #39709d;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  text-decoration: none;
+  font-size: 7px;
+  font-weight: 800;
+}
+
+.health-engine-two-column {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.health-engine-facts {
+  margin-top: 10px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 9px;
+}
+
+.health-engine-facts > div {
+  min-height: 84px;
+  padding: 12px;
+  border: 1px solid #e3eaf0;
+  border-radius: 9px;
+  background: #fbfcfe;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.health-engine-facts span {
+  color: #788a9d;
+  font-size: 7px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.health-engine-facts strong {
+  color: #2a455c;
+  font-size: 14px;
+}
+
+.health-engine-facts small {
+  margin-top: auto;
+  color: #8493a4;
+  font-size: 7px;
+}
+
+.health-engine-attention {
+  margin-top: 9px;
+}
+
+.health-engine-attention-row {
+  min-height: 58px;
+  border-top: 1px solid #e6edf3;
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr) 18px;
+  gap: 10px;
+  align-items: center;
+  padding: 8px 0;
+  text-decoration: none;
+}
+
+.health-engine-attention-icon {
+  width: 30px;
+  height: 30px;
+  border-radius: 9px;
+  display: grid;
+  place-items: center;
+}
+
+.health-engine-attention-row.positive .health-engine-attention-icon {
+  color: #34705a;
+  background: #eef8f4;
+}
+
+.health-engine-attention-row.review .health-engine-attention-icon {
+  color: #8b641f;
+  background: #fff8e9;
+}
+
+.health-engine-attention-row.critical .health-engine-attention-icon {
+  color: #944b55;
+  background: #fff1f3;
+}
+
+.health-engine-attention-row > div {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.health-engine-attention-row strong {
+  color: #2d475e;
+  font-size: 8px;
+}
+
+.health-engine-attention-row span {
+  color: #8191a2;
+  font-size: 7px;
+}
+
+.health-engine-attention-row > svg {
+  color: #8ca0b2;
+}
+
+@media (max-width: 1100px) {
+  .health-engine-component-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .health-engine-metrics {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 760px) {
+  .health-engine-hero {
+    grid-template-columns: 84px 1fr;
+  }
+
+  .health-engine-networth {
+    grid-column: 2;
+    text-align: left;
+  }
+
+  .health-engine-component-grid,
+  .health-engine-two-column {
+    grid-template-columns: 1fr;
+  }
+
+  .health-engine-facts {
+    grid-template-columns: 1fr;
+  }
+}
