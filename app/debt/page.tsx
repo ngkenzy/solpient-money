@@ -24,7 +24,7 @@ export default async function DebtPage() {
         eyebrow="DEBT"
         title="Know the cost, not just the balance."
         description="APR-aware household debt intelligence. The ordering shows a highest-APR-first calculation, not a personalized instruction."
-        action={<Link className="research-button" href="/scenario-lab">Open Scenario Lab <ArrowRight size={15} /></Link>}
+        action={<Link className="research-button" href="/plan">Open Financial Plan <ArrowRight size={15} /></Link>}
       />
 
       <div className="metric-grid four">
