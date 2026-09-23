@@ -40,6 +40,14 @@ function issueText(
     .join(" · ");
 }
 
+const CORE_REVIEW_FUNDS = [
+  ["G", "Government Securities Investment Fund"],
+  ["F", "Fixed Income Index Investment Fund"],
+  ["C", "Common Stock Index Investment Fund"],
+  ["S", "Small Capitalization Stock Index Investment Fund"],
+  ["I", "International Stock Index Investment Fund"],
+] as const;
+
 export default async function TspStatementReviewPage({
   params,
 }: {
@@ -55,6 +63,43 @@ export default async function TspStatementReviewPage({
     reconcileTspStatementReview(
       record.review
     );
+
+  const byCode = new Map(
+    record.review.funds.map((fund) => [
+      fund.fundCode.toUpperCase(),
+      fund,
+    ])
+  );
+
+  const coreReviewFunds =
+    CORE_REVIEW_FUNDS.map(
+      ([fundCode, fundName]) =>
+        byCode.get(fundCode) ?? {
+          fundCode,
+          fundName,
+          balanceCents: null,
+        }
+    );
+
+  const extraReviewFunds =
+    record.review.funds.filter(
+      (fund) =>
+        !CORE_REVIEW_FUNDS.some(
+          ([code]) =>
+            code ===
+            fund.fundCode.toUpperCase()
+        )
+    );
+
+  const editableFunds = [
+    ...coreReviewFunds,
+    ...extraReviewFunds,
+    {
+      fundCode: "",
+      fundName: "",
+      balanceCents: null,
+    },
+  ];
 
   const confirmed =
     record.validationState === "confirmed";
@@ -293,54 +338,45 @@ export default async function TspStatementReviewPage({
             </div>
           </div>
 
-          {record.review.funds.length ? (
-            <div className="tsp-import-funds">
-              {record.review.funds.map(
-                (fund, index) => (
-                  <div
-                    className="tsp-import-fund-row"
-                    key={`${fund.fundCode}-${index}`}
-                  >
-                    <input
-                      name="fundCode"
-                      defaultValue={
-                        fund.fundCode
-                      }
-                      aria-label="Fund code"
-                      disabled={confirmed}
-                    />
-                    <input
-                      name="fundName"
-                      defaultValue={
-                        fund.fundName
-                      }
-                      aria-label="Fund name"
-                      disabled={confirmed}
-                    />
-                    <input
-                      name="fundBalance"
-                      inputMode="decimal"
-                      defaultValue={dollars(
-                        fund.balanceCents
-                      )}
-                      aria-label="Fund balance"
-                      disabled={confirmed}
-                    />
-                  </div>
-                )
-              )}
-            </div>
-          ) : (
-            <div className="action-empty">
-              <AlertTriangle size={22} />
-              <strong>
-                No fund balances parsed.
-              </strong>
-              <span>
-                This import cannot be confirmed until fund balances are resolved.
-              </span>
-            </div>
-          )}
+          <div className="tsp-import-funds">
+            {editableFunds.map(
+              (fund, index) => (
+                <div
+                  className="tsp-import-fund-row"
+                  key={`${fund.fundCode || "custom"}-${index}`}
+                >
+                  <input
+                    name="fundCode"
+                    defaultValue={
+                      fund.fundCode
+                    }
+                    placeholder="Fund code"
+                    aria-label="Fund code"
+                    disabled={confirmed}
+                  />
+                  <input
+                    name="fundName"
+                    defaultValue={
+                      fund.fundName
+                    }
+                    placeholder="Fund name"
+                    aria-label="Fund name"
+                    disabled={confirmed}
+                  />
+                  <input
+                    name="fundBalance"
+                    inputMode="decimal"
+                    defaultValue={dollars(
+                      fund.balanceCents
+                    )}
+                    placeholder="0.00"
+                    aria-label="Fund balance"
+                    disabled={confirmed}
+                  />
+                </div>
+              )
+            )}
+          </div>
 
           <div className="tsp-import-reconciliation">
             <div>
