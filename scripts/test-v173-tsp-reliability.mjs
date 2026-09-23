@@ -6,6 +6,7 @@ const files = {
   autopilot: await readFile("lib/money-autopilot.ts", "utf8"),
   prices: await readFile("lib/tsp-prices.ts", "utf8"),
   runner: await readFile("components/AutopilotDailyRunner.tsx", "utf8"),
+  page: await readFile("app/tsp/page.tsx", "utf8"),
   scheduled: await readFile("scripts/run-scheduled-autopilot.mjs", "utf8"),
   page: await readFile("app/tsp/page.tsx", "utf8"),
   shell: await readFile("components/AppShell.tsx", "utf8"),
@@ -31,6 +32,18 @@ const checks = [
     "TSP fetch window uses local calendar day",
     files.prices.includes('import { localCalendarDateKey } from "@/lib/local-calendar-date"') &&
       files.prices.includes("const today = localCalendarDateKey(now)"),
+  ],
+  [
+    "TSP snapshot form defaults to local calendar day",
+    files.page.includes('import { localCalendarDateKey } from "@/lib/local-calendar-date"') &&
+      files.page.includes("localCalendarDateKey(new Date())"),
+  ],
+  [
+    "failed official fetch keeps newest cached price date",
+    files.prices.includes('.from("tsp_fund_prices")') &&
+      files.prices.includes('.select("price_date")') &&
+      files.prices.includes("cachedLatest") &&
+      files.prices.includes("cachedLatest?.price_date"),
   ],
   [
     "automatic TSP sync result is retained",
