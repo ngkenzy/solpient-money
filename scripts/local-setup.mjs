@@ -17,6 +17,7 @@ const MAX_PORT = 55449;
 const DATABASE = "solpient";
 const USER = "solpient";
 const CONTAINER = "solpient-money-postgres";
+const containerOnly = process.argv.includes("--container-only");
 
 async function exists(file) {
   try {
@@ -363,23 +364,25 @@ try {
   );
 }
 
-const migrate = spawnSync(
-  process.execPath,
-  ["scripts/local-db-init.mjs"],
-  {
-    stdio: "inherit",
-    env: {
-      ...process.env,
-      DATABASE_URL: databaseUrl,
-      SOLPIENT_DB_PORT: String(port),
-      CONNECT_SECRET_ENCRYPTION_KEY:
-        readKey(nextEnv, "CONNECT_SECRET_ENCRYPTION_KEY") ?? "",
-    },
-  }
-);
+if (!containerOnly) {
+  const migrate = spawnSync(
+    process.execPath,
+    ["scripts/local-db-init.mjs"],
+    {
+      stdio: "inherit",
+      env: {
+        ...process.env,
+        DATABASE_URL: databaseUrl,
+        SOLPIENT_DB_PORT: String(port),
+        CONNECT_SECRET_ENCRYPTION_KEY:
+          readKey(nextEnv, "CONNECT_SECRET_ENCRYPTION_KEY") ?? "",
+      },
+    }
+  );
 
-if (migrate.status !== 0) {
-  throw new Error("Local PostgreSQL migrations failed.");
+  if (migrate.status !== 0) {
+    throw new Error("Local PostgreSQL migrations failed.");
+  }
 }
 
 await verifyTcp(databaseUrl);
@@ -391,7 +394,11 @@ console.log("✓ .env.local and .env.local-db use the same password");
 console.log("✓ .env.local and .env.local-db use the same host port");
 console.log("✓ Actual PostgreSQL role password synchronized");
 console.log("✓ TCP authentication verified");
-console.log("✓ Solpient migrations current");
+console.log(
+  containerOnly
+    ? "✓ Container-only repair complete; schema migration intentionally skipped"
+    : "✓ Solpient migrations current"
+);
 
 if (shellDatabaseUrlDiffers(databaseUrl)) {
   console.log("");
