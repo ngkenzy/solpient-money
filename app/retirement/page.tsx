@@ -1,17 +1,10 @@
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import PageHeader from "@/components/PageHeader";
+import { getCashFlowIntelligence } from "@/lib/cash-flow-intelligence";
+import { buildFinancialHealthEngine } from "@/lib/financial-health-engine";
 import { money } from "@/lib/finance";
-import { getFinancialHealth } from "@/lib/intelligence";
 import { requireMoneyDataset } from "@/lib/money-data";
-
-function futureValue(principal: number, monthlyContribution: number, annualReturnPct: number, months: number) {
-  const monthlyRate = annualReturnPct / 100 / 12;
-  if (months <= 0) return principal;
-  if (Math.abs(monthlyRate) < 0.0000001) return principal + monthlyContribution * months;
-  const growth = Math.pow(1 + monthlyRate, months);
-  return principal * growth + monthlyContribution * ((growth - 1) / monthlyRate);
-}
 
 export const dynamic = "force-dynamic";
 
@@ -19,10 +12,11 @@ export default async function RetirementPage() {
   const context = await requireMoneyDataset();
   const data = context.dataset;
   const plan = data.householdPlan;
-  const health = getFinancialHealth({}, data);
-  const years = Math.max(0, plan.targetRetirementAge - plan.demoCurrentAge);
-  const projected = futureValue(health.metrics.investments, health.metrics.averageMonthlySavings, plan.expectedAnnualReturnPct, years * 12);
-  const funding = plan.targetRetirementAssets > 0 ? Math.min(100, projected / plan.targetRetirementAssets * 100) : 0;
+  const cashFlow = await getCashFlowIntelligence();
+  const health = buildFinancialHealthEngine(data, cashFlow);
+  const years = health.metrics.retirementYears;
+  const projected = health.metrics.retirementProjectedAssets;
+  const funding = health.metrics.retirementFundingPct;
 
   return (
     <div className="page">
@@ -41,7 +35,7 @@ export default async function RetirementPage() {
       <section className="card page-card">
         <div className="section-title-row"><div><span className="card-kicker">BASELINE ASSUMPTIONS</span><h2>Visible instead of hidden</h2></div></div>
         <div className="scenario-grid">
-          <div><strong>{money(health.metrics.averageMonthlySavings)}/mo</strong><span>Average household surplus</span></div>
+          <div><strong>{money(health.metrics.retirementMonthlyContribution)}/mo</strong><span>Trailing average positive household surplus</span></div>
           <div><strong>{plan.expectedAnnualReturnPct}%</strong><span>Constant annual investment-return assumption</span></div>
           <div><strong>{years} years</strong><span>Target age minus current-age assumption</span></div>
           <div><strong>Not modeled</strong><span>Taxes, inflation, pensions, Social Security, sequence risk</span></div>
