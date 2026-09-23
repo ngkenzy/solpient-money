@@ -29,9 +29,13 @@ if (packageJson.dependencies?.["@supabase/supabase-js"]) {
 if (packageJson.dependencies?.pg !== "8.23.0") {
   throw new Error("Local PostgreSQL driver is not pinned.");
 }
-if (!compose.includes('"127.0.0.1:5432:5432"')) {
+if (
+  !compose.includes(
+    '"127.0.0.1:${SOLPIENT_DB_PORT:-55433}:5432"'
+  )
+) {
   throw new Error(
-    "Local PostgreSQL is not bound to loopback only."
+    "Local PostgreSQL host binding is not loopback-only and configurable."
   );
 }
 if (!client.includes("LocalDbClient")) {
