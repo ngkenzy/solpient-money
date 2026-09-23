@@ -158,7 +158,7 @@ drop trigger if exists tsp_statement_imports_confirmed_immutable
   on public.tsp_statement_imports;
 
 create trigger tsp_statement_imports_confirmed_immutable
-before update or delete
+before update
 on public.tsp_statement_imports
 for each row
 execute function public.prevent_confirmed_tsp_import_mutation();
@@ -258,6 +258,6 @@ grant execute on function public.confirm_tsp_statement_import(uuid)
   to authenticated;
 
 comment on table public.tsp_statement_imports is
-  'V1.8 provenance + review state for deterministic TSP statement parsing. Raw statement content is not persisted.';
+  'V1.8 provenance + review state for deterministic TSP statement parsing. Raw statement content is not persisted. Authenticated clients have no DELETE grant; privileged household deletion may still cascade.';
 comment on function public.confirm_tsp_statement_import(uuid) is
   'Atomically confirms a reviewed TSP statement import by inserting a new immutable TSP snapshot revision.';
