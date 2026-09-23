@@ -9,10 +9,12 @@ import {
 } from "lucide-react";
 import { notFound } from "next/navigation";
 import PageHeader from "@/components/PageHeader";
+import InteractiveLineChart from "@/components/InteractiveLineChart";
 import { demoMoneyDataset } from "@/lib/demo-data";
 import { findHolding, getPortfolioMetrics, money } from "@/lib/finance";
 import { requireMoneyDataset } from "@/lib/money-data";
 import { formatResearchDate, loadResearchSnapshots } from "@/lib/research";
+import { getDecisionChange, getTickerHistory } from "@/lib/portfolio-history";
 
 export const dynamic = "force-dynamic";
 
@@ -42,6 +44,22 @@ export default async function HoldingPage({
 
   const research = await loadResearchSnapshots([holding.ticker]);
   const snapshot = research.snapshots[holding.ticker];
+  const [history, decisionChange] = await Promise.all([
+    getTickerHistory(holding.ticker, 180),
+    getDecisionChange(holding.ticker),
+  ]);
+
+  const priceHistory = history.map((point) => ({
+    label: point.date,
+    price: point.price,
+    baseValue: point.baseValue ?? point.price,
+  }));
+
+  const evidenceHistory = history.map((point) => ({
+    label: point.date,
+    weight: point.weightPct,
+    evidence: point.evidenceConfidence ?? 0,
+  }));
 
   return (
     <div className="page">
@@ -67,6 +85,92 @@ export default async function HoldingPage({
         <div className="metric-card"><span>Unrealized P/L</span><strong className={unrealized >= 0 ? "positive-text" : "negative-text"}>{money(unrealized)}</strong><small>{totalReturn >= 0 ? "+" : ""}{totalReturn.toFixed(1)}% vs cost basis</small></div>
         <div className="metric-card"><span>YTD return</span><strong className={holding.ytdReturn >= 0 ? "positive-text" : "negative-text"}>{holding.ytdReturn >= 0 ? "+" : ""}{holding.ytdReturn.toFixed(1)}%</strong><small>Illustrative holding return</small></div>
       </div>
+
+      <section className="card page-card holding-decision-history">
+        <div className="section-title-row">
+          <div>
+            <span className="card-kicker">V1.6 DECISION HISTORY</span>
+            <h2>What changed since your last decision</h2>
+          </div>
+          <Link className="text-button" href="/decision-journal">
+            Decision journal <ArrowRight size={15} />
+          </Link>
+        </div>
+
+        <p className="research-summary-copy">
+          {decisionChange.summary}
+        </p>
+
+        {decisionChange.decision ? (
+          <div className="research-provenance-grid decision-change-grid">
+            <div>
+              <span>Last decision</span>
+              <strong>{decisionChange.decision.decisionType.replaceAll("_", " ")}</strong>
+            </div>
+            <div>
+              <span>Price change</span>
+              <strong>{decisionChange.priceChangePct == null ? "—" : `${decisionChange.priceChangePct >= 0 ? "+" : ""}${decisionChange.priceChangePct.toFixed(1)}%`}</strong>
+            </div>
+            <div>
+              <span>Weight change</span>
+              <strong>{decisionChange.weightChangePctPoints == null ? "—" : `${decisionChange.weightChangePctPoints >= 0 ? "+" : ""}${decisionChange.weightChangePctPoints.toFixed(1)} pts`}</strong>
+            </div>
+            <div>
+              <span>Evidence change</span>
+              <strong>{decisionChange.evidenceChange == null ? "—" : `${decisionChange.evidenceChange >= 0 ? "+" : ""}${decisionChange.evidenceChange.toFixed(0)}`}</strong>
+            </div>
+            <div>
+              <span>Review priority Δ</span>
+              <strong>{decisionChange.reviewPriorityChange == null ? "—" : `${decisionChange.reviewPriorityChange >= 0 ? "+" : ""}${decisionChange.reviewPriorityChange}`}</strong>
+            </div>
+            <div>
+              <span>Thesis changed</span>
+              <strong>{decisionChange.thesisChanged ? "Yes" : "No"}</strong>
+            </div>
+          </div>
+        ) : null}
+      </section>
+
+      {history.length ? (
+        <div className="holding-layout">
+          <section className="card page-card">
+            <div className="section-title-row">
+              <div>
+                <span className="card-kicker">V1.6 PRICE HISTORY</span>
+                <h2>Holding price vs Research base value</h2>
+              </div>
+              <span className="small-muted">{history.length} daily snapshot{history.length === 1 ? "" : "s"}</span>
+            </div>
+            <InteractiveLineChart
+              data={priceHistory}
+              series={[
+                { key: "price", label: "Holding price", format: "currency" },
+                { key: "baseValue", label: "Research base value", format: "currency" },
+              ]}
+              defaultRange="ALL"
+              height={235}
+            />
+          </section>
+
+          <section className="card page-card">
+            <div className="section-title-row">
+              <div>
+                <span className="card-kicker">EXPOSURE + EVIDENCE</span>
+                <h2>Portfolio weight vs evidence confidence</h2>
+              </div>
+            </div>
+            <InteractiveLineChart
+              data={evidenceHistory}
+              series={[
+                { key: "weight", label: "Portfolio weight", format: "percent" },
+                { key: "evidence", label: "Evidence confidence", format: "number" },
+              ]}
+              defaultRange="ALL"
+              height={235}
+            />
+          </section>
+        </div>
+      ) : null}
 
       {!snapshot ? (
         <section className="card page-card empty-research-state">
