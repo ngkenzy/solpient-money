@@ -1,7 +1,9 @@
 import Link from "next/link";
 import { ArrowRight, CircleDollarSign } from "lucide-react";
 import PageHeader from "@/components/PageHeader";
-import { getDebtPriority, getFinancialHealth } from "@/lib/intelligence";
+import { getCashFlowIntelligence } from "@/lib/cash-flow-intelligence";
+import { buildFinancialHealthEngine } from "@/lib/financial-health-engine";
+import { getDebtPriority } from "@/lib/intelligence";
 import { money } from "@/lib/finance";
 import { requireMoneyDataset } from "@/lib/money-data";
 
@@ -11,7 +13,8 @@ export default async function DebtPage() {
   const context = await requireMoneyDataset();
   const data = context.dataset;
   const debts = getDebtPriority(data);
-  const health = getFinancialHealth({}, data);
+  const cashFlow = await getCashFlowIntelligence();
+  const health = buildFinancialHealthEngine(data, cashFlow);
   const total = debts.reduce((sum, debt) => sum + debt.balance, 0);
   const annualizedInterest = debts.reduce((sum, debt) => sum + debt.annualizedInterest, 0);
 
