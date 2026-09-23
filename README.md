@@ -733,3 +733,47 @@ npm run test:connect-v14
 npm run lint
 npm run build
 ```
+
+## V1.0 Local Money Copilot
+
+Solpient Money includes a read-only local financial copilot at `/copilot`.
+
+The Copilot has two layers:
+
+1. **Deterministic Solpient** — always available. Common questions about net worth, cash flow, reserves, debt, recurring bills, portfolio concentration, retirement, financial health, and the 12-month forecast are answered directly from reconciled Solpient calculations.
+2. **Local Ollama** — optional. Broader conversational explanations can be handled by a local model running on the same computer.
+
+Ollama is not required for the application to build or for deterministic Copilot questions to work.
+
+To enable a local model:
+
+```bash
+# Start Ollama using your normal local installation.
+ollama serve
+
+# See which local models are already installed.
+ollama list
+
+# Install a chat model of your choice if needed.
+ollama pull <model-name>
+```
+
+Optionally choose a specific installed model in `.env.local`:
+
+```env
+OLLAMA_MODEL=<model-name>
+# OLLAMA_BASE_URL=http://127.0.0.1:11434
+```
+
+If `OLLAMA_MODEL` is omitted, Solpient selects the first model returned by the local Ollama installation.
+
+### Copilot security boundary
+
+The V1.0 Copilot is intentionally read-only:
+
+- it does not receive database credentials or account last-four identifiers;
+- it cannot insert, update, delete, or merge financial records;
+- chat history remains in browser memory for the current page session and is not persisted;
+- deterministic calculations remain authoritative for displayed household metrics;
+- local-model responses are explanations and may be wrong, so important decisions should be checked against the underlying Solpient calculations.
+
