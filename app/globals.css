@@ -6369,3 +6369,365 @@ a {
     grid-column: 2;
   }
 }
+
+
+/* Solpient Money V0.9.2 Cash-Flow Intelligence */
+.cash-intel-hero {
+  margin-bottom: 12px;
+  padding: 18px;
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr) auto;
+  gap: 14px;
+  align-items: center;
+}
+
+.cash-intel-hero-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  color: #296a59;
+  background: #eef8f4;
+  border: 1px solid #cee4db;
+}
+
+.cash-intel-hero h2 {
+  margin: 3px 0 4px;
+  font-size: 22px;
+}
+
+.cash-intel-hero p {
+  margin: 0;
+  color: #708298;
+  font-size: 8px;
+}
+
+.cash-intel-health {
+  min-width: 160px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  text-align: right;
+}
+
+.cash-intel-health span,
+.cash-intel-health small {
+  color: #8191a2;
+  font-size: 7px;
+}
+
+.cash-intel-health strong {
+  color: #285a4b;
+  font-size: 22px;
+}
+
+.cash-intel-metric-grid {
+  margin-bottom: 12px;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.cash-intel-metric {
+  min-height: 112px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.cash-intel-metric > svg {
+  margin-bottom: 6px;
+  color: #49759b;
+}
+
+.cash-intel-metric span {
+  color: #718499;
+  font-size: 7px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+}
+
+.cash-intel-metric strong {
+  color: #263f57;
+  font-size: 20px;
+}
+
+.cash-intel-metric small {
+  margin-top: auto;
+  color: #8292a4;
+  font-size: 7px;
+}
+
+.cash-stability-pill,
+.cash-alert-count {
+  min-height: 28px;
+  padding: 0 9px;
+  border: 1px solid #d7e3eb;
+  border-radius: 999px;
+  background: #f7fafc;
+  color: #52708d;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 7px;
+  font-weight: 800;
+}
+
+.cash-alert-count.active {
+  color: #8a611b;
+  border-color: #ead7a9;
+  background: #fffaf0;
+}
+
+.cash-intel-two-column {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, .85fr);
+  gap: 12px;
+}
+
+.cash-recurring-list,
+.cash-category-list,
+.cash-alert-list {
+  margin-top: 10px;
+}
+
+.cash-recurring-row {
+  min-height: 58px;
+  border-top: 1px solid #e6edf3;
+  display: grid;
+  grid-template-columns: 34px minmax(190px, 1fr) 145px;
+  gap: 10px;
+  align-items: center;
+  padding: 8px 0;
+}
+
+.cash-recurring-icon,
+.cash-alert-icon {
+  width: 30px;
+  height: 30px;
+  border-radius: 9px;
+  display: grid;
+  place-items: center;
+}
+
+.cash-recurring-icon.income {
+  color: #34705b;
+  background: #eef8f4;
+}
+
+.cash-recurring-icon.bill {
+  color: #7b5a42;
+  background: #faf4ee;
+}
+
+.cash-recurring-icon.subscription {
+  color: #6c5c91;
+  background: #f5f1fb;
+}
+
+.cash-recurring-row > div:nth-child(2),
+.cash-recurring-amount {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.cash-recurring-row strong {
+  color: #2b455d;
+  font-size: 8px;
+}
+
+.cash-recurring-row span {
+  color: #8191a2;
+  font-size: 7px;
+}
+
+.cash-recurring-amount {
+  text-align: right;
+}
+
+.cash-category-row {
+  min-height: 60px;
+  border-top: 1px solid #e7edf3;
+  display: grid;
+  grid-template-columns: minmax(180px, 1fr) 100px;
+  gap: 7px 12px;
+  align-items: center;
+  padding: 9px 0;
+}
+
+.cash-category-row > div:first-child {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.cash-category-row strong {
+  color: #2c465d;
+  font-size: 8px;
+}
+
+.cash-category-row > strong {
+  text-align: right;
+}
+
+.cash-category-row span {
+  color: #8291a2;
+  font-size: 7px;
+}
+
+.cash-category-row em {
+  color: #687d92;
+  font-style: normal;
+  font-weight: 750;
+}
+
+.cash-category-row em.up {
+  color: #986326;
+}
+
+.cash-category-track {
+  grid-column: 1 / -1;
+  height: 5px;
+  border-radius: 999px;
+  background: #edf2f6;
+  overflow: hidden;
+}
+
+.cash-category-track span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: #4078a8;
+}
+
+.cash-alert-row {
+  min-height: 62px;
+  border-top: 1px solid #e6edf3;
+  display: grid;
+  grid-template-columns: 34px minmax(250px, 1fr) 160px;
+  gap: 10px;
+  align-items: center;
+  padding: 9px 0;
+}
+
+.cash-alert-icon {
+  color: #9a6a20;
+  background: #fff7e8;
+}
+
+.cash-alert-row.high .cash-alert-icon {
+  color: #9a4650;
+  background: #fff1f2;
+}
+
+.cash-alert-row > div:nth-child(2) {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.cash-alert-row strong {
+  color: #334b62;
+  font-size: 8px;
+}
+
+.cash-alert-row > div:nth-child(2) span {
+  color: #8291a2;
+  font-size: 7px;
+}
+
+.cash-alert-row > strong {
+  text-align: right;
+  color: #8b611d;
+}
+
+.cash-alert-row.high > strong {
+  color: #934851;
+}
+
+.cash-empty {
+  min-height: 115px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  color: #8292a3;
+  text-align: center;
+}
+
+.cash-empty.roomy {
+  min-height: 145px;
+}
+
+.cash-empty svg {
+  color: #4e7b6a;
+}
+
+.cash-empty strong {
+  color: #405b73;
+  font-size: 9px;
+}
+
+.cash-empty span {
+  font-size: 7px;
+}
+
+.cash-method-note {
+  margin-top: 12px;
+  padding: 10px 12px;
+  border: 1px solid #dce5ed;
+  border-radius: 9px;
+  background: #f8fafc;
+  color: #6c8094;
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  font-size: 7px;
+  line-height: 1.5;
+}
+
+.cash-method-note svg {
+  flex: 0 0 auto;
+  color: #4d7b69;
+}
+
+@media (max-width: 1050px) {
+  .cash-intel-metric-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .cash-intel-two-column {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 720px) {
+  .cash-intel-hero {
+    grid-template-columns: 44px 1fr;
+  }
+
+  .cash-intel-health {
+    grid-column: 2;
+    text-align: left;
+  }
+
+  .cash-intel-metric-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .cash-recurring-row,
+  .cash-alert-row {
+    grid-template-columns: 34px 1fr;
+  }
+
+  .cash-recurring-amount,
+  .cash-alert-row > strong {
+    grid-column: 2;
+    text-align: left;
+  }
+}
