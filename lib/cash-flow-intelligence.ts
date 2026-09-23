@@ -273,13 +273,20 @@ function buildRecurring(transactions: CleanTransaction[]) {
     if (!gaps.length) continue;
 
     const medianGapDays = median(gaps);
-    const cadence = cadenceFromGap(medianGapDays);
+    let cadence = cadenceFromGap(medianGapDays);
 
     if (
       cadence === "recurring" &&
       !(medianGapDays >= 5 && medianGapDays <= 60)
     ) {
       continue;
+    }
+
+    if (
+      group.length < 3 &&
+      (cadence === "weekly" || cadence === "biweekly")
+    ) {
+      cadence = "recurring";
     }
 
     const amounts = ordered.map((transaction) => transaction.amount);
