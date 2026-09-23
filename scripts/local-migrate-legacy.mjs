@@ -154,15 +154,15 @@ if (!legacy.running) {
 
 console.log("Preparing canonical PostgreSQL...");
 
+const cleanEnv = { ...process.env };
+delete cleanEnv.DATABASE_URL;
+
 const repair = spawnSync(
   process.execPath,
   ["scripts/local-setup.mjs"],
   {
     stdio: "inherit",
-    env: {
-      ...process.env,
-      DATABASE_URL: undefined,
-    },
+    env: cleanEnv,
   }
 );
 
@@ -215,10 +215,7 @@ const migrate = spawnSync(
   ["scripts/local-db-init.mjs"],
   {
     stdio: "inherit",
-    env: {
-      ...process.env,
-      DATABASE_URL: undefined,
-    },
+    env: cleanEnv,
   }
 );
 
