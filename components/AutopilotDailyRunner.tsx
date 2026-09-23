@@ -54,18 +54,30 @@ export default function AutopilotDailyRunner() {
         if (!response.ok) return;
 
         const body = (await response.json().catch(() => null)) as
-          | { ok?: boolean }
+          | {
+              ok?: boolean;
+              briefing?: {
+                tspPriceSync?: {
+                  ok?: boolean;
+                } | null;
+              };
+            }
           | null;
 
         if (!body?.ok || disposed) return;
 
-        try {
-          window.localStorage.setItem(
-            STORAGE_KEY,
-            new Date().toISOString()
-          );
-        } catch {
-          // Server-side idempotency remains authoritative.
+        const tspSyncFailed =
+          body.briefing?.tspPriceSync?.ok === false;
+
+        if (!tspSyncFailed) {
+          try {
+            window.localStorage.setItem(
+              STORAGE_KEY,
+              new Date().toISOString()
+            );
+          } catch {
+            // Server-side idempotency remains authoritative.
+          }
         }
 
         window.dispatchEvent(
