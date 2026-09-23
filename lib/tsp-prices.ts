@@ -381,6 +381,9 @@ export async function syncTspSharePrices(
         .order("snapshot_date", {
           ascending: false,
         })
+        .order("revision", {
+          ascending: false,
+        })
         .limit(1)
         .maybeSingle(),
     ]);
@@ -651,6 +654,9 @@ export async function getTspEstimatedCurrentValue() {
       householdId
     )
     .order("snapshot_date", {
+      ascending: false,
+    })
+    .order("revision", {
       ascending: false,
     })
     .limit(1)
