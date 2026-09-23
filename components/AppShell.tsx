@@ -22,6 +22,7 @@ import {
   ListChecks,
   Home,
   LineChart,
+  Landmark,
   PlugZap,
   List,
   PiggyBank,
@@ -67,6 +68,7 @@ const sections: Array<{ label?: string; items: NavItem[] }> = [
       { href: "/plan", label: "Financial Plan", icon: ListChecks },
       { href: "/monitor", label: "Plan Monitor", icon: Activity },
       { href: "/retirement", label: "Retirement", icon: PiggyBank },
+      { href: "/tsp", label: "Military TSP", icon: Landmark },
       { href: "/goals", label: "Goals", icon: Goal },
       { href: "/debt", label: "Debt", icon: CreditCard },
       { href: "/scenario-lab", label: "Scenario Lab", icon: SlidersHorizontal },
@@ -145,7 +147,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
               <Link href="/research">Research</Link>
               <Link className={pathname === "/research" ? "" : "selected"} href="/">Money</Link>
             </div>
-            <span className="global-sandbox-badge">LOCAL POSTGRES · MONEY V1.6</span>
+            <span className="global-sandbox-badge">LOCAL POSTGRES · MONEY V1.7</span>
           </div>
 
           <div className="top-actions">
