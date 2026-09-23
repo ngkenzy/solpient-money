@@ -73,7 +73,6 @@ export async function POST(request: Request) {
 
     const context = await getMoneyCopilotContext();
     const deterministic = answerMoneyQuestion(question, context);
-    const status = await getOllamaStatus();
 
     if (deterministic.matched) {
       return NextResponse.json({
@@ -83,10 +82,10 @@ export async function POST(request: Request) {
         intent: deterministic.intent,
         engine: "deterministic",
         model: null,
-        localModelAvailable: status.available,
-        localModel: status.model,
       });
     }
+
+    const status = await getOllamaStatus();
 
     if (status.available) {
       const history = safeMessages(body.messages);
