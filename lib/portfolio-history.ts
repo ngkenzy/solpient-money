@@ -308,7 +308,9 @@ function snapshotPayload(
     review_priority:
       position.reviewPriority,
     review_reasons:
-      position.reviewReasons,
+      JSON.stringify(
+        position.reviewReasons
+      ),
   };
 }
 
@@ -418,7 +420,7 @@ export async function createInvestmentDecision({
       .from(
         "portfolio_position_snapshots"
       )
-      .select("id,ticker,snapshot_date")
+      .select("*")
       .eq(
         "household_id",
         householdId
