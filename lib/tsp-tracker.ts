@@ -1,6 +1,7 @@
 import "server-only";
 
 import { requireActiveHousehold } from "@/lib/money-auth";
+import { getTspEstimatedCurrentValue } from "@/lib/tsp-prices";
 
 export const TSP_2026_RULES = {
   year: 2026,
@@ -80,6 +81,12 @@ export type TspTracker = {
   rothCatchUpRequired: boolean;
   fundBalanceTotal: number;
   fundReconciliationDifference: number;
+  estimatedCurrentValue: number | null;
+  estimatedChange: number | null;
+  estimatedChangePct: number | null;
+  latestPriceDate: string | null;
+  priceAgeDays: number | null;
+  estimatedFunds: Awaited<ReturnType<typeof getTspEstimatedCurrentValue>>["positions"];
   signals: TspSignal[];
 };
 
@@ -229,7 +236,7 @@ export async function getTspTracker(
 ): Promise<TspTracker> {
   const { supabase, householdId } = await requireActiveHousehold();
 
-  const [profileResult, snapshotsResult] = await Promise.all([
+  const [profileResult, snapshotsResult, estimate] = await Promise.all([
     supabase
       .from("tsp_profiles")
       .select("*")
@@ -241,6 +248,7 @@ export async function getTspTracker(
       .eq("household_id", householdId)
       .order("snapshot_date", { ascending: false })
       .limit(36),
+    getTspEstimatedCurrentValue(),
   ]);
 
   if (profileResult.error) {
@@ -469,6 +477,48 @@ export async function getTspTracker(
   const fundReconciliationDifference =
     (snapshot?.totalBalance ?? 0) - fundBalanceTotal;
 
+  const priceAgeDays =
+    estimate.priceDate
+      ? Math.max(
+          0,
+          Math.floor(
+            (now.getTime() -
+              new Date(
+                `${estimate.priceDate}T12:00:00Z`
+              ).getTime()) /
+              86_400_000
+          )
+        )
+      : null;
+
+  if (
+    profile &&
+    snapshot &&
+    funds.length > 0 &&
+    estimate.estimatedCurrentValue == null
+  ) {
+    signals.push({
+      id: "tsp:prices-not-synced",
+      level: "watch",
+      title: "Daily TSP prices are not synced yet",
+      detail:
+        "Use Sync prices now or let the local Autopilot fetch the official TSP share-price feed. The official account snapshot remains unchanged.",
+    });
+  } else if (
+    profile &&
+    snapshot &&
+    priceAgeDays != null &&
+    priceAgeDays > 4
+  ) {
+    signals.push({
+      id: "tsp:prices-stale",
+      level: "watch",
+      title: "Cached TSP share prices are stale",
+      detail:
+        `The newest cached TSP share price is dated ${estimate.priceDate}. Solpient will keep showing the last price date rather than describing it as live.`,
+    });
+  }
+
   if (
     snapshot &&
     funds.length > 0 &&
@@ -533,6 +583,17 @@ export async function getTspTracker(
     rothCatchUpRequired,
     fundBalanceTotal,
     fundReconciliationDifference,
+    estimatedCurrentValue:
+      estimate.estimatedCurrentValue,
+    estimatedChange:
+      estimate.estimatedChange,
+    estimatedChangePct:
+      estimate.estimatedChangePct,
+    latestPriceDate:
+      estimate.priceDate,
+    priceAgeDays,
+    estimatedFunds:
+      estimate.positions,
     signals,
   };
 }
