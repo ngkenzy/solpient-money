@@ -15,8 +15,20 @@ const pkg = JSON.parse(files.packageJson);
 const syncIndex = files.autopilot.indexOf("await syncTspSharePrices(now)");
 const existingIndex = files.autopilot.indexOf("const existing = await todayRun");
 
+function atLeast172(version) {
+  const [major = 0, minor = 0, patch = 0] = String(version)
+    .split(".")
+    .map((value) => Number.parseInt(value, 10) || 0);
+
+  return (
+    major > 1 ||
+    (major === 1 &&
+      (minor > 7 || (minor === 7 && patch >= 2)))
+  );
+}
+
 const checks = [
-  ["release is V1.7.2", pkg.version === "1.7.2"],
+  ["release includes V1.7.2 or newer", atLeast172(pkg.version)],
   [
     "body suppresses extension-injected hydration attributes",
     files.layout.includes("<body suppressHydrationWarning>"),
@@ -50,12 +62,12 @@ const checks = [
       files.scheduler.includes("tspMinute"),
   ],
   [
-    "visible Money release badge is V1.7.2",
-    files.shell.includes("MONEY V1.7.2"),
+    "visible Money release badge matches package version",
+    files.shell.includes(`MONEY V${pkg.version}`),
   ],
   [
-    "TSP page release label is V1.7.2",
-    files.page.includes("V1.7.2 · MILITARY TSP TRACKER"),
+    "TSP page release label matches package version",
+    files.page.includes(`V${pkg.version} · MILITARY TSP TRACKER`),
   ],
 ];
 
