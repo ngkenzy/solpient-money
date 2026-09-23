@@ -104,6 +104,22 @@ const checks = [
       files.page.includes("DAILY SHARE-PRICE ESTIMATE"),
   ],
   [
+    "TSP fund allocation shows latest official share price",
+    files.page.includes("Latest share price") &&
+      files.page.includes("Official prices") &&
+      files.page.includes("latestSharePrice") &&
+      files.page.includes("latestPriceDate"),
+  ],
+  [
+    "Military TSP lives under Invest rather than Plan",
+    files.shell.indexOf('{ href: "/tsp", label: "Military TSP", icon: Landmark }') >
+      files.shell.indexOf('label: "INVEST"') &&
+      files.shell.indexOf('{ href: "/tsp", label: "Military TSP", icon: Landmark }') <
+        files.shell.indexOf('label: "PLAN"') &&
+      files.shell.lastIndexOf('{ href: "/tsp", label: "Military TSP", icon: Landmark }') ===
+        files.shell.indexOf('{ href: "/tsp", label: "Military TSP", icon: Landmark }'),
+  ],
+  [
     "manual Sync prices now action exists",
     files.actions.includes("syncTspPricesNow") &&
       files.actions.includes("syncTspSharePrices"),
