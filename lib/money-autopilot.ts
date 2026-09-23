@@ -20,6 +20,7 @@ import { buildPortfolioIntelligence } from "@/lib/portfolio-intelligence";
 import { loadResearchSnapshots } from "@/lib/research";
 import { capturePortfolioHistory } from "@/lib/portfolio-history";
 import { getTspTracker } from "@/lib/tsp-tracker";
+import { syncTspSharePrices } from "@/lib/tsp-prices";
 
 export type AutopilotLevel =
   | "critical"
@@ -101,6 +102,7 @@ export type MoneyAutopilotBriefing = {
   portfolioIntelligenceVersion: "1.5";
   decisionHistoryVersion: "1.6";
   tspTrackerVersion: "1.7";
+  tspPriceSyncVersion: "1.7.1";
   runDate: string;
   observedAt: string;
   persisted: boolean;
@@ -657,7 +659,8 @@ function rowToBriefing(
     stored.version !== "1.3" ||
     stored.portfolioIntelligenceVersion !== "1.5" ||
     stored.decisionHistoryVersion !== "1.6" ||
-    stored.tspTrackerVersion !== "1.7"
+    stored.tspTrackerVersion !== "1.7" ||
+    stored.tspPriceSyncVersion !== "1.7.1"
   ) {
     return null;
   }
@@ -729,6 +732,7 @@ export async function getMoneyAutopilotBriefing(
     portfolioIntelligenceVersion: "1.5",
     decisionHistoryVersion: "1.6",
     tspTrackerVersion: "1.7",
+    tspPriceSyncVersion: "1.7.1",
     runDate,
     observedAt: now.toISOString(),
     persisted: false,
@@ -804,6 +808,8 @@ export async function runMoneyAutopilot({
       auth.householdId
     );
 
+  await syncTspSharePrices(now);
+
   const [
     observation,
     after,
@@ -851,6 +857,7 @@ export async function runMoneyAutopilot({
     portfolioIntelligenceVersion: "1.5",
     decisionHistoryVersion: "1.6",
     tspTrackerVersion: "1.7",
+    tspPriceSyncVersion: "1.7.1",
     runDate,
     observedAt: now.toISOString(),
     persisted: true,
