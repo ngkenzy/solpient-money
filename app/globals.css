@@ -8569,3 +8569,397 @@ a {
     grid-template-columns: 1fr;
   }
 }
+
+
+/* Solpient Money V1.2 Continuous Plan Monitoring */
+.plan-header-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.monitor-hero {
+  margin-bottom: 12px;
+  padding: 18px;
+  display: grid;
+  grid-template-columns: 92px minmax(0, 1fr) auto;
+  gap: 16px;
+  align-items: center;
+}
+
+.monitor-score {
+  width: 84px;
+  height: 84px;
+  border-radius: 50%;
+  border: 7px solid #d9e5ec;
+  background: #fbfdfe;
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 2px;
+  padding-top: 23px;
+}
+
+.monitor-score strong {
+  font-size: 28px;
+  line-height: 1;
+}
+
+.monitor-score span {
+  color: #78899a;
+  font-size: 9px;
+}
+
+.monitor-score.healthy {
+  border-color: #bcdccd;
+  color: #2f7058;
+}
+
+.monitor-score.watch {
+  border-color: #ead7a9;
+  color: #8b641f;
+}
+
+.monitor-hero-copy h2 {
+  margin: 3px 0 4px;
+  font-size: 22px;
+}
+
+.monitor-hero-copy p {
+  margin: 0;
+  color: #718399;
+  font-size: 8px;
+  line-height: 1.5;
+}
+
+.monitor-month-progress {
+  min-width: 210px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  text-align: right;
+}
+
+.monitor-month-progress > span,
+.monitor-month-progress small {
+  color: #8191a2;
+  font-size: 7px;
+}
+
+.monitor-month-progress > strong {
+  color: #2d485f;
+  font-size: 14px;
+}
+
+.monitor-month-progress > div {
+  width: 100%;
+  height: 7px;
+  border-radius: 999px;
+  background: #edf2f6;
+  overflow: hidden;
+}
+
+.monitor-month-progress > div span {
+  display: block;
+  height: 100%;
+  background: #4d8c73;
+  border-radius: inherit;
+}
+
+.monitor-metric-grid {
+  margin-bottom: 12px;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.monitor-metric {
+  min-height: 112px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.monitor-metric > svg {
+  margin-bottom: 6px;
+  color: #4b789c;
+}
+
+.monitor-metric span {
+  color: #718499;
+  font-size: 7px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.monitor-metric strong {
+  color: #29455d;
+  font-size: 18px;
+}
+
+.monitor-metric small {
+  margin-top: auto;
+  color: #8292a4;
+  font-size: 7px;
+}
+
+.monitor-two-column {
+  display: grid;
+  grid-template-columns: 1.15fr .85fr;
+  gap: 12px;
+}
+
+.monitor-signal-list {
+  margin-top: 10px;
+}
+
+.monitor-signal-row {
+  min-height: 66px;
+  border-top: 1px solid #e6edf3;
+  display: grid;
+  grid-template-columns: 32px 30px minmax(0, 1fr) 18px;
+  gap: 8px;
+  align-items: center;
+  padding: 9px 0;
+  text-decoration: none;
+}
+
+.monitor-signal-icon,
+.monitor-category-icon {
+  width: 29px;
+  height: 29px;
+  border-radius: 8px;
+  display: grid;
+  place-items: center;
+}
+
+.monitor-signal-row.positive .monitor-signal-icon {
+  color: #34705a;
+  background: #eef8f4;
+}
+
+.monitor-signal-row.watch .monitor-signal-icon {
+  color: #8d651f;
+  background: #fff8e9;
+}
+
+.monitor-signal-row.critical .monitor-signal-icon {
+  color: #964c56;
+  background: #fff1f3;
+}
+
+.monitor-category-icon {
+  color: #55758f;
+  background: #f1f5f8;
+}
+
+.monitor-signal-row > div {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.monitor-signal-row strong {
+  color: #2d475e;
+  font-size: 8px;
+}
+
+.monitor-signal-row span {
+  color: #8191a2;
+  font-size: 7px;
+  line-height: 1.4;
+}
+
+.monitor-signal-row > svg {
+  color: #90a0ae;
+}
+
+.monitor-drift-list {
+  margin-top: 10px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.monitor-drift-list > div {
+  min-height: 84px;
+  border: 1px solid #e3eaf0;
+  border-radius: 9px;
+  background: #fbfcfe;
+  padding: 11px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.monitor-drift-list span {
+  color: #7a8b9e;
+  font-size: 6px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.monitor-drift-list strong {
+  color: #2d485f;
+  font-size: 14px;
+}
+
+.monitor-drift-list small {
+  margin-top: auto;
+  color: #8795a5;
+  font-size: 6px;
+}
+
+.monitor-goal-list {
+  margin-top: 10px;
+}
+
+.monitor-goal-row {
+  min-height: 60px;
+  border-top: 1px solid #e6edf3;
+  display: grid;
+  grid-template-columns: minmax(160px, 1fr) 130px 130px 100px;
+  gap: 10px;
+  align-items: center;
+  padding: 8px 0;
+}
+
+.monitor-goal-row > div {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.monitor-goal-row strong {
+  color: #304960;
+  font-size: 8px;
+}
+
+.monitor-goal-row span {
+  color: #8291a2;
+  font-size: 7px;
+  text-transform: capitalize;
+}
+
+.monitor-empty {
+  min-height: 100px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  color: #7890a5;
+  text-align: center;
+}
+
+.monitor-empty.roomy {
+  min-height: 150px;
+}
+
+.monitor-empty strong {
+  color: #405b73;
+  font-size: 9px;
+}
+
+.monitor-empty span {
+  font-size: 7px;
+}
+
+.monitor-baseline-control {
+  margin-top: 12px;
+  padding: 16px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  gap: 14px;
+  align-items: center;
+}
+
+.monitor-baseline-control h2 {
+  margin: 3px 0 4px;
+  font-size: 17px;
+}
+
+.monitor-baseline-control p {
+  margin: 0;
+  color: #718399;
+  font-size: 8px;
+  line-height: 1.5;
+}
+
+.monitor-baseline-control button {
+  min-height: 34px;
+  border: 1px solid #d8e2ea;
+  border-radius: 8px;
+  background: white;
+  color: #5a7188;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 10px;
+  cursor: pointer;
+  font: inherit;
+  font-size: 7px;
+  font-weight: 800;
+}
+
+.monitor-baseline-control > span {
+  color: #8292a4;
+  font-size: 7px;
+}
+
+.monitor-method-note {
+  margin-top: 12px;
+  padding: 10px 12px;
+  border: 1px solid #dce5ed;
+  border-radius: 9px;
+  background: #f8fafc;
+  color: #6c8094;
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  font-size: 7px;
+  line-height: 1.5;
+}
+
+.monitor-method-note svg {
+  flex: 0 0 auto;
+  color: #4d7b69;
+}
+
+@media (max-width: 1080px) {
+  .monitor-metric-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .monitor-two-column {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 760px) {
+  .monitor-hero {
+    grid-template-columns: 84px 1fr;
+  }
+
+  .monitor-month-progress {
+    grid-column: 2;
+    text-align: left;
+  }
+
+  .monitor-goal-row {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .monitor-baseline-control {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 520px) {
+  .monitor-metric-grid,
+  .monitor-drift-list,
+  .monitor-goal-row {
+    grid-template-columns: 1fr;
+  }
+}
