@@ -10,6 +10,7 @@ const files = {
   copilot: await readFile("lib/money-copilot.ts", "utf8"),
   shell: await readFile("components/AppShell.tsx", "utf8"),
   setup: await readFile("app/setup/actions.ts", "utf8"),
+  planActions: await readFile("app/plan/actions.ts", "utf8"),
 };
 
 const checks = [
@@ -36,6 +37,8 @@ const checks = [
   ["demo setup seeds goal dates", files.setup.includes("target_date: goal.targetDate")],
   ["Copilot uses same plan engine", files.copilot.includes("buildHouseholdFinancialPlan")],
   ["Copilot can explain plan", files.copilot.includes('intent: "financial_plan"')],
+  ["household policy is editable", files.planActions.includes("updatePlanPolicy")],
+  ["policy update revalidates plan", files.planActions.includes('revalidatePath("/plan")')],
   ["Financial Plan is navigable", files.shell.includes('href: "/plan"')],
 ];
 
