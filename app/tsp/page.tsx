@@ -6,6 +6,7 @@ import {
   Flag,
   Gauge,
   Landmark,
+  RefreshCw,
   ShieldAlert,
 } from "lucide-react";
 import PageHeader from "@/components/PageHeader";
@@ -15,6 +16,7 @@ import { getTspTracker } from "@/lib/tsp-tracker";
 import {
   saveTspProfile,
   saveTspSnapshot,
+  syncTspPricesNow,
 } from "./actions";
 
 export const dynamic = "force-dynamic";
@@ -62,40 +64,48 @@ export default async function TspPage() {
   return (
     <div className="page tsp-page">
       <PageHeader
-        eyebrow="V1.7 · MILITARY TSP TRACKER"
+        eyebrow="V1.7.1 · MILITARY TSP TRACKER"
         title="Track the TSP the way a service member actually needs it."
         description="Monitor Traditional and Roth balances, G/F/C/S/I/L allocation, annual IRS limits, outside-plan deferrals, BRS matching, and whether your current contribution pace is likely to max too early."
         action={
-          <span className="live-pill connected">
-            LOCAL · NO TSP LOGIN
-          </span>
+          <form action={syncTspPricesNow}>
+            <button
+              className="research-button"
+              type="submit"
+              disabled={!profile || !snapshot}
+            >
+              <RefreshCw size={14} />
+              Sync prices now
+            </button>
+          </form>
         }
       />
 
       <div className="metric-grid four">
         <div className="metric-card">
-          <span>TSP balance</span>
+          <span>Official TSP snapshot</span>
           <strong>
             {snapshot
               ? money(snapshot.totalBalance)
               : "—"}
           </strong>
           <small>
-            Traditional + Roth
+            {snapshot
+              ? `Account snapshot · ${snapshot.date}`
+              : "Traditional + Roth"}
           </small>
         </div>
         <div className="metric-card">
-          <span>2026 employee limit</span>
+          <span>Estimated current value</span>
           <strong>
-            {money(
-              tracker.employeeAnnualLimit
-            )}
+            {tracker.estimatedCurrentValue == null
+              ? "—"
+              : money(tracker.estimatedCurrentValue)}
           </strong>
           <small>
-            {profile?.ageAtYearEnd &&
-            profile.ageAtYearEnd >= 50
-              ? "Includes applicable catch-up"
-              : "Regular elective-deferral limit"}
+            {tracker.latestPriceDate
+              ? `Official TSP prices · ${tracker.latestPriceDate}`
+              : "Sync daily share prices"}
           </small>
         </div>
         <div className="metric-card">
@@ -132,6 +142,136 @@ export default async function TspPage() {
           </small>
         </div>
       </div>
+
+      {snapshot ? (
+        <section className="card page-card tsp-live-estimate-card">
+          <div className="section-title-row">
+            <div>
+              <span className="card-kicker">
+                DAILY SHARE-PRICE ESTIMATE
+              </span>
+              <h2>
+                Official snapshot vs latest published TSP prices
+              </h2>
+            </div>
+            <span className="small-muted">
+              {tracker.latestPriceDate
+                ? `Price date ${tracker.latestPriceDate}`
+                : "Not synced"}
+            </span>
+          </div>
+
+          <div className="tsp-estimate-summary">
+            <div>
+              <span>Official snapshot</span>
+              <strong>{money(snapshot.totalBalance)}</strong>
+              <small>{snapshot.date}</small>
+            </div>
+            <div>
+              <span>Estimated current value</span>
+              <strong>
+                {tracker.estimatedCurrentValue == null
+                  ? "—"
+                  : money(tracker.estimatedCurrentValue)}
+              </strong>
+              <small>
+                {tracker.latestPriceDate
+                  ? `Using TSP share prices dated ${tracker.latestPriceDate}`
+                  : "Sync required"}
+              </small>
+            </div>
+            <div>
+              <span>Estimated change</span>
+              <strong
+                className={
+                  (tracker.estimatedChange ?? 0) >= 0
+                    ? "positive-text"
+                    : "negative-text"
+                }
+              >
+                {tracker.estimatedChange == null
+                  ? "—"
+                  : `${tracker.estimatedChange >= 0 ? "+" : "-"}${money(
+                      Math.abs(tracker.estimatedChange)
+                    )}`}
+              </strong>
+              <small>
+                {tracker.estimatedChangePct == null
+                  ? "Since official snapshot"
+                  : `${tracker.estimatedChangePct >= 0 ? "+" : ""}${tracker.estimatedChangePct.toFixed(
+                      2
+                    )}% since snapshot`}
+              </small>
+            </div>
+          </div>
+
+          {tracker.estimatedFunds.length ? (
+            <div className="tsp-live-fund-list">
+              {tracker.estimatedFunds.map((fund) => (
+                <div
+                  className="tsp-live-fund-row"
+                  key={fund.fundCode}
+                >
+                  <span className="tsp-fund-code">
+                    {fund.fundCode}
+                  </span>
+                  <div>
+                    <strong>{fund.fundName}</strong>
+                    <span>
+                      {fund.shares == null
+                        ? "Shares not inferred yet"
+                        : `${fund.shares.toLocaleString("en-US", {
+                            maximumFractionDigits: 4,
+                          })} shares`}
+                    </span>
+                  </div>
+                  <div>
+                    <span>Snapshot price</span>
+                    <strong>
+                      {fund.snapshotSharePrice == null
+                        ? "—"
+                        : `${fund.snapshotSharePrice.toFixed(4)}`}
+                    </strong>
+                    <small>{fund.snapshotPriceDate ?? "—"}</small>
+                  </div>
+                  <div>
+                    <span>Latest price</span>
+                    <strong>
+                      {fund.latestSharePrice == null
+                        ? "—"
+                        : `${fund.latestSharePrice.toFixed(4)}`}
+                    </strong>
+                    <small>{fund.latestPriceDate ?? "—"}</small>
+                  </div>
+                  <div>
+                    <span>Estimated value</span>
+                    <strong>
+                      {fund.estimatedCurrentValue == null
+                        ? "—"
+                        : money(fund.estimatedCurrentValue)}
+                    </strong>
+                    <small>
+                      {fund.estimatedChangePct == null
+                        ? "—"
+                        : `${fund.estimatedChangePct >= 0 ? "+" : ""}${fund.estimatedChangePct.toFixed(
+                            2
+                          )}%`}
+                    </small>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : null}
+
+          <div className="bottom-note tsp-price-note">
+            <RefreshCw size={15} />
+            <span>
+              Estimated current value = inferred fund shares × latest published TSP share price.
+              Your official TSP snapshot is never overwritten by this estimate.
+            </span>
+          </div>
+        </section>
+      ) : null}
 
       <div className="tsp-top-grid">
         <section className="card page-card">
@@ -833,7 +973,7 @@ export default async function TspPage() {
       <div className="bottom-note">
         <Landmark size={15} />
         <span>
-          V1.7 stores no TSP.gov username or password and does not change TSP elections.
+          V1.7.1 stores no TSP.gov username or password and does not change TSP elections.
           Annual-limit and BRS calculations are planning aids; payroll/TSP records remain authoritative.
         </span>
       </div>
