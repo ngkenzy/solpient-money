@@ -4,6 +4,13 @@ export const LOCAL_USER_EMAIL =
   process.env.SOLPIENT_LOCAL_USER_EMAIL?.trim() ||
   "local@solpient.local";
 
+function parsePort(value: string | undefined) {
+  const parsed = Number.parseInt(String(value ?? ""), 10);
+  return Number.isInteger(parsed) && parsed > 1024 && parsed < 65536
+    ? parsed
+    : null;
+}
+
 export function getDatabaseUrl() {
   const value = process.env.DATABASE_URL?.trim();
   if (!value) {
@@ -15,17 +22,21 @@ export function getDatabaseUrl() {
   if (process.env.SOLPIENT_LOCAL_MODE?.trim() === "true") {
     try {
       const parsed = new URL(value);
-      const port = parsed.port || "5432";
+      const port = parsePort(parsed.port || "5432");
+      const expectedPort = parsePort(
+        process.env.SOLPIENT_DB_PORT
+      );
       const database = parsed.pathname.replace(/^\//, "");
 
       if (
         parsed.hostname !== "127.0.0.1" ||
-        port !== "5432" ||
+        !expectedPort ||
+        port !== expectedPort ||
         database !== "solpient" ||
         decodeURIComponent(parsed.username) !== "solpient"
       ) {
         throw new Error(
-          "Legacy or non-canonical local PostgreSQL configuration detected. Solpient Local now uses solpient-money-postgres at 127.0.0.1:5432. Run npm run local:repair, then npm run local:doctor."
+          "Legacy or non-canonical local PostgreSQL configuration detected. Run npm run local:repair, then npm run local:doctor."
         );
       }
     } catch (error) {
