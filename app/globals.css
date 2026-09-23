@@ -8516,3 +8516,56 @@ a {
     grid-template-columns: 1fr;
   }
 }
+
+
+.plan-policy-form {
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid #e6edf3;
+  display: grid;
+  grid-template-columns: repeat(5, minmax(110px, 1fr)) auto;
+  gap: 8px;
+  align-items: end;
+}
+
+.plan-policy-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.plan-policy-form label span {
+  color: #74879a;
+  font-size: 6px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.plan-policy-form input {
+  min-height: 34px;
+  border: 1px solid #dce5ed;
+  border-radius: 8px;
+  padding: 0 9px;
+  background: white;
+  color: #314b62;
+  font: inherit;
+  font-size: 8px;
+}
+
+@media (max-width: 1120px) {
+  .plan-policy-form {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 700px) {
+  .plan-policy-form {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 520px) {
+  .plan-policy-form {
+    grid-template-columns: 1fr;
+  }
+}
