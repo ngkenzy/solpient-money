@@ -777,3 +777,26 @@ The V1.0 Copilot is intentionally read-only:
 - deterministic calculations remain authoritative for displayed household metrics;
 - local-model responses are explanations and may be wrong, so important decisions should be checked against the underlying Solpient calculations.
 
+## V1.1 Household Financial Plan
+
+The V1.1 Financial Plan at `/plan` converts the observed monthly household surplus into one deterministic priority waterfall.
+
+The monthly surplus is allocated once, in this sequence:
+
+1. emergency-reserve catch-up toward the household reserve target;
+2. extra payment toward debt at or above the household high-interest APR threshold;
+3. dated household goals at the monthly amount required to reach each target date;
+4. retirement contribution required to reach the tracked retirement target under the household return assumption;
+5. any remaining amount stays explicitly flexible / unallocated.
+
+V1.1 also adds:
+
+- debt-avalanche payoff schedules with freed minimum payments rolling forward to the next highest-APR balance;
+- modeled interest savings from the plan's extra debt payment;
+- editable goal amounts, dates, and priorities;
+- editable reserve, debt-threshold, retirement-age, retirement-target, and return assumptions;
+- a clear “Why?” and “What changes this?” explanation for every plan line;
+- deterministic Money Copilot answers about the household plan.
+
+The plan does not move money or execute payments. It is a read/modeling layer over reconciled Solpient Money data. Household assumptions are user-editable; V1.1 system policies such as the 12-month reserve catch-up and high-interest payoff horizon are displayed separately so the logic remains inspectable.
+
