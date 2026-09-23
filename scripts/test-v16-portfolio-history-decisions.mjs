@@ -106,6 +106,12 @@ const checks = [
       files.migration.includes("position_snapshot_id"),
   ],
   [
+    "decision-time baseline is frozen independently of daily snapshot updates",
+    files.migration.includes("baseline_snapshot jsonb") &&
+      files.engine.includes("baseline_snapshot:") &&
+      files.engine.includes("decision?.baselineSnapshot"),
+  ],
+  [
     "V1.6 tables are household isolated",
     files.migration.includes(
       "portfolio_position_snapshots_household_access"
