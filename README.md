@@ -901,3 +901,39 @@ Container PostgreSQL port: 5432
 
 This allows Homebrew PostgreSQL, another Docker database, or another application to keep using host port `5432` without blocking Solpient.
 
+## V1.2.3 Safe Legacy Restore
+
+V1.2.3 fixes legacy migration failures caused by restoring an older `--clean` dump into a canonical database that already contains newer schema dependencies.
+
+The safe migration now follows this order:
+
+```text
+legacy solpient-local-db-1
+        ↓
+temporary pg_dump file
+        ↓
+prepare canonical container only
+        ↓
+verify canonical DB has no household data
+        ↓
+recreate the empty canonical solpient database
+        ↓
+restore legacy dump without --clean
+        ↓
+apply all current migrations
+        ↓
+verify household/account/transaction row counts
+```
+
+The old legacy container is never modified or deleted.
+
+The temporary dump file is removed after migration. Staging the dump before restore also prevents the prior `EPIPE` failure when `psql` exits early.
+
+Use:
+
+```bash
+npm run local:migrate-legacy -- --confirm
+```
+
+The command still refuses to overwrite a canonical database that already contains household data.
+
