@@ -33,10 +33,11 @@ const reviewPage = await readFile(
 const staticChecks = [
   [
     "raw statement content is not persisted",
-    !migration.includes("raw_statement") &&
-      !migration.includes("raw_content") &&
+    !/\braw_(statement|content)\b/i.test(migration) &&
       migration.includes("source_content_sha256") &&
-      storage.includes('createHash("sha256")'),
+      /createHash\(\s*["']sha256["']\s*\)/.test(storage) &&
+      !migration.includes("source_text") &&
+      !migration.includes("source_bytes"),
   ],
   [
     "parser provenance is retained",
