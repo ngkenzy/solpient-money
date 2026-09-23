@@ -37,6 +37,8 @@ type Status = {
 };
 
 const QUICK_PROMPTS = [
+  "Am I on pace to max my TSP?",
+  "Am I getting the full BRS match?",
   "What changed since my last decision?",
   "Which holdings need review?",
   "Give me my daily briefing",
