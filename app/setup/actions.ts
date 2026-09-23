@@ -196,12 +196,13 @@ export async function createHouseholdWithDemoData(formData: FormData) {
   if (transactionsError) throw new Error(transactionsError.message);
 
   const { error: goalsError } = await supabase.from("goals").insert(
-    householdGoals.map((goal, index) => ({
+    householdGoals.map((goal) => ({
       household_id: householdId,
       name: goal.name,
       current_cents: cents(goal.current),
       target_cents: cents(goal.target),
-      priority: (index + 1) * 100,
+      target_date: goal.targetDate,
+      priority: goal.priority,
     }))
   );
   if (goalsError) throw new Error(goalsError.message);
