@@ -773,6 +773,19 @@ export async function runMoneyAutopilot({
 } = {}): Promise<MoneyAutopilotBriefing> {
   const auth = await requireActiveHousehold();
   const runDate = dayKey(now);
+
+  // TSP share prices are independent market data. Refresh them even when
+  // today's Money Autopilot briefing already exists, so a morning briefing
+  // cannot prevent a later official TSP price publication from being cached.
+  try {
+    await syncTspSharePrices(now);
+  } catch (error) {
+    console.warn(
+      "Automatic TSP share-price refresh failed:",
+      error instanceof Error ? error.message : error
+    );
+  }
+
   const existing = await todayRun(
     auth.householdId,
     runDate
@@ -807,8 +820,6 @@ export async function runMoneyAutopilot({
       before,
       auth.householdId
     );
-
-  await syncTspSharePrices(now);
 
   const [
     observation,
