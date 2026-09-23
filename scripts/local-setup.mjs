@@ -5,9 +5,15 @@ import {
   writeFile,
 } from "node:fs/promises";
 import { spawnSync } from "node:child_process";
+import pg from "pg";
 
 const dockerEnvPath = ".env.local-db";
 const nextEnvPath = ".env.local";
+
+const HOST = "127.0.0.1";
+const PORT = "5432";
+const DATABASE = "solpient";
+const USER = "solpient";
 
 async function exists(file) {
   try {
@@ -21,31 +27,68 @@ async function exists(file) {
 function readKey(content, key) {
   const line = content
     .split(/\r?\n/)
-    .find((item) =>
-      item.startsWith(`${key}=`)
-    );
-  return line
-    ? line.slice(key.length + 1).trim()
-    : null;
+    .find((item) => item.startsWith(`${key}=`));
+  return line ? line.slice(key.length + 1).trim() : null;
 }
 
 function upsertEnv(content, key, value) {
   const line = `${key}=${value}`;
   const rows = content
     .split(/\r?\n/)
-    .filter(
-      (item) =>
-        !item.startsWith(`${key}=`)
-    );
+    .filter((item) => !item.startsWith(`${key}=`));
   rows.push(line);
-  return rows
-    .filter(
-      (item, index, all) =>
-        item || index < all.length - 1
-    )
-    .join("\n")
-    .replace(/\n{3,}/g, "\n\n")
-    .trimEnd() + "\n";
+  return (
+    rows
+      .filter((item, index, all) => item || index < all.length - 1)
+      .join("\n")
+      .replace(/\n{3,}/g, "\n\n")
+      .trimEnd() + "\n"
+  );
+}
+
+function canonicalUrl(password) {
+  return `postgresql://${USER}:${encodeURIComponent(
+    password
+  )}@${HOST}:${PORT}/${DATABASE}`;
+}
+
+function composeArgs(...args) {
+  return [
+    "compose",
+    "-f",
+    "docker-compose.local.yml",
+    "--env-file",
+    dockerEnvPath,
+    ...args,
+  ];
+}
+
+function shellDatabaseUrlDiffers(expected) {
+  const inherited = process.env.DATABASE_URL?.trim();
+  return Boolean(inherited && inherited !== expected);
+}
+
+async function verifyTcp(databaseUrl) {
+  const { Client } = pg;
+  const client = new Client({
+    connectionString: databaseUrl,
+    connectionTimeoutMillis: 5000,
+  });
+
+  await client.connect();
+  try {
+    const result = await client.query(
+      "select current_database() as database, current_user as user"
+    );
+    const row = result.rows[0];
+    if (row?.database !== DATABASE || row?.user !== USER) {
+      throw new Error(
+        `Unexpected PostgreSQL identity: ${JSON.stringify(row)}`
+      );
+    }
+  } finally {
+    await client.end();
+  }
 }
 
 const dockerVersion = spawnSync(
@@ -63,51 +106,33 @@ if (dockerVersion.status !== 0) {
 let dockerEnv = (await exists(dockerEnvPath))
   ? await readFile(dockerEnvPath, "utf8")
   : "";
-let password = readKey(
-  dockerEnv,
-  "POSTGRES_PASSWORD"
-);
+
+let password = readKey(dockerEnv, "POSTGRES_PASSWORD");
 
 if (!password) {
   password = randomBytes(32).toString("hex");
-  dockerEnv = upsertEnv(
-    dockerEnv,
-    "POSTGRES_PASSWORD",
-    password
-  );
-  await writeFile(
-    dockerEnvPath,
-    dockerEnv,
-    { mode: 0o600 }
-  );
 }
+
+dockerEnv = upsertEnv(
+  dockerEnv,
+  "POSTGRES_PASSWORD",
+  password
+);
+
+await writeFile(dockerEnvPath, dockerEnv, {
+  mode: 0o600,
+});
 
 let nextEnv = (await exists(nextEnvPath))
   ? await readFile(nextEnvPath, "utf8")
   : "";
 
-const encodedPassword =
-  encodeURIComponent(password);
-const databaseUrl =
-  `postgresql://solpient:${encodedPassword}@127.0.0.1:5432/solpient`;
+const databaseUrl = canonicalUrl(password);
 
-nextEnv = upsertEnv(
-  nextEnv,
-  "DATABASE_URL",
-  databaseUrl
-);
-nextEnv = upsertEnv(
-  nextEnv,
-  "SOLPIENT_LOCAL_MODE",
-  "true"
-);
+nextEnv = upsertEnv(nextEnv, "DATABASE_URL", databaseUrl);
+nextEnv = upsertEnv(nextEnv, "SOLPIENT_LOCAL_MODE", "true");
 
-if (
-  !readKey(
-    nextEnv,
-    "CONNECT_SECRET_ENCRYPTION_KEY"
-  )
-) {
+if (!readKey(nextEnv, "CONNECT_SECRET_ENCRYPTION_KEY")) {
   nextEnv = upsertEnv(
     nextEnv,
     "CONNECT_SECRET_ENCRYPTION_KEY",
@@ -115,12 +140,7 @@ if (
   );
 }
 
-if (
-  !readKey(
-    nextEnv,
-    "SOLPIENT_BACKUP_ENCRYPTION_KEY"
-  )
-) {
+if (!readKey(nextEnv, "SOLPIENT_BACKUP_ENCRYPTION_KEY")) {
   nextEnv = upsertEnv(
     nextEnv,
     "SOLPIENT_BACKUP_ENCRYPTION_KEY",
@@ -132,24 +152,17 @@ await writeFile(nextEnvPath, nextEnv, {
   mode: 0o600,
 });
 
-console.log("Starting local PostgreSQL...");
+console.log("Starting canonical Solpient PostgreSQL...");
 
 const up = spawnSync(
   "docker",
-  [
-    "compose",
-    "-f",
-    "docker-compose.local.yml",
-    "--env-file",
-    dockerEnvPath,
-    "up",
-    "-d",
-  ],
+  composeArgs("up", "-d"),
   { stdio: "inherit" }
 );
+
 if (up.status !== 0) {
   throw new Error(
-    "Unable to start the local PostgreSQL container."
+    "Unable to start the canonical local PostgreSQL container on 127.0.0.1:5432. Run npm run local:doctor for diagnostics."
   );
 }
 
@@ -157,21 +170,16 @@ let ready = false;
 for (let attempt = 0; attempt < 30; attempt += 1) {
   const probe = spawnSync(
     "docker",
-    [
-      "compose",
-      "-f",
-      "docker-compose.local.yml",
-      "--env-file",
-      dockerEnvPath,
+    composeArgs(
       "exec",
       "-T",
       "postgres",
       "pg_isready",
       "-U",
-      "solpient",
+      USER,
       "-d",
-      "solpient",
-    ],
+      DATABASE
+    ),
     { stdio: "ignore" }
   );
 
@@ -180,14 +188,50 @@ for (let attempt = 0; attempt < 30; attempt += 1) {
     break;
   }
 
-  await new Promise((resolve) =>
-    setTimeout(resolve, 1000)
-  );
+  await new Promise((resolve) => setTimeout(resolve, 1000));
 }
 
 if (!ready) {
   throw new Error(
-    "PostgreSQL did not become ready."
+    "Canonical PostgreSQL did not become ready. Run npm run local:doctor."
+  );
+}
+
+// POSTGRES_PASSWORD only initializes a new PostgreSQL data directory.
+// Existing volumes keep the role password stored inside PostgreSQL.
+// Explicitly synchronize the actual role every time setup/repair runs.
+const escapedPassword = password.replaceAll("'", "''");
+const synchronize = spawnSync(
+  "docker",
+  composeArgs(
+    "exec",
+    "-T",
+    "postgres",
+    "psql",
+    "-U",
+    USER,
+    "-d",
+    DATABASE,
+    "-v",
+    "ON_ERROR_STOP=1"
+  ),
+  {
+    input: `ALTER ROLE ${USER} WITH PASSWORD '${escapedPassword}';\n`,
+    encoding: "utf8",
+  }
+);
+
+if (synchronize.status !== 0) {
+  throw new Error(
+    `Unable to synchronize the PostgreSQL role password: ${synchronize.stderr || "unknown error"}`
+  );
+}
+
+try {
+  await verifyTcp(databaseUrl);
+} catch (error) {
+  throw new Error(
+    `Canonical TCP authentication verification failed after password synchronization: ${error instanceof Error ? error.message : String(error)}`
   );
 }
 
@@ -200,28 +244,32 @@ const migrate = spawnSync(
       ...process.env,
       DATABASE_URL: databaseUrl,
       CONNECT_SECRET_ENCRYPTION_KEY:
-        readKey(
-          nextEnv,
-          "CONNECT_SECRET_ENCRYPTION_KEY"
-        ) ?? "",
+        readKey(nextEnv, "CONNECT_SECRET_ENCRYPTION_KEY") ?? "",
     },
   }
 );
 
 if (migrate.status !== 0) {
-  throw new Error(
-    "Local PostgreSQL migrations failed."
+  throw new Error("Local PostgreSQL migrations failed.");
+}
+
+await verifyTcp(databaseUrl);
+
+console.log("");
+console.log("✓ Canonical PostgreSQL container: solpient-money-postgres");
+console.log("✓ PostgreSQL endpoint: 127.0.0.1:5432");
+console.log("✓ .env.local and .env.local-db use the same password");
+console.log("✓ Actual PostgreSQL role password synchronized");
+console.log("✓ TCP authentication verified");
+console.log("✓ Solpient migrations current");
+
+if (shellDatabaseUrlDiffers(databaseUrl)) {
+  console.log("");
+  console.warn(
+    "WARNING: your shell has a different exported DATABASE_URL. npm run dev now overrides stale shell values with .env.local, but run 'unset DATABASE_URL' to clean the shell."
   );
 }
 
 console.log("");
 console.log("Solpient Local is ready.");
-console.log(
-  "PostgreSQL: 127.0.0.1:5432 (localhost only)"
-);
-console.log(
-  "Secrets: .env.local and .env.local-db (gitignored)"
-);
-console.log(
-  "Next: npm run dev"
-);
+console.log("Next: npm run local:doctor && npm run dev");
