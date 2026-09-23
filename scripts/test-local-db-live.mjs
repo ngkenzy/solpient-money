@@ -27,6 +27,7 @@ try {
       to_regclass('public.account_merge_audit') is not null as account_merge_audit,
       to_regclass('public.financial_plan_snapshots') is not null as financial_plan_snapshots,
       to_regclass('public.money_autopilot_runs') is not null as money_autopilot_runs,
+      to_regclass('public.money_action_items') is not null as money_action_items,
       to_regprocedure('public.merge_truth_accounts(uuid,uuid)') is not null as merge_truth_accounts,
       exists (
         select 1 from information_schema.columns
@@ -57,6 +58,7 @@ try {
     "account_merge_audit",
     "financial_plan_snapshots",
     "money_autopilot_runs",
+    "money_action_items",
     "merge_truth_accounts",
     "truth_category",
     "truth_suppressed",
