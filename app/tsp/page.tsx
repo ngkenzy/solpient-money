@@ -275,8 +275,8 @@ export default async function TspPage() {
           <div className="bottom-note tsp-price-note">
             <RefreshCw size={15} />
             <span>
-              Estimated current value = inferred fund shares × latest published TSP share price.
-              Your official TSP snapshot is never overwritten by this estimate.
+              Per-fund estimated value = inferred fund shares × that fund's latest official TSP share price.
+              If owned funds have different official price dates, Solpient withholds the combined estimate. Your official TSP snapshot is never overwritten.
             </span>
           </div>
         </section>
