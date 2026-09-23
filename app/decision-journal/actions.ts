@@ -32,6 +32,9 @@ export async function recordInvestmentDecision(
   const note = String(
     formData.get("note") ?? ""
   ).trim();
+  const actionItemId = String(
+    formData.get("actionItemId") ?? ""
+  ).trim() || null;
 
   if (!ticker) {
     throw new Error(
@@ -84,6 +87,7 @@ export async function recordInvestmentDecision(
     ticker,
     decisionType: rawType,
     note,
+    actionItemId,
   });
 
   revalidatePath(
