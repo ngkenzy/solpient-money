@@ -9816,3 +9816,269 @@ a {
   }
 }
 
+/* Solpient Money V1.6 Decision Journal */
+.decision-journal-page {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.decision-entry-card {
+  padding: 16px;
+}
+
+.decision-entry-form {
+  margin-top: 12px;
+  display: grid;
+  grid-template-columns: minmax(180px, .7fr) minmax(170px, .6fr) minmax(260px, 1.4fr) auto;
+  gap: 10px;
+  align-items: end;
+}
+
+.decision-entry-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.decision-entry-form label > span {
+  color: #718399;
+  font-size: 7px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.decision-entry-form select,
+.decision-entry-form textarea {
+  width: 100%;
+  border: 1px solid #dbe5ed;
+  border-radius: 8px;
+  background: #fff;
+  color: #314b62;
+  font: inherit;
+  font-size: 8px;
+}
+
+.decision-entry-form select {
+  min-height: 36px;
+  padding: 0 10px;
+}
+
+.decision-entry-form textarea {
+  min-height: 66px;
+  padding: 9px 10px;
+  resize: vertical;
+}
+
+.decision-journal-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) minmax(300px, .75fr);
+  gap: 12px;
+}
+
+.decision-list,
+.decision-attribution-list {
+  margin-top: 10px;
+}
+
+.decision-row {
+  min-height: 68px;
+  border-top: 1px solid #e6edf3;
+  display: grid;
+  grid-template-columns: 52px minmax(0, 1fr) 122px 18px;
+  gap: 10px;
+  align-items: center;
+  padding: 9px 0;
+  text-decoration: none;
+}
+
+.decision-symbol {
+  color: #294a67;
+  font-size: 10px;
+  font-weight: 900;
+}
+
+.decision-row > div {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.decision-row > div strong {
+  color: #304960;
+  font-size: 8px;
+  text-transform: capitalize;
+}
+
+.decision-row > div span {
+  overflow: hidden;
+  color: #7b8d9f;
+  font-size: 7px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.decision-row time {
+  color: #8292a3;
+  font-size: 6px;
+  text-align: right;
+}
+
+.decision-row > svg {
+  color: #93a1ae;
+}
+
+.decision-attribution-row {
+  min-height: 60px;
+  border-top: 1px solid #e6edf3;
+  display: grid;
+  grid-template-columns: 30px minmax(0, 1fr) 92px 62px;
+  gap: 9px;
+  align-items: center;
+  padding: 8px 0;
+}
+
+.decision-attribution-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  display: grid;
+  place-items: center;
+}
+
+.decision-attribution-icon.positive {
+  color: #34705a;
+  background: #eef8f4;
+}
+
+.decision-attribution-icon.negative {
+  color: #98535c;
+  background: #fff1f3;
+}
+
+.decision-attribution-row > div {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.decision-attribution-row > div strong {
+  color: #304960;
+  font-size: 8px;
+}
+
+.decision-attribution-row > div span,
+.decision-attribution-row > span:last-child {
+  color: #8292a3;
+  font-size: 7px;
+}
+
+.decision-attribution-row > strong {
+  font-size: 8px;
+  text-align: right;
+}
+
+.decision-attribution-row > span:last-child {
+  text-align: right;
+}
+
+.decision-context-grid {
+  margin-top: 10px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.decision-context-grid > a {
+  min-height: 64px;
+  border: 1px solid #e2e9ef;
+  border-radius: 9px;
+  background: #fbfcfe;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 90px 70px 16px;
+  gap: 8px;
+  align-items: center;
+  padding: 10px;
+  text-decoration: none;
+}
+
+.decision-context-grid > a > div {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.decision-context-grid strong {
+  color: #304960;
+  font-size: 8px;
+}
+
+.decision-context-grid span {
+  color: #8191a2;
+  font-size: 7px;
+}
+
+.decision-context-grid svg {
+  color: #93a1ae;
+}
+
+.holding-decision-history {
+  margin-top: 12px;
+}
+
+.decision-change-grid {
+  margin-top: 12px;
+}
+
+@media (max-width: 1120px) {
+  .decision-entry-form {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .decision-note-field {
+    grid-column: 1 / -1;
+  }
+
+  .decision-journal-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 720px) {
+  .decision-entry-form,
+  .decision-context-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .decision-note-field {
+    grid-column: auto;
+  }
+
+  .decision-row {
+    grid-template-columns: 52px minmax(0, 1fr) 18px;
+  }
+
+  .decision-row time {
+    grid-column: 2;
+    text-align: left;
+  }
+
+  .decision-attribution-row {
+    grid-template-columns: 30px minmax(0, 1fr) 72px;
+  }
+
+  .decision-attribution-row > span:last-child {
+    grid-column: 2;
+    text-align: left;
+  }
+
+  .decision-context-grid > a {
+    grid-template-columns: 1fr 70px 16px;
+  }
+
+  .decision-context-grid > a > div:nth-child(3) {
+    grid-column: 2;
+  }
+}
+
