@@ -85,6 +85,7 @@ export type PlanMonitoringReport = {
   progressPct: number;
   baselineCapturedAt: string;
   baselineResetCount: number;
+  baselinePersisted: boolean;
   baselinePlan: HouseholdFinancialPlan;
   currentPlan: HouseholdFinancialPlan;
   pace: {
@@ -641,7 +642,8 @@ function alignmentScore(signals: PlanMonitorSignal[]) {
 }
 
 export async function getPlanMonitoring(
-  now: Date = new Date()
+  now: Date = new Date(),
+  options: { createBaseline?: boolean } = {}
 ): Promise<PlanMonitoringReport> {
   const { auth, cashFlow, plan: currentPlan } =
     await getCurrentInputs(now);
@@ -651,12 +653,38 @@ export async function getPlanMonitoring(
     auth.householdId,
     month
   );
+  let baselinePersisted = Boolean(snapshot);
 
-  if (!snapshot) {
+  if (!snapshot && options.createBaseline !== false) {
     snapshot = await saveCurrentMonthBaseline({
       overwrite: false,
       now,
     });
+    baselinePersisted = true;
+  }
+
+  if (!snapshot) {
+    snapshot = {
+      id: "ephemeral",
+      plan_month: month,
+      plan_version: currentPlan.version,
+      planned_income_cents: cents(currentPlan.monthlyIncome),
+      planned_spending_cents: cents(currentPlan.monthlySpending),
+      planned_surplus_cents: cents(currentPlan.monthlySurplus),
+      reserve_allocation_cents: cents(currentPlan.reserveAllocation),
+      debt_allocation_cents: cents(currentPlan.debtAllocation),
+      goal_allocation_cents: cents(currentPlan.goalAllocation),
+      retirement_allocation_cents: cents(currentPlan.retirementAllocation),
+      flexible_allocation_cents: cents(currentPlan.flexibleMonthly),
+      debt_payoff_months: currentPlan.debtPayoffMonths,
+      retirement_required_monthly_cents: cents(
+        currentPlan.retirementRequiredMonthly
+      ),
+      baseline_plan: currentPlan,
+      reset_count: 0,
+      captured_at: now.toISOString(),
+      updated_at: now.toISOString(),
+    };
   }
 
   const baselinePlan = rowToBaseline(snapshot);
@@ -772,6 +800,7 @@ export async function getPlanMonitoring(
     progressPct,
     baselineCapturedAt: normalizeIso(snapshot.captured_at),
     baselineResetCount: numberValue(snapshot.reset_count),
+    baselinePersisted,
     baselinePlan,
     currentPlan,
     pace,
