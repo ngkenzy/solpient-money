@@ -61,4 +61,5 @@ jobs:
       - run: npm run test:v10
       - run: npm run test:v11
       - run: npm run test:v12
+      - run: npm run test:v121
       - run: npm run build
