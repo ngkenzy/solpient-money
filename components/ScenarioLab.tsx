@@ -172,14 +172,19 @@ export default function ScenarioLab({
     ]
   );
 
+  const comparisonAllocation = Math.min(
+    monthlyAllocation,
+    observedSurplus
+  );
+
   const comparisons = useMemo(
     () =>
       compareStrategies(
         inputs,
         horizonMonths,
-        monthlyAllocation
+        comparisonAllocation
       ),
-    [horizonMonths, inputs, monthlyAllocation]
+    [comparisonAllocation, horizonMonths, inputs]
   );
 
   const currentDebt = inputs.debts.reduce(
@@ -502,7 +507,7 @@ export default function ScenarioLab({
             <span className="card-kicker">SAME DOLLARS, DIFFERENT USE</span>
             <h2>Cash vs invest vs debt</h2>
             <p className="empty-copy">
-              Each path uses the same {currency(monthlyAllocation)} monthly allocation for{" "}
+              Each path uses the same {currency(comparisonAllocation)} monthly allocation for{" "}
               {horizonYears} years. The comparison describes modeled outcomes; it does not select
               an action for you.
             </p>
