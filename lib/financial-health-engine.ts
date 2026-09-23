@@ -236,15 +236,17 @@ export function buildFinancialHealthEngine(
       householdPlan.demoCurrentAge
   );
 
-  const positiveMonthlyContribution = Math.max(
-    0,
-    cashFlow.health.latestSaved,
-    cashFlow.monthly.length
+  const averageMonthlySurplus =
+    cashFlow.monthly.length > 0
       ? cashFlow.monthly.reduce(
           (sum, month) => sum + month.saved,
           0
         ) / cashFlow.monthly.length
-      : 0
+      : 0;
+
+  const positiveMonthlyContribution = Math.max(
+    0,
+    averageMonthlySurplus
   );
 
   const retirementProjectedAssets = futureValue(
