@@ -1,5 +1,7 @@
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
+import Link from "next/link";
+import { ArrowRight } from "lucide-react";
 import PageHeader from "@/components/PageHeader";
 import { getCashFlowIntelligence } from "@/lib/cash-flow-intelligence";
 import { buildFinancialHealthEngine } from "@/lib/financial-health-engine";
@@ -26,6 +28,7 @@ export default async function RetirementPage() {
         description="The baseline uses household planning assumptions, current invested assets, and transaction-derived savings."
         action={<Link className="research-button" href="/scenario-lab">Open Scenario Lab <ArrowRight size={15} /></Link>}
       />
+      <div className="retirement-plan-link"><Link href="/plan">Open Financial Plan <ArrowRight size={14} /></Link></div>
       <div className="metric-grid four">
         <div className="metric-card"><span>Invested assets</span><strong>{money(health.metrics.investments)}</strong><small>Current household portfolio</small></div>
         <div className="metric-card"><span>Baseline projection</span><strong>{money(projected)}</strong><small>{years} years at {plan.expectedAnnualReturnPct}% assumption</small></div>
