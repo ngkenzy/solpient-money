@@ -5,18 +5,18 @@ import {
   type TspStatementIssue,
   type TspStatementParseResult,
   type TspStatementSourceKind,
-} from "./tsp-statement-types";
+} from "./tsp-statement-types.ts";
 
 export {
   TSP_STATEMENT_PARSER_VERSION,
-} from "./tsp-statement-types";
+} from "./tsp-statement-types.ts";
 export type {
   TspStatementCandidate,
   TspStatementFundBalance,
   TspStatementIssue,
   TspStatementParseResult,
   TspStatementSourceKind,
-} from "./tsp-statement-types";
+} from "./tsp-statement-types.ts";
 
 const ROUNDING_CENTS = 100;
 
