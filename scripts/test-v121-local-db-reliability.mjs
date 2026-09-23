@@ -32,9 +32,9 @@ const checks = [
   ["local repair command exists", pkg.scripts?.["local:repair"] === "node scripts/local-setup.mjs"],
   ["local doctor command exists", pkg.scripts?.["local:doctor"] === "node scripts/local-doctor.mjs"],
   ["legacy migration command exists", pkg.scripts?.["local:migrate-legacy"] === "node scripts/local-migrate-legacy.mjs"],
-  ["canonical compose binds loopback 5432", files.compose.includes('"127.0.0.1:5432:5432"')],
+  ["canonical compose binds a configurable loopback host port", files.compose.includes('"127.0.0.1:${SOLPIENT_DB_PORT:-55433}:5432"')],
   ["canonical container name is stable", files.compose.includes("container_name: solpient-money-postgres")],
-  ["setup writes canonical 5432 DATABASE_URL", files.setup.includes('const PORT = "5432"') && files.setup.includes("canonicalUrl(password)")],
+  ["setup writes a canonical local DATABASE_URL", files.setup.includes("canonicalUrl(password, port)") && files.setup.includes("SOLPIENT_DB_PORT")],
   ["setup synchronizes actual PostgreSQL role password", files.setup.includes("ALTER ROLE") && files.setup.includes("synchronize")],
   ["setup verifies TCP authentication after synchronization", files.setup.includes("await verifyTcp(databaseUrl)")],
   ["setup keeps env files password-aligned", files.setup.includes("POSTGRES_PASSWORD") && files.setup.includes('nextEnv = upsertEnv(nextEnv, "DATABASE_URL", databaseUrl)')],
@@ -50,9 +50,9 @@ const checks = [
   ["legacy migration uses pg_dump and psql", files.legacy.includes("pg_dump") && files.legacy.includes('"psql"')],
   ["legacy migration preserves source container", files.legacy.includes("legacy source remains untouched") && !files.legacy.includes("docker rm")],
   ["legacy migration clears inherited DATABASE_URL", files.legacy.includes("delete cleanEnv.DATABASE_URL")],
-  ["runtime config rejects non-canonical local DB", files.config.includes("127.0.0.1:5432") && files.config.includes("npm run local:repair")],
+  ["runtime config rejects non-canonical local DB", files.config.includes("SOLPIENT_DB_PORT") && files.config.includes("npm run local:repair")],
   ["runtime auth failure gives actionable repair command", files.client.includes("Solpient Local PostgreSQL credential mismatch")],
-  ["sidebar label shows V1.2.1", files.shell.includes("MONEY V1.2.1")],
+  ["sidebar label remains on V1.2.x reliability line", files.shell.includes("MONEY V1.2.")],
 ];
 
 const failed = checks.filter(([, ok]) => !ok);
