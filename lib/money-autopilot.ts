@@ -18,6 +18,7 @@ import { getPlanMonitoring } from "@/lib/plan-monitor-engine";
 import { syncActionCenterFromAlerts } from "@/lib/money-action-center";
 import { buildPortfolioIntelligence } from "@/lib/portfolio-intelligence";
 import { loadResearchSnapshots } from "@/lib/research";
+import { capturePortfolioHistory } from "@/lib/portfolio-history";
 
 export type AutopilotLevel =
   | "critical"
@@ -96,6 +97,7 @@ export type AutopilotConnectorSummary = {
 export type MoneyAutopilotBriefing = {
   version: "1.3";
   portfolioIntelligenceVersion: "1.5";
+  decisionHistoryVersion: "1.6";
   runDate: string;
   observedAt: string;
   persisted: boolean;
@@ -628,7 +630,8 @@ function rowToBriefing(
   const stored = row.briefing as MoneyAutopilotBriefing;
   if (
     stored.version !== "1.3" ||
-    stored.portfolioIntelligenceVersion !== "1.5"
+    stored.portfolioIntelligenceVersion !== "1.5" ||
+    stored.decisionHistoryVersion !== "1.6"
   ) {
     return null;
   }
@@ -694,6 +697,7 @@ export async function getMoneyAutopilotBriefing(
   return {
     version: "1.3",
     portfolioIntelligenceVersion: "1.5",
+    decisionHistoryVersion: "1.6",
     runDate,
     observedAt: now.toISOString(),
     persisted: false,
@@ -810,6 +814,7 @@ export async function runMoneyAutopilot({
   const briefing: MoneyAutopilotBriefing = {
     version: "1.3",
     portfolioIntelligenceVersion: "1.5",
+    decisionHistoryVersion: "1.6",
     runDate,
     observedAt: now.toISOString(),
     persisted: true,
@@ -867,6 +872,12 @@ export async function runMoneyAutopilot({
       `Unable to save Money Autopilot daily run: ${error.message}`
     );
   }
+
+  await capturePortfolioHistory(
+    observation.portfolioIntelligence,
+    observation.context.dataset,
+    now
+  );
 
   await syncActionCenterFromAlerts(
     briefing.alerts,
