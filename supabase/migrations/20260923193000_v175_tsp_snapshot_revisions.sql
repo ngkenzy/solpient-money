@@ -79,6 +79,7 @@ declare
   v_snapshot_id uuid;
   v_revision integer;
   v_attempt integer := 0;
+  v_constraint text;
   v_funds jsonb;
 begin
   v_funds := coalesce(p_funds_json, '[]')::jsonb;
@@ -157,9 +158,13 @@ begin
       return;
     exception
       when unique_violation then
-        if v_attempt >= 3 then
+        get stacked diagnostics v_constraint = constraint_name;
+
+        if v_constraint <> 'tsp_snapshots_household_date_revision_uidx'
+          or v_attempt >= 3 then
           raise;
         end if;
+
         v_previous_id := null;
         v_previous_revision := null;
     end;
