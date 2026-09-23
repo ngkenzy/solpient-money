@@ -36,6 +36,9 @@ export default function AutopilotRunButton() {
         );
       }
 
+      window.dispatchEvent(
+        new Event("solpient:autopilot-complete")
+      );
       router.refresh();
     } catch (runError) {
       setError(
