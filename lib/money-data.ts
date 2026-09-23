@@ -388,6 +388,8 @@ export async function getMoneyContext(): Promise<MoneyContext> {
       name: String(row.name),
       current: dollars(row.current_cents),
       target: dollars(row.target_cents),
+      targetDate: row.target_date ? normalizeDate(row.target_date) : null,
+      priority: numberValue(row.priority, 100),
     })),
   };
 
