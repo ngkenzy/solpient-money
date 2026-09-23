@@ -1,6 +1,6 @@
 {
   "name": "solpient-money",
-  "version": "1.2.3",
+  "version": "1.3.0",
   "private": true,
   "scripts": {
     "dev": "node scripts/local-dev.mjs",
@@ -41,7 +41,8 @@
     "local:migrate-legacy": "node scripts/local-migrate-legacy.mjs",
     "test:v121": "node scripts/test-v121-local-db-reliability.mjs",
     "test:v122": "node scripts/test-v122-dynamic-db-port.mjs",
-    "test:v123": "node scripts/test-v123-safe-legacy-restore.mjs"
+    "test:v123": "node scripts/test-v123-safe-legacy-restore.mjs",
+    "test:v13": "node scripts/test-v13-money-autopilot.mjs"
   },
   "dependencies": {
     "lucide-react": "^0.468.0",
