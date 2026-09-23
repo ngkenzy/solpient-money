@@ -7936,3 +7936,583 @@ a {
     grid-template-columns: 1fr;
   }
 }
+
+
+/* Solpient Money V1.1 Household Financial Plan */
+.plan-hero {
+  margin-bottom: 12px;
+  padding: 18px;
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr) auto;
+  gap: 14px;
+  align-items: center;
+}
+
+.plan-hero-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  color: #2f6f5a;
+  background: #eef8f4;
+  border: 1px solid #cfe3da;
+}
+
+.plan-hero h2 {
+  margin: 3px 0 4px;
+  font-size: 22px;
+}
+
+.plan-hero p {
+  margin: 0;
+  color: #718399;
+  font-size: 8px;
+}
+
+.plan-hero-allocation {
+  min-width: 205px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  text-align: right;
+}
+
+.plan-hero-allocation span,
+.plan-hero-allocation small {
+  color: #8191a2;
+  font-size: 7px;
+}
+
+.plan-hero-allocation strong {
+  color: #29475e;
+  font-size: 21px;
+}
+
+.plan-metric-grid {
+  margin-bottom: 12px;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.plan-metric {
+  min-height: 112px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.plan-metric > svg {
+  margin-bottom: 6px;
+  color: #4a7598;
+}
+
+.plan-metric span {
+  color: #718499;
+  font-size: 7px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.plan-metric strong {
+  color: #283f57;
+  font-size: 19px;
+}
+
+.plan-metric small {
+  margin-top: auto;
+  color: #8191a2;
+  font-size: 7px;
+}
+
+.plan-line-list {
+  margin-top: 10px;
+}
+
+.plan-line {
+  min-height: 92px;
+  border-top: 1px solid #e6edf3;
+  display: grid;
+  grid-template-columns: 28px 36px minmax(0, 1fr) 155px;
+  gap: 10px;
+  align-items: start;
+  padding: 12px 0;
+}
+
+.plan-line-rank {
+  width: 24px;
+  height: 24px;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  background: #edf2f6;
+  color: #6e8195;
+  font-size: 7px;
+  font-weight: 900;
+}
+
+.plan-line-rank.complete,
+.plan-line-rank.on_track {
+  background: #eaf6f0;
+  color: #34705a;
+}
+
+.plan-line-rank.unfunded {
+  background: #fff0f1;
+  color: #96515a;
+}
+
+.plan-line-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 9px;
+  display: grid;
+  place-items: center;
+}
+
+.plan-line-icon.reserve {
+  color: #34705a;
+  background: #eef8f4;
+}
+
+.plan-line-icon.high_interest_debt {
+  color: #8a5544;
+  background: #faf1ed;
+}
+
+.plan-line-icon.goal {
+  color: #416f9a;
+  background: #edf5fb;
+}
+
+.plan-line-icon.retirement {
+  color: #665c91;
+  background: #f4f1fa;
+}
+
+.plan-line-icon.flexible {
+  color: #66798c;
+  background: #f2f5f7;
+}
+
+.plan-line-main {
+  min-width: 0;
+}
+
+.plan-line-title {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.plan-line-title strong {
+  color: #2d465d;
+  font-size: 9px;
+}
+
+.plan-line-status {
+  padding: 4px 6px;
+  border-radius: 999px;
+  background: #f0f4f7;
+  color: #6b8094;
+  font-size: 6px;
+  font-weight: 850;
+  text-transform: uppercase;
+}
+
+.plan-line-status.complete,
+.plan-line-status.on_track {
+  background: #eaf6f0;
+  color: #34705a;
+}
+
+.plan-line-status.unfunded {
+  background: #fff0f1;
+  color: #96515a;
+}
+
+.plan-line-main > span,
+.plan-line-main details,
+.plan-line-main details span {
+  color: #8191a2;
+  font-size: 7px;
+}
+
+.plan-line-main > p {
+  margin: 5px 0 6px;
+  color: #60768b;
+  font-size: 8px;
+  line-height: 1.45;
+}
+
+.plan-line-main summary {
+  cursor: pointer;
+  color: #4b7191;
+  font-weight: 800;
+}
+
+.plan-line-money {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  text-align: right;
+}
+
+.plan-line-money strong {
+  color: #29465e;
+  font-size: 15px;
+}
+
+.plan-line-money span {
+  color: #8191a2;
+  font-size: 7px;
+}
+
+.plan-line-money a {
+  margin-top: 3px;
+  color: #376e9c;
+  text-decoration: none;
+  display: inline-flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 4px;
+  font-size: 7px;
+  font-weight: 800;
+}
+
+.plan-two-column {
+  display: grid;
+  grid-template-columns: 1.1fr .9fr;
+  gap: 12px;
+}
+
+.plan-debt-list,
+.plan-goal-list {
+  margin-top: 10px;
+}
+
+.plan-debt-row {
+  min-height: 58px;
+  border-top: 1px solid #e6edf3;
+  display: grid;
+  grid-template-columns: 24px minmax(150px, 1fr) 110px 110px;
+  gap: 10px;
+  align-items: center;
+  padding: 8px 0;
+}
+
+.plan-debt-row > span:first-child {
+  width: 22px;
+  height: 22px;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  background: #edf2f6;
+  color: #6f8194;
+  font-size: 7px;
+  font-weight: 900;
+}
+
+.plan-debt-row > div {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.plan-debt-row strong,
+.plan-goal-row strong {
+  color: #304960;
+  font-size: 8px;
+}
+
+.plan-debt-row span,
+.plan-debt-row small,
+.plan-goal-row span {
+  color: #8291a2;
+  font-size: 7px;
+}
+
+.plan-goal-row {
+  min-height: 62px;
+  border-top: 1px solid #e6edf3;
+  display: grid;
+  grid-template-columns: minmax(160px, 1fr) 90px 90px auto;
+  gap: 10px;
+  align-items: center;
+  padding: 8px 0;
+}
+
+.plan-goal-row > div {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.plan-goal-state {
+  padding: 5px 7px;
+  border-radius: 999px;
+  font-size: 6px !important;
+  font-weight: 850;
+}
+
+.plan-goal-state.good {
+  background: #eaf6f0;
+  color: #34705a;
+}
+
+.plan-goal-state.warn {
+  background: #fff4e3;
+  color: #95651d;
+}
+
+.plan-goal-state.neutral {
+  background: #eef2f5;
+  color: #718296;
+}
+
+.plan-note {
+  margin-top: 12px;
+  padding: 10px 11px;
+  border: 1px solid #dce6ed;
+  border-radius: 9px;
+  background: #f8fafc;
+  color: #6f8295;
+  display: flex;
+  align-items: flex-start;
+  gap: 7px;
+  font-size: 7px;
+  line-height: 1.45;
+}
+
+.plan-note svg {
+  flex: 0 0 auto;
+  color: #577895;
+}
+
+.plan-policy-grid {
+  margin-top: 10px;
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.plan-policy-grid > div {
+  min-height: 82px;
+  padding: 11px;
+  border: 1px solid #e2e9ef;
+  border-radius: 9px;
+  background: #fbfcfe;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.plan-policy-grid span {
+  color: #7a8b9d;
+  font-size: 6px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.plan-policy-grid strong {
+  color: #2d475e;
+  font-size: 10px;
+}
+
+.plan-policy-grid small {
+  margin-top: auto;
+  color: #8a98a7;
+  font-size: 6px;
+}
+
+.plan-empty {
+  min-height: 100px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #7890a5;
+  gap: 6px;
+}
+
+.goal-plan-list {
+  margin-top: 10px;
+}
+
+.goal-plan-row {
+  border-top: 1px solid #e6edf3;
+  padding: 10px 0;
+}
+
+.goal-plan-row summary {
+  cursor: pointer;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 12px;
+  list-style: none;
+}
+
+.goal-plan-row summary::-webkit-details-marker {
+  display: none;
+}
+
+.goal-plan-row summary > div {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.goal-plan-row summary strong {
+  color: #2d475e;
+  font-size: 9px;
+}
+
+.goal-plan-row summary span {
+  color: #7d8e9f;
+  font-size: 7px;
+}
+
+.goal-plan-row .goal-track {
+  margin-top: 8px;
+}
+
+.goal-edit-form,
+.goal-create-form {
+  margin-top: 12px;
+  display: grid;
+  grid-template-columns: 1.2fr repeat(4, minmax(100px, .7fr)) auto;
+  gap: 8px;
+  align-items: end;
+}
+
+.goal-edit-form label,
+.goal-create-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.goal-edit-form label span,
+.goal-create-form label span {
+  color: #75889b;
+  font-size: 6px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.goal-edit-form input,
+.goal-create-form input {
+  min-height: 34px;
+  border: 1px solid #dce5ed;
+  border-radius: 8px;
+  padding: 0 9px;
+  background: white;
+  color: #314b62;
+  font: inherit;
+  font-size: 8px;
+}
+
+.goal-delete-form {
+  margin-top: 7px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.goal-delete-form button {
+  border: 0;
+  background: transparent;
+  color: #97535b;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  cursor: pointer;
+  font: inherit;
+  font-size: 7px;
+  font-weight: 800;
+}
+
+.retirement-plan-link {
+  margin: -8px 0 12px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.retirement-plan-link a {
+  color: #356e9b;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 8px;
+  font-weight: 800;
+}
+
+@media (max-width: 1120px) {
+  .plan-metric-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .plan-two-column {
+    grid-template-columns: 1fr;
+  }
+
+  .plan-policy-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .goal-edit-form,
+  .goal-create-form {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 760px) {
+  .plan-hero {
+    grid-template-columns: 44px 1fr;
+  }
+
+  .plan-hero-allocation {
+    grid-column: 2;
+    text-align: left;
+  }
+
+  .plan-line {
+    grid-template-columns: 28px 36px 1fr;
+  }
+
+  .plan-line-money {
+    grid-column: 3;
+    text-align: left;
+  }
+
+  .plan-line-money a {
+    justify-content: flex-start;
+  }
+
+  .plan-debt-row,
+  .plan-goal-row {
+    grid-template-columns: 24px 1fr;
+  }
+
+  .plan-debt-row > div:nth-child(n+3),
+  .plan-goal-row > div:nth-child(n+2),
+  .plan-goal-state {
+    grid-column: 2;
+  }
+
+  .plan-policy-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 520px) {
+  .plan-metric-grid,
+  .plan-policy-grid,
+  .goal-edit-form,
+  .goal-create-form {
+    grid-template-columns: 1fr;
+  }
+}
