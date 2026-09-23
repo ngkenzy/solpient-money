@@ -10514,3 +10514,250 @@ a {
     grid-template-columns: 1fr;
   }
 }
+
+
+/* Solpient Money V1.8 TSP Statement Import */
+.tsp-header-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.tsp-import-principles {
+  margin-top: 12px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 9px;
+}
+
+.tsp-import-principles > div {
+  min-height: 86px;
+  border: 1px solid #e2e9ef;
+  border-radius: 9px;
+  padding: 11px;
+  display: grid;
+  grid-template-columns: 24px 1fr;
+  gap: 9px;
+  align-items: start;
+  background: #fbfcfe;
+}
+
+.tsp-import-principles > div > div,
+.tsp-import-message > div {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.tsp-import-principles strong,
+.tsp-import-message strong {
+  color: #304960;
+  font-size: 8px;
+}
+
+.tsp-import-principles span,
+.tsp-import-message span {
+  color: #74879a;
+  font-size: 7px;
+  line-height: 1.45;
+}
+
+.tsp-import-list {
+  margin-top: 10px;
+}
+
+.tsp-import-row {
+  min-height: 68px;
+  display: grid;
+  grid-template-columns: minmax(220px, 1.5fr) 130px 80px 80px;
+  gap: 12px;
+  align-items: center;
+  border-top: 1px solid #e6edf3;
+  padding: 9px 0;
+  color: inherit;
+  text-decoration: none;
+}
+
+.tsp-import-row:hover {
+  background: #fbfcfe;
+}
+
+.tsp-import-row > div {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.tsp-import-row span,
+.tsp-import-provenance span,
+.tsp-import-reconciliation span,
+.tsp-import-note > span {
+  color: #8292a2;
+  font-size: 6px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.tsp-import-row strong,
+.tsp-import-provenance strong,
+.tsp-import-reconciliation strong {
+  color: #304960;
+  font-size: 8px;
+}
+
+.tsp-import-provenance {
+  margin-top: 10px;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.tsp-import-provenance > div,
+.tsp-import-reconciliation > div {
+  min-height: 70px;
+  border: 1px solid #e2e9ef;
+  border-radius: 9px;
+  background: #fbfcfe;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.tsp-import-message {
+  margin-top: 10px;
+  padding: 10px 11px;
+  border-radius: 9px;
+  display: flex;
+  gap: 9px;
+  align-items: flex-start;
+}
+
+.tsp-import-message.watch {
+  background: #fff8e9;
+  color: #8d651f;
+}
+
+.tsp-import-message.critical {
+  background: #fff4f4;
+  color: #974a52;
+}
+
+.tsp-import-message.positive {
+  background: #f4fbf7;
+  color: #2d7657;
+}
+
+.tsp-import-review-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.tsp-import-funds {
+  margin-top: 10px;
+}
+
+.tsp-import-fund-row {
+  display: grid;
+  grid-template-columns: 90px minmax(220px, 1fr) 150px;
+  gap: 8px;
+  align-items: center;
+  border-top: 1px solid #e6edf3;
+  padding: 8px 0;
+}
+
+.tsp-import-fund-row input,
+.tsp-import-note textarea {
+  width: 100%;
+  border: 1px solid #dbe5ed;
+  border-radius: 8px;
+  background: #fff;
+  color: #314b62;
+  font: inherit;
+  font-size: 8px;
+}
+
+.tsp-import-fund-row input {
+  min-height: 36px;
+  padding: 0 9px;
+}
+
+.tsp-import-fund-row input:disabled,
+.tsp-import-note textarea:disabled,
+.tsp-import-review-grid input:disabled {
+  background: #f4f7fa;
+  color: #6f8192;
+}
+
+.tsp-import-reconciliation {
+  margin-top: 12px;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.tsp-import-note {
+  margin-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.tsp-import-note textarea {
+  min-height: 76px;
+  padding: 9px;
+  resize: vertical;
+}
+
+.tsp-import-confirm-actions {
+  margin-top: 12px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.tsp-import-confirm-actions form {
+  margin: 0;
+}
+
+@media (max-width: 900px) {
+  .tsp-import-principles,
+  .tsp-import-provenance,
+  .tsp-import-reconciliation,
+  .tsp-import-review-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .tsp-import-row {
+    grid-template-columns: minmax(180px, 1fr) 120px 70px 70px;
+  }
+}
+
+@media (max-width: 650px) {
+  .tsp-import-principles,
+  .tsp-import-provenance,
+  .tsp-import-reconciliation,
+  .tsp-import-review-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .tsp-import-row {
+    grid-template-columns: 1fr 1fr;
+    padding: 12px 0;
+  }
+
+  .tsp-import-fund-row {
+    grid-template-columns: 1fr;
+  }
+
+  .tsp-import-confirm-actions {
+    justify-content: stretch;
+    flex-direction: column;
+  }
+
+  .tsp-import-confirm-actions form,
+  .tsp-import-confirm-actions button {
+    width: 100%;
+  }
+}
