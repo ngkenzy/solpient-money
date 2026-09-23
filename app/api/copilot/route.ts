@@ -10,6 +10,7 @@ import { getMoneyAutopilotBriefing } from "@/lib/money-autopilot";
 import { buildPortfolioIntelligence } from "@/lib/portfolio-intelligence";
 import { requireMoneyDataset } from "@/lib/money-data";
 import { loadResearchSnapshots } from "@/lib/research";
+import { getDecisionChange, getDecisionJournal } from "@/lib/portfolio-history";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -74,6 +75,120 @@ export async function POST(request: Request) {
         { error: "Ask a financial question first." },
         { status: 400 }
       );
+    }
+
+    if (
+      /last decision|decision journal|since my decision|since i decided|what changed since.*decision/i.test(
+        question
+      )
+    ) {
+      const moneyContext =
+        await requireMoneyDataset();
+      const ownedTickers =
+        moneyContext.dataset.holdings
+          .filter(
+            (holding) =>
+              holding.kind === "stock"
+          )
+          .map(
+            (holding) =>
+              holding.ticker.toUpperCase()
+          );
+
+      const explicitTicker =
+        ownedTickers.find(
+          (ticker) =>
+            new RegExp(
+              `\\b${ticker.replace(/[.*+?^$\{\}()|[\\]\\\\]/g, "\\    if (
+      /portfolio intelligence|which holdings need review|which stocks need review|portfolio risk|portfolio concentration|research conflict|thesis risk|valuation conflict/i.test(
+        question
+      )
+    ) {")}\\b`,
+              "i"
+            ).test(question)
+        ) ?? null;
+
+      const decisions =
+        explicitTicker
+          ? []
+          : await getDecisionJournal(1);
+      const ticker =
+        explicitTicker ??
+        decisions[0]?.ticker ??
+        null;
+
+      if (!ticker) {
+        return NextResponse.json({
+          answer:
+            "No V1.6 investment decision has been recorded yet. Open Decision Journal to create the first decision-time baseline.",
+          facts: [],
+          calculation:
+            "V1.6 compares the latest position/Research snapshot with the snapshot attached to your latest recorded decision.",
+          intent: "decision_history",
+          engine: "deterministic",
+          model: null,
+        });
+      }
+
+      const change =
+        await getDecisionChange(
+          ticker
+        );
+
+      const signed = (
+        value: number | null,
+        suffix = "%"
+      ) =>
+        value == null
+          ? "—"
+          : `${value >= 0 ? "+" : ""}${value.toFixed(
+              1
+            )}${suffix}`;
+
+      return NextResponse.json({
+        answer: change.summary,
+        facts: [
+          {
+            label: "Ticker",
+            value: ticker,
+          },
+          {
+            label: "Last decision",
+            value:
+              change.decision?.decisionType.replaceAll(
+                "_",
+                " "
+              ) ?? "None",
+          },
+          {
+            label: "Price change",
+            value: signed(
+              change.priceChangePct
+            ),
+          },
+          {
+            label: "Weight change",
+            value: signed(
+              change.weightChangePctPoints,
+              " pts"
+            ),
+          },
+          {
+            label: "Evidence change",
+            value:
+              change.evidenceChange == null
+                ? "—"
+                : `${change.evidenceChange >= 0 ? "+" : ""}${change.evidenceChange.toFixed(
+                    0
+                  )}`,
+          },
+        ],
+        calculation:
+          "Latest V1.6 daily position/Research snapshot compared with the exact snapshot attached to your latest human-authored investment decision.",
+        intent: "decision_history",
+        engine: "deterministic",
+        model: null,
+      });
     }
 
     if (
