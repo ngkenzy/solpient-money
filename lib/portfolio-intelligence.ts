@@ -155,9 +155,16 @@ function thesisNeedsReview(
   const health = snapshot.thesis_health
     .trim()
     .toLowerCase();
+  const weakenedChange =
+    snapshot.what_changed.some(
+      (change) =>
+        String(change.direction ?? "")
+          .toLowerCase() === "weakened"
+    );
 
   return (
     snapshot.thesis_weakened_count > 0 ||
+    weakenedChange ||
     [
       "watch",
       "monitor",
@@ -175,9 +182,18 @@ function thesisCritical(
   const health = snapshot.thesis_health
     .trim()
     .toLowerCase();
+  const highMaterialityWeakening =
+    snapshot.what_changed.some(
+      (change) =>
+        String(change.direction ?? "")
+          .toLowerCase() === "weakened" &&
+        String(change.materiality ?? "")
+          .toLowerCase() === "high"
+    );
 
   return (
     snapshot.thesis_weakened_count >= 2 ||
+    highMaterialityWeakening ||
     [
       "at_risk",
       "at risk",
@@ -507,6 +523,7 @@ export function buildPortfolioIntelligence(
         .singleStockReviewPct;
 
     if (
+      research.connected &&
       !position.researchCovered &&
       materialWeight
     ) {
