@@ -1185,7 +1185,7 @@ A user can record one of these human-authored labels:
 - Watch
 - No action
 
-Before saving a decision, Solpient captures the current V1.6 portfolio/Research state and links the journal entry to that snapshot. The optional note records the user's own reasoning or uncertainty.
+Before saving a decision, Solpient captures the current V1.6 portfolio/Research state, links the journal entry to that daily snapshot, and freezes an independent JSON copy of the decision-time evidence. A later same-day Autopilot refresh therefore cannot rewrite what was known when the decision was recorded. The optional note records the user's own reasoning or uncertainty.
 
 Portfolio Action Center items include a **Record decision** path that preselects the affected ticker and links the journal record back to the Action Center item after household ownership validation.
 
