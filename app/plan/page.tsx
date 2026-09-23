@@ -17,6 +17,7 @@ import {
 } from "@/lib/financial-plan-engine";
 import { money } from "@/lib/finance";
 import { requireMoneyDataset } from "@/lib/money-data";
+import { updatePlanPolicy } from "./actions";
 
 export const dynamic = "force-dynamic";
 
@@ -303,8 +304,8 @@ export default async function PlanPage() {
             <span className="card-kicker">HOUSEHOLD POLICY</span>
             <h2>The rules behind the plan</h2>
             <p className="empty-copy">
-              Household assumptions are separated from V1.1 plan-engine policies so the logic is
-              inspectable rather than hidden inside an AI answer.
+              Household assumptions are editable. V1.1 engine policies such as the 12-month reserve
+              catch-up and high-interest payoff horizon remain explicit system rules.
             </p>
           </div>
         </div>
@@ -318,6 +319,71 @@ export default async function PlanPage() {
             </div>
           ))}
         </div>
+
+        <form className="plan-policy-form" action={updatePlanPolicy}>
+          <label>
+            <span>Emergency reserve months</span>
+            <input
+              name="emergency_fund_target_months"
+              type="number"
+              min="0"
+              max="60"
+              step="0.5"
+              defaultValue={context.dataset.householdPlan.emergencyFundTargetMonths}
+              required
+            />
+          </label>
+          <label>
+            <span>High-interest APR threshold</span>
+            <input
+              name="high_interest_debt_apr_pct"
+              type="number"
+              min="0"
+              max="100"
+              step="0.1"
+              defaultValue={context.dataset.householdPlan.highInterestDebtAprPct}
+              required
+            />
+          </label>
+          <label>
+            <span>Target retirement age</span>
+            <input
+              name="target_retirement_age"
+              type="number"
+              min="19"
+              max="100"
+              step="1"
+              defaultValue={context.dataset.householdPlan.targetRetirementAge}
+              required
+            />
+          </label>
+          <label>
+            <span>Expected annual return %</span>
+            <input
+              name="expected_annual_return_pct"
+              type="number"
+              min="-50"
+              max="50"
+              step="0.1"
+              defaultValue={context.dataset.householdPlan.expectedAnnualReturnPct}
+              required
+            />
+          </label>
+          <label>
+            <span>Retirement target</span>
+            <input
+              name="target_retirement_assets"
+              type="number"
+              min="0"
+              step="1000"
+              defaultValue={context.dataset.householdPlan.targetRetirementAssets}
+              required
+            />
+          </label>
+          <button className="data-submit" type="submit">
+            Save household policy
+          </button>
+        </form>
       </section>
     </div>
   );
