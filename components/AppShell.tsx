@@ -14,6 +14,7 @@ import {
   CreditCard,
   Goal,
   Gauge,
+  ListChecks,
   Home,
   LineChart,
   PlugZap,
@@ -55,6 +56,7 @@ const sections: Array<{ label?: string; items: NavItem[] }> = [
   {
     label: "PLAN",
     items: [
+      { href: "/plan", label: "Financial Plan", icon: ListChecks },
       { href: "/retirement", label: "Retirement", icon: PiggyBank },
       { href: "/goals", label: "Goals", icon: Goal },
       { href: "/debt", label: "Debt", icon: CreditCard },
@@ -131,7 +133,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
               <Link href="/research">Research</Link>
               <Link className={pathname === "/research" ? "" : "selected"} href="/">Money</Link>
             </div>
-            <span className="global-sandbox-badge">LOCAL POSTGRES · MONEY V1.0</span>
+            <span className="global-sandbox-badge">LOCAL POSTGRES · MONEY V1.1</span>
           </div>
 
           <div className="top-actions">
