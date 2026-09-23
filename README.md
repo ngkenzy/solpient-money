@@ -1238,3 +1238,100 @@ npm run local:verify-release
 
 to apply migrations and run the V1.6 release gate locally.
 
+## V1.7 Military TSP Tracker
+
+V1.7 adds a local-first TSP planning workspace for Uniformed Service members at:
+
+```text
+/tsp
+```
+
+The tracker stores no TSP.gov username or password and does not change payroll or TSP elections.
+
+### What it tracks
+
+- Traditional TSP balance;
+- Roth TSP balance;
+- outstanding TSP loan balance;
+- employee contributions YTD;
+- Service Automatic (1%) contributions YTD;
+- Service Matching contributions YTD;
+- G, F, C, S, I and one current Lifecycle fund balance;
+- dated TSP history;
+- retirement system (BRS / legacy);
+- service component;
+- service-entry / PEBD date;
+- age at year-end;
+- annual basic pay;
+- Traditional and Roth basic-pay contribution percentages;
+- outside 401(k)-type elective deferrals YTD;
+- prior-year plan wages for the 2026 Roth catch-up rule.
+
+### 2026 rules encoded
+
+V1.7 carries explicitly dated 2026 constants rather than pretending tax limits never change:
+
+- regular employee elective-deferral limit: $24,500;
+- age-50+ catch-up: $8,000;
+- age 60–63 higher catch-up: $11,250;
+- defined-contribution annual-additions limit: $72,000;
+- prior-year wage threshold used by the 2026 Roth catch-up rule: $150,000.
+
+Traditional and Roth TSP employee contributions share the employee elective-deferral limit. Entered outside-plan elective deferrals are also deducted from remaining room because elective deferrals across applicable employer plans can share the annual limit.
+
+### BRS logic
+
+For a BRS profile, V1.7 models:
+
+- Service Automatic 1% after the applicable 60-day service threshold;
+- matching after 24 months of service;
+- 100% matching on the first 3% contributed;
+- 50% matching on the next 2%;
+- a maximum 4% Service Matching contribution;
+- the 5% member-contribution threshold for the full matching structure;
+- automatic/matching eligibility through the pay period around 26 years of service.
+
+The tracker combines Traditional + Roth member contribution percentages when evaluating BRS matching.
+
+### Contribution pace
+
+V1.7 calculates:
+
+- employee limit used;
+- remaining annual employee room;
+- current estimated monthly contribution from basic pay;
+- monthly amount needed to max by year-end;
+- estimated basic-pay percentage needed to max;
+- projected year-end employee deferrals;
+- possible early-max risk while BRS matching is still relevant.
+
+These are planning estimates. Payroll and TSP records remain authoritative.
+
+### Solpient integration
+
+After a TSP profile is configured, material TSP signals can flow into:
+
+```text
+Military TSP
+    ↓
+Autopilot
+    ↓
+Action Center
+```
+
+Money Copilot supports deterministic questions including:
+
+```text
+Am I on pace to max my TSP?
+Am I getting the full BRS match?
+```
+
+The TSP tracker does not add its balance to net worth by itself, preventing accidental double counting when the same TSP is already represented by an existing retirement account.
+
+GitHub Actions remain manual-only. Use the local release gate:
+
+```bash
+npm run local:repair
+npm run local:verify-release
+```
+
