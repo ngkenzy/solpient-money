@@ -1,6 +1,6 @@
 {
   "name": "solpient-money",
-  "version": "0.9.4",
+  "version": "1.0.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -31,7 +31,8 @@
     "test:v091": "node scripts/test-v091-review-reconcile.mjs",
     "test:v092": "node scripts/test-v092-cash-flow-intelligence.mjs",
     "test:v093": "node scripts/test-v093-financial-health-engine.mjs",
-    "test:v094": "node scripts/test-v094-forecast-scenario-engine.mjs"
+    "test:v094": "node scripts/test-v094-forecast-scenario-engine.mjs",
+    "test:v10": "node scripts/test-v10-local-money-copilot.mjs"
   },
   "dependencies": {
     "lucide-react": "^0.468.0",
