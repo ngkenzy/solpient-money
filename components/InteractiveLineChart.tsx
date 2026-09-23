@@ -69,7 +69,7 @@ export default function InteractiveLineChart({
   const yAt = (value: number) =>
     height - padY - ((value - low) / Math.max(high - low, 1)) * (height - padY * 2);
 
-  const colors = ["#1769e0", "#8a99ad"];
+  const colors = ["#1769e0", "#8a99ad", "#2f8d68"];
   const activeIndex = hoverIndex ?? visible.length - 1;
   const activePoint = visible[activeIndex];
 
