@@ -48,6 +48,7 @@ export type InvestmentDecision = {
   note: string | null;
   actionItemId: string | null;
   positionSnapshotId: string | null;
+  baselineSnapshot: PortfolioHistoryPoint | null;
   decidedAt: string;
 };
 
@@ -242,6 +243,16 @@ function decisionRow(
       row.position_snapshot_id == null
         ? null
         : String(row.position_snapshot_id),
+    baselineSnapshot:
+      row.baseline_snapshot &&
+      typeof row.baseline_snapshot === "object" &&
+      Object.keys(
+        row.baseline_snapshot as Record<string, unknown>
+      ).length
+        ? historyPoint(
+            row.baseline_snapshot as Record<string, unknown>
+          )
+        : null,
     decidedAt: isoTimestamp(
       row.decided_at
     ),
@@ -465,6 +476,8 @@ export async function createInvestmentDecision({
         validatedActionItemId,
       position_snapshot_id:
         latest?.id ?? null,
+      baseline_snapshot:
+        latest ?? {},
       decided_at:
         new Date().toISOString(),
     });
@@ -647,11 +660,12 @@ export async function getDecisionChange(
       : null;
 
   const baseline =
-    decision
+    decision?.baselineSnapshot ??
+    (decision
       ? await snapshotById(
           decision.positionSnapshotId
         )
-      : null;
+      : null);
 
   const current =
     currentResult.data
