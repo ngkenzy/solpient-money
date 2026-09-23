@@ -45,6 +45,7 @@ create table if not exists public.investment_decisions (
   note text,
   action_item_id uuid references public.money_action_items(id) on delete set null,
   position_snapshot_id uuid references public.portfolio_position_snapshots(id) on delete set null,
+  baseline_snapshot jsonb not null default '{}'::jsonb,
   decided_at timestamptz not null default now(),
   created_at timestamptz not null default now()
 );
