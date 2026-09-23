@@ -56,7 +56,8 @@
     "test:v172": "node scripts/test-v172-tsp-auto-sync.mjs",
     "test:v173": "node scripts/test-v173-tsp-reliability.mjs",
     "test:v174": "node scripts/test-v174-tsp-investment-display.mjs",
-    "test:v175": "node scripts/test-v175-tsp-snapshot-revisions.mjs"
+    "test:v175": "node scripts/test-v175-tsp-snapshot-revisions.mjs",
+    "test:v18:workflow": "node scripts/test-v18-tsp-statement-import-workflow.mjs"
   },
   "dependencies": {
     "lucide-react": "^0.468.0",
