@@ -84,6 +84,14 @@ export async function saveTspProfile(formData: FormData) {
   revalidatePath("/tsp");
 }
 
+type FundInsertRow = {
+  household_id: string;
+  snapshot_id: string;
+  fund_code: string;
+  fund_name: string;
+  balance_cents: number;
+};
+
 const CORE_FUNDS = [
   ["G", "Government Securities Investment Fund"],
   ["F", "Fixed Income Index Investment Fund"],
@@ -156,7 +164,7 @@ export async function saveTspSnapshot(formData: FormData) {
     );
   }
 
-  const fundRows = CORE_FUNDS.flatMap(([code, name]) => {
+  const fundRows: FundInsertRow[] = CORE_FUNDS.flatMap(([code, name]) => {
     const cents = dollarsToCents(formData.get(`fund${code}`));
     return cents > 0
       ? [
