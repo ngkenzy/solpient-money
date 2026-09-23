@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
+  Activity,
   BarChart3,
   Bell,
   Bot,
@@ -57,6 +58,7 @@ const sections: Array<{ label?: string; items: NavItem[] }> = [
     label: "PLAN",
     items: [
       { href: "/plan", label: "Financial Plan", icon: ListChecks },
+      { href: "/monitor", label: "Plan Monitor", icon: Activity },
       { href: "/retirement", label: "Retirement", icon: PiggyBank },
       { href: "/goals", label: "Goals", icon: Goal },
       { href: "/debt", label: "Debt", icon: CreditCard },
@@ -133,7 +135,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
               <Link href="/research">Research</Link>
               <Link className={pathname === "/research" ? "" : "selected"} href="/">Money</Link>
             </div>
-            <span className="global-sandbox-badge">LOCAL POSTGRES · MONEY V1.1</span>
+            <span className="global-sandbox-badge">LOCAL POSTGRES · MONEY V1.2</span>
           </div>
 
           <div className="top-actions">
