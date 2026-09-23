@@ -461,26 +461,34 @@ export default async function TspPage() {
               Current TSP investment mix
             </h2>
           </div>
-          <Landmark size={18} />
+          <div className="tsp-fund-price-date">
+            <Landmark size={18} />
+            <span>
+              {tracker.latestPriceDate
+                ? `Official prices · ${tracker.latestPriceDate}`
+                : "Official prices not synced"}
+            </span>
+          </div>
         </div>
 
         {tracker.funds.length ? (
           <div className="tsp-fund-list">
-            {tracker.funds.map(
-              (fund) => (
+            {tracker.funds.map((fund) => {
+              const live = tracker.estimatedFunds.find(
+                (item) => item.fundCode === fund.code
+              );
+
+              return (
                 <div
                   className="tsp-fund-row"
-                  key={
-                    fund.code
-                  }
+                  key={fund.code}
                 >
                   <span className="tsp-fund-code">
                     {fund.code}
                   </span>
-                  <div>
-                    <strong>
-                      {fund.name}
-                    </strong>
+
+                  <div className="tsp-fund-main">
+                    <strong>{fund.name}</strong>
                     <div className="tsp-fund-track">
                       <span
                         style={{
@@ -492,19 +500,51 @@ export default async function TspPage() {
                       />
                     </div>
                   </div>
-                  <strong>
-                    {pct(
-                      fund.allocationPct
-                    )}
-                  </strong>
-                  <span>
-                    {money(
-                      fund.balance
-                    )}
-                  </span>
+
+                  <div className="tsp-fund-metric">
+                    <span>Allocation</span>
+                    <strong>{pct(fund.allocationPct)}</strong>
+                  </div>
+
+                  <div className="tsp-fund-metric">
+                    <span>Snapshot balance</span>
+                    <strong>{money(fund.balance)}</strong>
+                  </div>
+
+                  <div className="tsp-fund-metric">
+                    <span>Latest share price</span>
+                    <strong>
+                      {live?.latestSharePrice == null
+                        ? "—"
+                        : `${live.latestSharePrice.toFixed(4)}`}
+                    </strong>
+                    <small>
+                      {live?.shares == null
+                        ? live?.latestPriceDate ?? "Not synced"
+                        : `${live.shares.toLocaleString("en-US", {
+                            maximumFractionDigits: 4,
+                          })} shares · ${live.latestPriceDate ?? "—"}`}
+                    </small>
+                  </div>
+
+                  <div className="tsp-fund-metric tsp-fund-current-value">
+                    <span>Estimated current value</span>
+                    <strong>
+                      {live?.estimatedCurrentValue == null
+                        ? "—"
+                        : money(live.estimatedCurrentValue)}
+                    </strong>
+                    <small>
+                      {live?.estimatedChangePct == null
+                        ? "Daily official TSP price"
+                        : `${live.estimatedChangePct >= 0 ? "+" : ""}${live.estimatedChangePct.toFixed(
+                            2
+                          )}% vs snapshot`}
+                    </small>
+                  </div>
                 </div>
-              )
-            )}
+              );
+            })}
           </div>
         ) : (
           <div className="action-empty">
