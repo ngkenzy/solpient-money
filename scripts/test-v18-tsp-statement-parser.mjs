@@ -64,6 +64,36 @@ check("unknown fields recorded and ignored", unknown.ok && unknown.unknownFields
 const structured = parseTspStatement(await fixture("structured.txt"));
 check("structured text source kind", structured.sourceKind === "structured_text" && structured.ok);
 
+const structuredComma = parseTspStatement(
+  "Traditional: $10,000.00\nRoth: $2,000.00",
+  "statement.txt"
+);
+check(
+  "txt source stays structured even when amounts contain commas",
+  structuredComma.sourceKind === "structured_text" &&
+    structuredComma.candidate.traditionalBalanceCents === 1000000
+);
+
+const quotedCsv = parseTspStatement(
+  'field,value\nTraditional Balance,"$1,234.56"\nRoth Balance,"$200.00"',
+  "statement.csv"
+);
+check(
+  "quoted CSV amounts with thousands separators parse correctly",
+  quotedCsv.sourceKind === "csv" &&
+    quotedCsv.candidate.traditionalBalanceCents === 123456 &&
+    quotedCsv.candidate.rothBalanceCents === 20000
+);
+
+const invalidDate = parseTspStatement(
+  "Statement Date: 2026-02-31",
+  "statement.txt"
+);
+check(
+  "invalid calendar dates are rejected",
+  invalidDate.errors.some((e) => e.code === "malformed_date")
+);
+
 const empty = parseTspStatement("   ");
 check("empty source errors", !empty.ok && empty.errors.some((e) => e.code === "empty_source"));
 
