@@ -15,8 +15,20 @@ const tspNavIndex = files.shell.indexOf(tspNav);
 const investIndex = files.shell.indexOf('label: "INVEST"');
 const planIndex = files.shell.indexOf('label: "PLAN"');
 
+function atLeast174(version) {
+  const [major = 0, minor = 0, patch = 0] = String(version)
+    .split(".")
+    .map((value) => Number.parseInt(value, 10) || 0);
+
+  return (
+    major > 1 ||
+    (major === 1 &&
+      (minor > 7 || (minor === 7 && patch >= 4)))
+  );
+}
+
 const checks = [
-  ["release is V1.7.4", pkg.version === "1.7.4"],
+  ["release includes V1.7.4 or newer", atLeast174(pkg.version)],
   [
     "Military TSP appears once and under Invest",
     tspNavIndex > investIndex &&
