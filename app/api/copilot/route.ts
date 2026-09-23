@@ -7,6 +7,9 @@ import {
 import { getOllamaStatus, runOllamaChat } from "@/lib/ollama";
 import { getPlanMonitoring } from "@/lib/plan-monitor-engine";
 import { getMoneyAutopilotBriefing } from "@/lib/money-autopilot";
+import { buildPortfolioIntelligence } from "@/lib/portfolio-intelligence";
+import { requireMoneyDataset } from "@/lib/money-data";
+import { loadResearchSnapshots } from "@/lib/research";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -71,6 +74,66 @@ export async function POST(request: Request) {
         { error: "Ask a financial question first." },
         { status: 400 }
       );
+    }
+
+    if (
+      /portfolio intelligence|which holdings need review|which stocks need review|portfolio risk|portfolio concentration|research conflict|thesis risk|valuation conflict/i.test(
+        question
+      )
+    ) {
+      const moneyContext =
+        await requireMoneyDataset();
+      const tickers = moneyContext.dataset.holdings
+        .filter((holding) => holding.kind === "stock")
+        .map((holding) => holding.ticker);
+      const research =
+        await loadResearchSnapshots(tickers);
+      const report =
+        buildPortfolioIntelligence(
+          moneyContext.dataset,
+          research
+        );
+      const top = report.signals.find(
+        (signal) =>
+          signal.level === "critical" ||
+          signal.level === "watch"
+      );
+      const topPosition =
+        report.positions[0];
+
+      return NextResponse.json({
+        answer: top
+          ? `V1.5 shows ${report.criticalCount} critical and ${report.watchCount} review item(s). ${top.title}. ${top.detail}`
+          : "V1.5 does not detect a material conflict between current portfolio exposure and the available published Research evidence.",
+        facts: [
+          {
+            label: "Research coverage",
+            value: `${report.coveragePct.toFixed(0)}%`,
+          },
+          {
+            label: "Top-three weight",
+            value: `${report.topThreeStockWeightPct.toFixed(1)}%`,
+          },
+          {
+            label: "Highest review priority",
+            value: topPosition
+              ? `${topPosition.ticker} · ${topPosition.reviewPriority}`
+              : "—",
+          },
+          {
+            label: "Evidence confidence",
+            value:
+              report.weightedEvidenceConfidence == null
+                ? "—"
+                : `${report.weightedEvidenceConfidence.toFixed(0)}/100`,
+          },
+        ],
+        calculation:
+          "Position size and household concentration thresholds combined with published Research thesis health, base valuation, evidence confidence, decision readiness, and evidence age. Review priority is not a buy/sell score.",
+        intent: "portfolio_intelligence",
+        engine: "deterministic",
+        model: null,
+      });
     }
 
     if (
