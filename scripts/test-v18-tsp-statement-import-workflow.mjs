@@ -29,6 +29,10 @@ const reviewPage = await readFile(
   "app/tsp/import/[id]/page.tsx",
   "utf8"
 );
+const localClient = await readFile(
+  "lib/local-db/client.ts",
+  "utf8"
+);
 
 const staticChecks = [
   [
@@ -38,6 +42,10 @@ const staticChecks = [
       /createHash\(\s*["']sha256["']\s*\)/.test(storage) &&
       !migration.includes("source_text") &&
       !migration.includes("source_bytes"),
+  ],
+  [
+    "local DB client registers statement imports",
+    localClient.includes('"tsp_statement_imports"'),
   ],
   [
     "parser provenance is retained",
