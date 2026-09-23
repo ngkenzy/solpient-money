@@ -299,7 +299,7 @@ function emptyCandidate(): TspStatementCandidate {
 
 export function parseTspStatement(
   source: string,
-  filename = "statement.txt"
+  filename = ""
 ): TspStatementParseResult {
   const errors: TspStatementIssue[] = [];
   const warnings: TspStatementIssue[] = [];
