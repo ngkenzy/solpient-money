@@ -13,6 +13,7 @@ import PageHeader from "@/components/PageHeader";
 import InteractiveLineChart from "@/components/InteractiveLineChart";
 import { money } from "@/lib/finance";
 import { getTspTracker } from "@/lib/tsp-tracker";
+import { localCalendarDateKey } from "@/lib/local-calendar-date";
 import {
   saveTspProfile,
   saveTspSnapshot,
@@ -59,7 +60,7 @@ export default async function TspPage() {
     }));
 
   const snapshotDefaultDate =
-    new Date().toISOString().slice(0, 10);
+    localCalendarDateKey(new Date());
 
   return (
     <div className="page tsp-page">
