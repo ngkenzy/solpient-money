@@ -110,6 +110,15 @@ function dateOnly(value: unknown) {
     : parsed.toISOString().slice(0, 10);
 }
 
+function daysOfService(entryDate: string | null, now: Date) {
+  if (!entryDate) return null;
+  const start = new Date(`${entryDate}T00:00:00Z`);
+  if (Number.isNaN(start.getTime()) || start > now) return null;
+  return Math.floor(
+    (now.getTime() - start.getTime()) / 86_400_000
+  );
+}
+
 function monthsOfService(entryDate: string | null, now: Date) {
   if (!entryDate) return null;
   const start = new Date(`${entryDate}T00:00:00`);
@@ -332,13 +341,27 @@ export async function getTspTracker(
     profile?.serviceEntryDate ?? null,
     now
   );
+  const serviceDays = daysOfService(
+    profile?.serviceEntryDate ?? null,
+    now
+  );
   const isBrs = profile?.retirementSystem === "brs";
-  const under26Years =
-    serviceMonths == null ? false : serviceMonths < 26 * 12;
+  const through26YearPayPeriod =
+    serviceMonths == null ? false : serviceMonths <= 26 * 12;
   const brsAutomaticEligible =
-    Boolean(isBrs && serviceMonths != null && serviceMonths >= 2 && under26Years);
+    Boolean(
+      isBrs &&
+      serviceDays != null &&
+      serviceDays >= 60 &&
+      through26YearPayPeriod
+    );
   const brsMatchingEligible =
-    Boolean(isBrs && serviceMonths != null && serviceMonths >= 24 && under26Years);
+    Boolean(
+      isBrs &&
+      serviceMonths != null &&
+      serviceMonths >= 24 &&
+      through26YearPayPeriod
+    );
   const brsAutomaticPct = brsAutomaticEligible ? 1 : 0;
   const brsMatch = brsMatchingEligible
     ? brsMatchPct(totalContributionPct)
