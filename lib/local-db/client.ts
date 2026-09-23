@@ -53,6 +53,7 @@ const TABLES = new Set([
   "truth_merchant_rules",
   "account_merge_audit",
   "financial_plan_snapshots",
+  "money_autopilot_runs",
 ]);
 
 const DEFAULT_CONFLICTS: Record<string, string[]> = {
