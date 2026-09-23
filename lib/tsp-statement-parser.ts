@@ -105,16 +105,38 @@ function parseMoneyToCents(raw: string): { ok: true; cents: number } | { ok: fal
   return { ok: true, cents: negative ? -cents : cents };
 }
 
+function validCalendarDate(value: string) {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
+
+  const [year, month, day] = value
+    .split("-")
+    .map((part) => Number(part));
+
+  const date = new Date(
+    Date.UTC(year, month - 1, day)
+  );
+
+  return (
+    date.getUTCFullYear() === year &&
+    date.getUTCMonth() === month - 1 &&
+    date.getUTCDate() === day
+  );
+}
+
 function parseDate(raw: string): string | null {
   const value = raw.trim();
-  if (/^\d{4}-\d{2}-\d{2}$/.test(value)) return value;
+
+  if (validCalendarDate(value)) return value;
+
   const mdy = value.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
-  if (mdy) {
-    const month = mdy[1].padStart(2, "0");
-    const day = mdy[2].padStart(2, "0");
-    return `${mdy[3]}-${month}-${day}`;
-  }
-  return null;
+  if (!mdy) return null;
+
+  const normalized =
+    `${mdy[3]}-${mdy[1].padStart(2, "0")}-${mdy[2].padStart(2, "0")}`;
+
+  return validCalendarDate(normalized)
+    ? normalized
+    : null;
 }
 
 function detectSourceKind(text: string): TspStatementSourceKind {
@@ -123,31 +145,78 @@ function detectSourceKind(text: string): TspStatementSourceKind {
   return first.includes(",") ? "csv" : "structured_text";
 }
 
+function parseCsvLine(line: string) {
+  const columns: string[] = [];
+  let current = "";
+  let quoted = false;
+
+  for (let index = 0; index < line.length; index += 1) {
+    const char = line[index];
+
+    if (char === '"') {
+      if (quoted && line[index + 1] === '"') {
+        current += '"';
+        index += 1;
+      } else {
+        quoted = !quoted;
+      }
+      continue;
+    }
+
+    if (char === "," && !quoted) {
+      columns.push(current.trim());
+      current = "";
+      continue;
+    }
+
+    current += char;
+  }
+
+  columns.push(current.trim());
+  return columns;
+}
+
 function parseCsvRecords(text: string) {
-  const lines = text.split(/\r?\n/).map((line) => line.trim()).filter(Boolean);
-  if (lines.length < 2) return [] as Array<{ key: string; value: string }>;
+  const lines = text
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter(Boolean);
 
-  const header = lines[0].split(",").map((part) => part.trim());
+  if (lines.length < 2) {
+    return [] as Array<{ key: string; value: string }>;
+  }
+
+  const header = parseCsvLine(lines[0]);
   const headerNorm = header.map(normalizeKey);
-  const looksWide =
-    headerNorm.includes("field") ||
-    headerNorm.includes("label") ||
-    headerNorm.includes("name");
+  const fieldValueShape =
+    header.length >= 2 &&
+    (
+      headerNorm[0] === "field" ||
+      headerNorm[0] === "label" ||
+      headerNorm[0] === "name"
+    ) &&
+    (
+      headerNorm[1] === "value" ||
+      headerNorm[1] === "amount" ||
+      headerNorm[1] === "balance"
+    );
 
-  if (looksWide && header.length >= 2) {
-    const keyIndex = 0;
-    const valueIndex = header.length > 1 ? 1 : 0;
+  if (fieldValueShape) {
     return lines.slice(1).map((line) => {
-      const cols = line.split(",");
+      const cols = parseCsvLine(line);
+
       return {
-        key: (cols[keyIndex] ?? "").trim(),
-        value: (cols[valueIndex] ?? "").trim(),
+        key: (cols[0] ?? "").trim(),
+        // A human-exported field,value file sometimes leaves thousands
+        // separators unquoted. Preserve the remainder as the value.
+        value: cols.slice(1).join(",").trim(),
       };
     });
   }
 
   if (lines.length === 2 && header.length > 1) {
-    const values = lines[1].split(",").map((part) => part.trim());
+    const values = parseCsvLine(lines[1]);
+
     return header.map((key, index) => ({
       key,
       value: values[index] ?? "",
@@ -155,11 +224,11 @@ function parseCsvRecords(text: string) {
   }
 
   return lines.slice(1).map((line) => {
-    const idx = line.indexOf(",");
-    if (idx < 0) return { key: line, value: "" };
+    const cols = parseCsvLine(line);
+
     return {
-      key: line.slice(0, idx).trim(),
-      value: line.slice(idx + 1).trim(),
+      key: (cols[0] ?? "").trim(),
+      value: cols.slice(1).join(",").trim(),
     };
   });
 }
