@@ -67,9 +67,8 @@ const staticChecks = [
   ],
   [
     "duplicate source files are keyed by SHA-256",
-    migration.includes(
-      "unique (household_id, source_content_sha256)"
-    ) &&
+    migration.includes("source_content_sha256") &&
+      migration.includes("parser_version") &&
       storage.includes("duplicate: true"),
   ],
   [
@@ -370,7 +369,7 @@ try {
           source_content_sha256,
           parser_version
         )
-        values ($1, 'structured_text', $2, 'test-parser-v2')
+        values ($1, 'structured_text', $2, 'test-parser-v1')
       `,
       [householdId, sourceHash]
     );
@@ -380,7 +379,27 @@ try {
 
   if (!duplicateBlocked) {
     throw new Error(
-      "Duplicate statement content hash was accepted."
+      "Duplicate statement content for the same parser version was accepted."
+    );
+  }
+
+  const reparsed = await admin.query(
+    `
+      insert into public.tsp_statement_imports(
+        household_id,
+        source_kind,
+        source_content_sha256,
+        parser_version
+      )
+      values ($1, 'structured_text', $2, 'test-parser-v2')
+      returning id
+    `,
+    [householdId, sourceHash]
+  );
+
+  if (!reparsed.rows[0]?.id) {
+    throw new Error(
+      "A newer parser version could not reprocess the same source file."
     );
   }
 
@@ -400,7 +419,7 @@ try {
     "✓ confirmed import cannot be mutated"
   );
   console.log(
-    "✓ duplicate statement content is rejected"
+    "✓ same-parser duplicate is blocked while newer parser reparse is allowed"
   );
 } finally {
   if (householdId) {
