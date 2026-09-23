@@ -2,11 +2,13 @@
 
 import Link from "next/link";
 import AutopilotDailyRunner from "@/components/AutopilotDailyRunner";
+import ActionCenterNavBadge from "@/components/ActionCenterNavBadge";
 import { usePathname } from "next/navigation";
 import {
   Activity,
   BarChart3,
   Bell,
+  BellRing,
   Bot,
   BrainCircuit,
   BriefcaseBusiness,
@@ -70,6 +72,7 @@ const sections: Array<{ label?: string; items: NavItem[] }> = [
   {
     label: "INTELLIGENCE",
     items: [
+      { href: "/action-center", label: "Action Center", icon: BellRing },
       { href: "/autopilot", label: "Autopilot", icon: Radar },
       { href: "/copilot", label: "Money Copilot", icon: Bot },
       { href: "/health", label: "Financial Health", icon: Gauge },
@@ -117,7 +120,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
                   >
                     <Icon size={18} strokeWidth={1.8} />
                     <span>{item.label}</span>
-                    {item.badge ? <span className="side-badge">{item.badge}</span> : null}
+                    {item.href === "/action-center" ? <ActionCenterNavBadge /> : item.badge ? <span className="side-badge">{item.badge}</span> : null}
                   </Link>
                 );
               })}
@@ -139,7 +142,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
               <Link href="/research">Research</Link>
               <Link className={pathname === "/research" ? "" : "selected"} href="/">Money</Link>
             </div>
-            <span className="global-sandbox-badge">LOCAL POSTGRES · MONEY V1.3</span>
+            <span className="global-sandbox-badge">LOCAL POSTGRES · MONEY V1.4</span>
           </div>
 
           <div className="top-actions">
@@ -147,9 +150,13 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
               <Search size={16} />
               <span>Search...</span>
             </div>
-            <button className="icon-button" aria-label="Notifications">
+            <Link
+              className="icon-button"
+              aria-label="Open Action Center"
+              href="/action-center"
+            >
               <Bell size={18} />
-            </button>
+            </Link>
             <div className="profile">
               <span className="avatar">SM</span>
               <span>Money Household</span>
