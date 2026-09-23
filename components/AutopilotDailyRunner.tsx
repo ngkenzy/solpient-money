@@ -7,9 +7,20 @@ import {
 } from "next/navigation";
 
 const STORAGE_KEY = "solpient-money-autopilot-last-run";
+const REFRESH_INTERVAL_MS = 4 * 60 * 60 * 1000;
 
-function todayKey() {
-  return new Date().toISOString().slice(0, 10);
+function shouldRefresh() {
+  try {
+    const raw = window.localStorage.getItem(STORAGE_KEY);
+    if (!raw) return true;
+
+    const last = Date.parse(raw);
+    if (!Number.isFinite(last)) return true;
+
+    return Date.now() - last >= REFRESH_INTERVAL_MS;
+  } catch {
+    return true;
+  }
 }
 
 export default function AutopilotDailyRunner() {
@@ -17,61 +28,74 @@ export default function AutopilotDailyRunner() {
   const router = useRouter();
 
   useEffect(() => {
-    const today = todayKey();
+    let disposed = false;
+    let activeController: AbortController | null = null;
 
-    try {
-      if (window.localStorage.getItem(STORAGE_KEY) === today) {
-        return;
-      }
-    } catch {
-      // Autopilot can still run when localStorage is unavailable.
-    }
+    const run = async () => {
+      if (disposed || !shouldRefresh()) return;
 
-    const controller = new AbortController();
+      activeController?.abort();
+      const controller = new AbortController();
+      activeController = controller;
 
-    void fetch("/api/autopilot", {
-      method: "POST",
-      headers: {
-        "content-type": "application/json",
-      },
-      body: JSON.stringify({
-        force: false,
-        runKind: "automatic",
-      }),
-      signal: controller.signal,
-    })
-      .then(async (response) => {
+      try {
+        const response = await fetch("/api/autopilot", {
+          method: "POST",
+          headers: {
+            "content-type": "application/json",
+          },
+          body: JSON.stringify({
+            force: false,
+            runKind: "automatic",
+          }),
+          signal: controller.signal,
+        });
+
         if (!response.ok) return;
 
         const body = (await response.json().catch(() => null)) as
           | { ok?: boolean }
           | null;
 
-        if (body?.ok) {
-          try {
-            window.localStorage.setItem(STORAGE_KEY, today);
-          } catch {
-            // The server-side daily idempotency gate remains authoritative.
-          }
+        if (!body?.ok || disposed) return;
 
-          window.dispatchEvent(
-            new Event("solpient:autopilot-complete")
+        try {
+          window.localStorage.setItem(
+            STORAGE_KEY,
+            new Date().toISOString()
           );
-
-          if (
-            pathname === "/autopilot" ||
-            pathname === "/action-center"
-          ) {
-            router.refresh();
-          }
+        } catch {
+          // Server-side idempotency remains authoritative.
         }
-      })
-      .catch(() => {
-        // Never interrupt normal Money navigation because an automatic
-        // intelligence refresh failed. /autopilot surfaces the error state.
-      });
 
-    return () => controller.abort();
+        window.dispatchEvent(
+          new Event("solpient:autopilot-complete")
+        );
+
+        if (
+          pathname === "/autopilot" ||
+          pathname === "/action-center" ||
+          pathname === "/tsp"
+        ) {
+          router.refresh();
+        }
+      } catch {
+        // Never interrupt normal Money navigation because a background
+        // intelligence or TSP price refresh failed.
+      }
+    };
+
+    void run();
+
+    const timer = window.setInterval(() => {
+      void run();
+    }, REFRESH_INTERVAL_MS);
+
+    return () => {
+      disposed = true;
+      activeController?.abort();
+      window.clearInterval(timer);
+    };
   }, [pathname, router]);
 
   return null;
