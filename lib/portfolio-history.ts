@@ -430,6 +430,29 @@ export async function createInvestmentDecision({
       .trim()
       .slice(0, 4000);
 
+  let validatedActionItemId: string | null = null;
+
+  if (actionItemId) {
+    const { data: actionItem, error: actionError } =
+      await supabase
+        .from("money_action_items")
+        .select("id,household_id")
+        .eq("id", actionItemId)
+        .eq("household_id", householdId)
+        .maybeSingle();
+
+    if (actionError) {
+      throw new Error(
+        `Unable to validate Action Center link: ${actionError.message}`
+      );
+    }
+
+    validatedActionItemId =
+      actionItem?.id
+        ? String(actionItem.id)
+        : null;
+  }
+
   const { error } = await supabase
     .from("investment_decisions")
     .insert({
@@ -439,7 +462,7 @@ export async function createInvestmentDecision({
       note:
         trimmedNote || null,
       action_item_id:
-        actionItemId || null,
+        validatedActionItemId,
       position_snapshot_id:
         latest?.id ?? null,
       decided_at:
