@@ -37,6 +37,7 @@ type Status = {
 };
 
 const QUICK_PROMPTS = [
+  "What changed since my last decision?",
   "Which holdings need review?",
   "Give me my daily briefing",
   "What changed since yesterday?",
