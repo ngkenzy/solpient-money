@@ -14,8 +14,10 @@ import AllocationDonut from "@/components/AllocationDonut";
 import AttentionFeed from "@/components/AttentionFeed";
 import InteractiveLineChart from "@/components/InteractiveLineChart";
 import { dataAsOf, demoRefresh } from "@/lib/demo-data";
+import { getCashFlowIntelligence } from "@/lib/cash-flow-intelligence";
+import { buildFinancialHealthEngine } from "@/lib/financial-health-engine";
 import { getFinancialSummary, getPortfolioMetrics, money } from "@/lib/finance";
-import { getAttentionFeed, getFinancialHealth } from "@/lib/intelligence";
+import { getAttentionFeed } from "@/lib/intelligence";
 import { requireMoneyDataset } from "@/lib/money-data";
 import { loadResearchSnapshots, summarizeResearchCoverage } from "@/lib/research";
 
@@ -31,7 +33,8 @@ export default async function HomePage() {
     .map((holding) => holding.ticker);
   const research = await loadResearchSnapshots(directTickers);
   const researchSummary = summarizeResearchCoverage(data.holdings, research.snapshots);
-  const health = getFinancialHealth(research.snapshots, data);
+  const cashFlowIntelligence = await getCashFlowIntelligence();
+  const health = buildFinancialHealthEngine(data, cashFlowIntelligence);
   const attention = getAttentionFeed(research.snapshots, data);
   const recent = data.transactions.slice(0, 5);
   const latestCashFlow = data.monthlyCashFlow.at(-1) ?? { label: "Current", income: 0, spending: 0 };
@@ -109,8 +112,8 @@ export default async function HomePage() {
               </div>
             ))}
           </div>
-          <Link className="attention-button" href="/insights">
-            <span>Review household intelligence</span>
+          <Link className="attention-button" href="/health">
+            <span>Open financial health</span>
             <ArrowRight size={17} />
           </Link>
         </section>
