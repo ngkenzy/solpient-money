@@ -28,6 +28,8 @@ export type TspProfile = {
 export type TspSnapshot = {
   id: string;
   date: string;
+  revision: number;
+  supersedesId: string | null;
   traditionalBalance: number;
   rothBalance: number;
   totalBalance: number;
@@ -217,6 +219,11 @@ function snapshotFromRow(row: Row): TspSnapshot {
   return {
     id: String(row.id ?? ""),
     date: dateOnly(row.snapshot_date) ?? "",
+    revision: Math.max(1, n(row.revision, 1)),
+    supersedesId:
+      row.supersedes_id == null
+        ? null
+        : String(row.supersedes_id),
     traditionalBalance,
     rothBalance,
     totalBalance: traditionalBalance + rothBalance,
@@ -250,7 +257,8 @@ export async function getTspTracker(
       .select("*")
       .eq("household_id", householdId)
       .order("snapshot_date", { ascending: false })
-      .limit(36),
+      .order("revision", { ascending: false })
+      .limit(72),
     getTspEstimatedCurrentValue(),
   ]);
 
@@ -270,8 +278,15 @@ export async function getTspTracker(
     (profileResult.data ?? null) as Row | null
   );
 
-  const history = ((snapshotsResult.data ?? []) as Row[])
+  const snapshotRows = ((snapshotsResult.data ?? []) as Row[])
     .map(snapshotFromRow);
+
+  const seenDates = new Set<string>();
+  const history = snapshotRows.filter((item) => {
+    if (seenDates.has(item.date)) return false;
+    seenDates.add(item.date);
+    return true;
+  });
 
   const snapshot = history[0] ?? null;
 

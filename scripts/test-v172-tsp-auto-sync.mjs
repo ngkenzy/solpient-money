@@ -12,8 +12,19 @@ const files = {
 
 const pkg = JSON.parse(files.packageJson);
 
-const syncIndex = files.autopilot.indexOf("await syncTspSharePrices(now)");
-const existingIndex = files.autopilot.indexOf("const existing = await todayRun");
+const runAutopilotStart = files.autopilot.indexOf(
+  "export async function runMoneyAutopilot"
+);
+const runAutopilotSource =
+  runAutopilotStart >= 0
+    ? files.autopilot.slice(runAutopilotStart)
+    : "";
+const syncIndex = runAutopilotSource.indexOf(
+  "await syncTspSharePrices(now)"
+);
+const existingIndex = runAutopilotSource.indexOf(
+  "const existing = await todayRun"
+);
 
 function atLeast172(version) {
   const [major = 0, minor = 0, patch = 0] = String(version)

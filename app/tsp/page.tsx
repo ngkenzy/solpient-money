@@ -65,7 +65,7 @@ export default async function TspPage() {
   return (
     <div className="page tsp-page">
       <PageHeader
-        eyebrow="V1.7.4 · MILITARY TSP TRACKER"
+        eyebrow="V1.7.5 · MILITARY TSP TRACKER"
         title="Track the TSP the way a service member actually needs it."
         description="Monitor Traditional and Roth balances, G/F/C/S/I/L allocation, annual IRS limits, outside-plan deferrals, BRS matching, and whether your current contribution pace is likely to max too early."
         action={
@@ -92,7 +92,7 @@ export default async function TspPage() {
           </strong>
           <small>
             {snapshot
-              ? `Account snapshot · ${snapshot.date}`
+              ? `Account snapshot · ${snapshot.date} · rev ${snapshot.revision}`
               : "Traditional + Roth"}
           </small>
         </div>
@@ -170,7 +170,9 @@ export default async function TspPage() {
             <div>
               <span>Official snapshot</span>
               <strong>{money(snapshot.totalBalance)}</strong>
-              <small>{snapshot.date}</small>
+              <small>
+                {snapshot.date} · revision {snapshot.revision}
+              </small>
             </div>
             <div>
               <span>Estimated current value</span>
@@ -275,7 +277,7 @@ export default async function TspPage() {
           <div className="bottom-note tsp-price-note">
             <RefreshCw size={15} />
             <span>
-              Per-fund estimated value = inferred fund shares × that fund's latest official TSP share price.
+              Per-fund estimated value = inferred fund shares × that fund&apos;s latest official TSP share price.
               If owned funds have different official price dates, Solpient withholds the combined estimate. Your official TSP snapshot is never overwritten.
             </span>
           </div>
