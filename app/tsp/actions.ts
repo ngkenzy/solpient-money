@@ -85,9 +85,7 @@ export async function saveTspProfile(formData: FormData) {
   revalidatePath("/tsp");
 }
 
-type FundInsertRow = {
-  household_id: string;
-  snapshot_id: string;
+type FundRevisionInput = {
   fund_code: string;
   fund_name: string;
   balance_cents: number;
@@ -112,76 +110,11 @@ export async function saveTspSnapshot(formData: FormData) {
     throw new Error("Enter a valid TSP snapshot date.");
   }
 
-  const {
-    data: previousRevision,
-    error: previousRevisionError,
-  } = await supabase
-    .from("tsp_snapshots")
-    .select("id,revision")
-    .eq("household_id", householdId)
-    .eq("snapshot_date", snapshotDate)
-    .order("revision", {
-      ascending: false,
-    })
-    .limit(1)
-    .maybeSingle();
-
-  if (previousRevisionError) {
-    throw new Error(
-      `Unable to read prior TSP snapshot revision: ${previousRevisionError.message}`
-    );
-  }
-
-  const revision =
-    Number(previousRevision?.revision ?? 0) + 1;
-
-  const { data: saved, error } = await supabase
-    .from("tsp_snapshots")
-    .insert({
-      household_id: householdId,
-      snapshot_date: snapshotDate,
-      revision,
-      supersedes_id:
-        previousRevision?.id ?? null,
-      traditional_balance_cents: dollarsToCents(
-        formData.get("traditionalBalance")
-      ),
-      roth_balance_cents: dollarsToCents(
-        formData.get("rothBalance")
-      ),
-      outstanding_loan_cents: dollarsToCents(
-        formData.get("outstandingLoan")
-      ),
-      employee_contrib_ytd_cents: dollarsToCents(
-        formData.get("employeeContribYtd")
-      ),
-      service_auto_ytd_cents: dollarsToCents(
-        formData.get("serviceAutoYtd")
-      ),
-      service_match_ytd_cents: dollarsToCents(
-        formData.get("serviceMatchYtd")
-      ),
-      note:
-        String(formData.get("note") ?? "").trim().slice(0, 2000) || null,
-    })
-    .select("id")
-    .single();
-
-  if (error || !saved?.id) {
-    throw new Error(
-      `Unable to save TSP snapshot revision: ${error?.message ?? "No snapshot id returned."}`
-    );
-  }
-
-  const snapshotId = String(saved.id);
-
-  const fundRows: FundInsertRow[] = CORE_FUNDS.flatMap(([code, name]) => {
+  const fundRows: FundRevisionInput[] = CORE_FUNDS.flatMap(([code, name]) => {
     const cents = dollarsToCents(formData.get(`fund${code}`));
     return cents > 0
       ? [
           {
-            household_id: householdId,
-            snapshot_id: snapshotId,
             fund_code: code,
             fund_name: name,
             balance_cents: cents,
@@ -203,8 +136,6 @@ export async function saveTspSnapshot(formData: FormData) {
 
   if (lifecycleCode && lifecycleCents > 0) {
     fundRows.push({
-      household_id: householdId,
-      snapshot_id: snapshotId,
       fund_code: lifecycleCode.startsWith("L")
         ? lifecycleCode.replaceAll(" ", "")
         : `L${lifecycleCode.replaceAll(" ", "")}`,
@@ -213,16 +144,42 @@ export async function saveTspSnapshot(formData: FormData) {
     });
   }
 
-  if (fundRows.length) {
-    const { error: fundError } = await supabase
-      .from("tsp_fund_positions")
-      .insert(fundRows);
-
-    if (fundError) {
-      throw new Error(
-        `Unable to save TSP fund allocation: ${fundError.message}`
-      );
+  const {
+    data: revisionRows,
+    error: revisionError,
+  } = await supabase.rpc(
+    "insert_tsp_snapshot_revision",
+    {
+      p_household_id: householdId,
+      p_snapshot_date: snapshotDate,
+      p_traditional_balance_cents: dollarsToCents(
+        formData.get("traditionalBalance")
+      ),
+      p_roth_balance_cents: dollarsToCents(
+        formData.get("rothBalance")
+      ),
+      p_outstanding_loan_cents: dollarsToCents(
+        formData.get("outstandingLoan")
+      ),
+      p_employee_contrib_ytd_cents: dollarsToCents(
+        formData.get("employeeContribYtd")
+      ),
+      p_service_auto_ytd_cents: dollarsToCents(
+        formData.get("serviceAutoYtd")
+      ),
+      p_service_match_ytd_cents: dollarsToCents(
+        formData.get("serviceMatchYtd")
+      ),
+      p_note:
+        String(formData.get("note") ?? "").trim().slice(0, 2000) || null,
+      p_funds_json: JSON.stringify(fundRows),
     }
+  );
+
+  if (revisionError || !revisionRows?.[0]?.snapshot_id) {
+    throw new Error(
+      `Unable to save atomic TSP snapshot revision: ${revisionError?.message ?? "No snapshot revision returned."}`
+    );
   }
 
   revalidatePath("/tsp");
