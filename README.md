@@ -821,3 +821,54 @@ Money Copilot can answer questions such as `What changed from my financial plan?
 
 The full encrypted PostgreSQL backup already includes the V1.2 snapshot history because local backups use a complete `pg_dump`.
 
+## V1.2.1 Local Database Reliability
+
+V1.2.1 standardizes Solpient Local on one PostgreSQL runtime:
+
+```text
+Container: solpient-money-postgres
+Host:      127.0.0.1
+Port:      5432
+Database:  solpient
+User:      solpient
+```
+
+The canonical password lives in `.env.local-db` as `POSTGRES_PASSWORD`. `npm run local:repair` rewrites the matching `DATABASE_URL` in `.env.local`, starts the canonical container, explicitly synchronizes the real PostgreSQL `solpient` role password, verifies TCP authentication, and applies migrations.
+
+This fixes an important PostgreSQL/Docker behavior: changing `POSTGRES_PASSWORD` after a data volume already exists does not change the role password stored inside PostgreSQL. Solpient now performs that synchronization explicitly.
+
+Useful commands:
+
+```bash
+npm run local:repair
+npm run local:doctor
+npm run dev
+```
+
+`npm run dev` now runs through a database preflight wrapper. It reads the canonical URL directly from `.env.local`, rejects legacy local ports/configurations, verifies the database before Next.js starts, and overrides a stale exported shell `DATABASE_URL`.
+
+### Migrating the legacy 55432 database
+
+Older local builds may still use the preserved Docker container:
+
+```text
+solpient-local-db-1
+```
+
+To safely copy that data into the canonical local database:
+
+```bash
+npm run local:migrate-legacy -- --confirm
+```
+
+The migration:
+
+- prepares the canonical database first;
+- refuses to overwrite a canonical database that already contains household data;
+- copies the legacy database with `pg_dump` → `psql`;
+- applies current migrations afterward;
+- verifies household and account row counts;
+- leaves `solpient-local-db-1` untouched as rollback protection.
+
+Do not delete the legacy container until `npm run local:doctor` passes and the expected accounts/transactions are visible in the canonical app.
+
