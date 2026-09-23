@@ -52,6 +52,7 @@ const TABLES = new Set([
   "oauth_fdx_connections",
   "truth_merchant_rules",
   "account_merge_audit",
+  "financial_plan_snapshots",
 ]);
 
 const DEFAULT_CONFLICTS: Record<string, string[]> = {
