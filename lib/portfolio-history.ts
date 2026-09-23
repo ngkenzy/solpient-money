@@ -1,6 +1,6 @@
 import "server-only";
 
-import type { MoneyDataset } from "@/lib/demo-data";
+import type { Holding, MoneyDataset } from "@/lib/demo-data";
 import { requireActiveHousehold } from "@/lib/money-auth";
 import type {
   PortfolioIntelligenceReport,
@@ -255,7 +255,8 @@ function cents(value: number) {
 function snapshotPayload(
   householdId: string,
   snapshotDate: string,
-  position: PortfolioPositionIntelligence
+  position: PortfolioPositionIntelligence,
+  holding: Holding
 ) {
   return {
     household_id: householdId,
@@ -263,11 +264,7 @@ function snapshotPayload(
     ticker: position.ticker,
     name: position.name,
     sector: position.sector,
-    shares:
-      position.currentPrice > 0
-        ? position.value /
-          position.currentPrice
-        : 0,
+    shares: holding.shares,
     price: position.currentPrice,
     market_value_cents:
       cents(position.value),
@@ -279,7 +276,8 @@ function snapshotPayload(
       position.unrealizedPct,
     research_covered:
       position.researchCovered,
-    research_version: null,
+    research_version:
+      position.researchVersion,
     research_score:
       position.researchScore,
     base_value:
@@ -339,7 +337,8 @@ export async function capturePortfolioHistory(
         currentPrice: holding.price,
         costBasis: holding.costBasis,
         value: holding.value,
-      }
+      },
+      holding
     );
 
     const { error } = await supabase
