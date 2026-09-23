@@ -306,43 +306,58 @@ async function fetchOfficialTspCsv({
     "1"
   );
 
-  const response = await fetch(
-    url.toString(),
-    {
-      cache: "no-store",
-      headers: {
-        accept:
-          "text/csv,text/plain,*/*;q=0.8",
-        "user-agent":
-          "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 Chrome/152 Safari/537.36 SolpientMoney/1.7.1",
-        referer:
-          "https://www.tsp.gov/share-price-history/",
-        "x-requested-with":
-          "XMLHttpRequest",
-      },
-      signal:
-        AbortSignal.timeout(
-          25_000
-        ),
-    }
-  );
+  const headers = {
+    accept:
+      "text/csv,text/plain,*/*;q=0.8",
+    "user-agent":
+      "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 Chrome/152 Safari/537.36 SolpientMoney/1.7.1",
+    referer:
+      "https://www.tsp.gov/share-price-history/",
+    "x-requested-with":
+      "XMLHttpRequest",
+  };
 
-  if (!response.ok) {
-    throw new Error(
-      `Official TSP share-price feed returned HTTP ${response.status}.`
+  const candidates = [
+    url.toString(),
+    TSP_PRICE_SOURCE_URL,
+  ];
+
+  let lastStatus: number | null = null;
+
+  for (const candidate of candidates) {
+    const response = await fetch(
+      candidate,
+      {
+        cache: "no-store",
+        headers,
+        signal:
+          AbortSignal.timeout(
+            25_000
+          ),
+      }
     );
+
+    lastStatus = response.status;
+
+    if (!response.ok) {
+      continue;
+    }
+
+    const csv =
+      await response.text();
+
+    return {
+      url: candidate,
+      records:
+        parseOfficialTspPriceCsv(
+          csv
+        ),
+    };
   }
 
-  const csv =
-    await response.text();
-
-  return {
-    url: url.toString(),
-    records:
-      parseOfficialTspPriceCsv(
-        csv
-      ),
-  };
+  throw new Error(
+    `Official TSP share-price feed returned HTTP ${lastStatus ?? "unknown"} after both official request forms.`
+  );
 }
 
 export async function syncTspSharePrices(
