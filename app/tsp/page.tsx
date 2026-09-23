@@ -65,7 +65,7 @@ export default async function TspPage() {
   return (
     <div className="page tsp-page">
       <PageHeader
-        eyebrow="V1.7.3 · MILITARY TSP TRACKER"
+        eyebrow="V1.7.4 · MILITARY TSP TRACKER"
         title="Track the TSP the way a service member actually needs it."
         description="Monitor Traditional and Roth balances, G/F/C/S/I/L allocation, annual IRS limits, outside-plan deferrals, BRS matching, and whether your current contribution pace is likely to max too early."
         action={
@@ -104,9 +104,11 @@ export default async function TspPage() {
               : money(tracker.estimatedCurrentValue)}
           </strong>
           <small>
-            {tracker.latestPriceDate
-              ? `Official TSP prices · ${tracker.latestPriceDate}`
-              : "Sync daily share prices"}
+            {tracker.mixedPriceDates
+              ? "Withheld · owned funds have different official price dates"
+              : tracker.latestPriceDate
+                ? `Official price date · ${tracker.latestPriceDate}`
+                : "Sync official TSP share prices"}
           </small>
         </div>
         <div className="metric-card">
@@ -156,9 +158,11 @@ export default async function TspPage() {
               </h2>
             </div>
             <span className="small-muted">
-              {tracker.latestPriceDate
-                ? `Price date ${tracker.latestPriceDate}`
-                : "Not synced"}
+              {tracker.mixedPriceDates
+                ? `Official dates vary · ${tracker.oldestPriceDate ?? "—"} to ${tracker.newestPriceDate ?? "—"}`
+                : tracker.latestPriceDate
+                  ? `Official price date ${tracker.latestPriceDate}`
+                  : "Not synced"}
             </span>
           </div>
 
@@ -176,9 +180,11 @@ export default async function TspPage() {
                   : money(tracker.estimatedCurrentValue)}
               </strong>
               <small>
-                {tracker.latestPriceDate
-                  ? `Using TSP share prices dated ${tracker.latestPriceDate}`
-                  : "Sync required"}
+                {tracker.mixedPriceDates
+                  ? "Withheld until all owned funds share one official as-of date"
+                  : tracker.latestPriceDate
+                    ? `Using official TSP share prices dated ${tracker.latestPriceDate}`
+                    : "Sync required"}
               </small>
             </div>
             <div>
@@ -236,13 +242,15 @@ export default async function TspPage() {
                     <small>{fund.snapshotPriceDate ?? "—"}</small>
                   </div>
                   <div>
-                    <span>Latest price</span>
+                    <span>Latest official TSP share price</span>
                     <strong>
                       {fund.latestSharePrice == null
                         ? "—"
                         : `${fund.latestSharePrice.toFixed(4)}`}
                     </strong>
-                    <small>{fund.latestPriceDate ?? "—"}</small>
+                    <small>
+                      Official price date · {fund.latestPriceDate ?? "—"}
+                    </small>
                   </div>
                   <div>
                     <span>Estimated value</span>
@@ -267,8 +275,8 @@ export default async function TspPage() {
           <div className="bottom-note tsp-price-note">
             <RefreshCw size={15} />
             <span>
-              Estimated current value = inferred fund shares × latest published TSP share price.
-              Your official TSP snapshot is never overwritten by this estimate.
+              Per-fund estimated value = inferred fund shares × that fund's latest official TSP share price.
+              If owned funds have different official price dates, Solpient withholds the combined estimate. Your official TSP snapshot is never overwritten.
             </span>
           </div>
         </section>
@@ -462,26 +470,36 @@ export default async function TspPage() {
               Current TSP investment mix
             </h2>
           </div>
-          <Landmark size={18} />
+          <div className="tsp-fund-price-date">
+            <Landmark size={18} />
+            <span>
+              {tracker.mixedPriceDates
+                ? "Official fund price dates vary"
+                : tracker.latestPriceDate
+                  ? `Official price date · ${tracker.latestPriceDate}`
+                  : "Official prices not synced"}
+            </span>
+          </div>
         </div>
 
         {tracker.funds.length ? (
           <div className="tsp-fund-list">
-            {tracker.funds.map(
-              (fund) => (
+            {tracker.funds.map((fund) => {
+              const priced = tracker.estimatedFunds.find(
+                (item) => item.fundCode === fund.code
+              );
+
+              return (
                 <div
                   className="tsp-fund-row"
-                  key={
-                    fund.code
-                  }
+                  key={fund.code}
                 >
                   <span className="tsp-fund-code">
                     {fund.code}
                   </span>
-                  <div>
-                    <strong>
-                      {fund.name}
-                    </strong>
+
+                  <div className="tsp-fund-main">
+                    <strong>{fund.name}</strong>
                     <div className="tsp-fund-track">
                       <span
                         style={{
@@ -493,19 +511,63 @@ export default async function TspPage() {
                       />
                     </div>
                   </div>
-                  <strong>
-                    {pct(
-                      fund.allocationPct
-                    )}
-                  </strong>
-                  <span>
-                    {money(
-                      fund.balance
-                    )}
-                  </span>
+
+                  <div className="tsp-fund-metric">
+                    <span>Allocation</span>
+                    <strong>{pct(fund.allocationPct)}</strong>
+                  </div>
+
+                  <div className="tsp-fund-metric">
+                    <span>Snapshot balance</span>
+                    <strong>{money(fund.balance)}</strong>
+                  </div>
+
+                  <div className="tsp-fund-metric">
+                    <span>Estimated fund value</span>
+                    <strong>
+                      {priced?.estimatedCurrentValue == null
+                        ? "—"
+                        : money(priced.estimatedCurrentValue)}
+                    </strong>
+                  </div>
+
+                  <div className="tsp-fund-market-data">
+                    <div>
+                      <span>Latest official TSP share price</span>
+                      <strong>
+                        {priced?.latestSharePrice == null
+                          ? "—"
+                          : `${priced.latestSharePrice.toFixed(4)}`}
+                      </strong>
+                    </div>
+                    <div>
+                      <span>Official price date</span>
+                      <strong>{priced?.latestPriceDate ?? "—"}</strong>
+                    </div>
+                    <div>
+                      <span>Inferred shares</span>
+                      <strong>
+                        {priced?.shares == null
+                          ? "—"
+                          : priced.shares.toLocaleString("en-US", {
+                              maximumFractionDigits: 4,
+                            })}
+                      </strong>
+                    </div>
+                    <div>
+                      <span>Change vs snapshot</span>
+                      <strong>
+                        {priced?.estimatedChangePct == null
+                          ? "—"
+                          : `${priced.estimatedChangePct >= 0 ? "+" : ""}${priced.estimatedChangePct.toFixed(
+                              2
+                            )}%`}
+                      </strong>
+                    </div>
+                  </div>
                 </div>
-              )
-            )}
+              );
+            })}
           </div>
         ) : (
           <div className="action-empty">

@@ -1,0 +1,76 @@
+import { readFile } from "node:fs/promises";
+
+const files = {
+  packageJson: await readFile("package.json", "utf8"),
+  shell: await readFile("components/AppShell.tsx", "utf8"),
+  page: await readFile("app/tsp/page.tsx", "utf8"),
+  prices: await readFile("lib/tsp-prices.ts", "utf8"),
+  tracker: await readFile("lib/tsp-tracker.ts", "utf8"),
+  css: await readFile("app/globals.css", "utf8"),
+};
+
+const pkg = JSON.parse(files.packageJson);
+const tspNav = '{ href: "/tsp", label: "Military TSP", icon: Landmark }';
+const tspNavIndex = files.shell.indexOf(tspNav);
+const investIndex = files.shell.indexOf('label: "INVEST"');
+const planIndex = files.shell.indexOf('label: "PLAN"');
+
+const checks = [
+  ["release is V1.7.4", pkg.version === "1.7.4"],
+  [
+    "Military TSP appears once and under Invest",
+    tspNavIndex > investIndex &&
+      tspNavIndex < planIndex &&
+      files.shell.lastIndexOf(tspNav) === tspNavIndex,
+  ],
+  [
+    "fund rows label official share price and official price date separately",
+    files.page.includes("Latest official TSP share price") &&
+      files.page.includes("Official price date") &&
+      files.page.includes("Inferred shares") &&
+      files.page.includes("Estimated fund value"),
+  ],
+  [
+    "mixed official dates are surfaced",
+    files.page.includes("Official fund price dates vary") &&
+      files.tracker.includes("tsp:mixed-price-dates"),
+  ],
+  [
+    "combined estimate is withheld for mixed price dates",
+    files.prices.includes("complete && !mixedPriceDates") &&
+      files.page.includes("Withheld until all owned funds share one official as-of date"),
+  ],
+  [
+    "mixed price headline cannot expose the newest date as one portfolio date",
+    files.prices.includes("mixedPriceDates") &&
+      files.prices.includes("? null") &&
+      files.prices.includes("newestPriceDate"),
+  ],
+  [
+    "per-fund official price date remains available",
+    files.page.includes("priced?.latestPriceDate") &&
+      files.page.includes("fund.latestPriceDate"),
+  ],
+  [
+    "responsive TSP market detail layout exists",
+    files.css.includes(".tsp-fund-market-data") &&
+      files.css.includes("grid-column: 2 / -1"),
+  ],
+];
+
+const failed = checks.filter(([, ok]) => !ok);
+
+for (const [name, ok] of checks) {
+  console.log(`${ok ? "✓" : "✗"} ${name}`);
+}
+
+if (failed.length) {
+  process.exitCode = 1;
+  throw new Error(
+    `V1.7.4 TSP investment display failures: ${failed
+      .map(([name]) => name)
+      .join(", ")}`
+  );
+}
+
+console.log("V1.7.4 TSP investment display invariants passed.");

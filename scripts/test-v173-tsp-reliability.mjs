@@ -14,8 +14,20 @@ const files = {
 
 const pkg = JSON.parse(files.packageJson);
 
+function atLeast173(version) {
+  const [major = 0, minor = 0, patch = 0] = String(version)
+    .split(".")
+    .map((value) => Number.parseInt(value, 10) || 0);
+
+  return (
+    major > 1 ||
+    (major === 1 &&
+      (minor > 7 || (minor === 7 && patch >= 3)))
+  );
+}
+
 const checks = [
-  ["release is V1.7.3", pkg.version === "1.7.3"],
+  ["release includes V1.7.3 or newer", atLeast173(pkg.version)],
   [
     "local calendar helper does not derive day from UTC ISO",
     files.localDate.includes("getFullYear()") &&
@@ -67,9 +79,9 @@ const checks = [
       files.scheduled.includes("throw new Error"),
   ],
   [
-    "visible release labels match V1.7.3",
-    files.shell.includes("MONEY V1.7.3") &&
-      files.page.includes("V1.7.3 · MILITARY TSP TRACKER"),
+    "visible release labels match package version",
+    files.shell.includes(`MONEY V${pkg.version}`) &&
+      files.page.includes(`V${pkg.version} · MILITARY TSP TRACKER`),
   ],
 ];
 
