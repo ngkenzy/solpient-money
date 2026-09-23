@@ -13,6 +13,7 @@ import PageHeader from "@/components/PageHeader";
 import InteractiveLineChart from "@/components/InteractiveLineChart";
 import { money } from "@/lib/finance";
 import { getTspTracker } from "@/lib/tsp-tracker";
+import { localCalendarDateKey } from "@/lib/local-calendar-date";
 import {
   saveTspProfile,
   saveTspSnapshot,
@@ -59,12 +60,12 @@ export default async function TspPage() {
     }));
 
   const snapshotDefaultDate =
-    new Date().toISOString().slice(0, 10);
+    localCalendarDateKey(new Date());
 
   return (
     <div className="page tsp-page">
       <PageHeader
-        eyebrow="V1.7.2 · MILITARY TSP TRACKER"
+        eyebrow="V1.7.3 · MILITARY TSP TRACKER"
         title="Track the TSP the way a service member actually needs it."
         description="Monitor Traditional and Roth balances, G/F/C/S/I/L allocation, annual IRS limits, outside-plan deferrals, BRS matching, and whether your current contribution pace is likely to max too early."
         action={

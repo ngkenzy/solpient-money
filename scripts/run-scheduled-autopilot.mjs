@@ -57,6 +57,15 @@ async function run() {
       }
 
       const briefing = body.briefing ?? {};
+      const tspPriceSync = briefing.tspPriceSync ?? null;
+
+      if (tspPriceSync?.ok === false) {
+        throw new Error(
+          tspPriceSync.warning ??
+            "Automatic TSP share-price refresh failed."
+        );
+      }
+
       const critical = Number(
         briefing.criticalCount ?? 0
       );
