@@ -335,6 +335,10 @@ export async function stageTspStatementImport(
         "source_content_sha256",
         sourceContentSha256
       )
+      .eq(
+        "parser_version",
+        input.parserVersion
+      )
       .maybeSingle();
 
   if (existingError) {
@@ -422,6 +426,10 @@ export async function stageTspStatementImport(
       .eq(
         "source_content_sha256",
         sourceContentSha256
+      )
+      .eq(
+        "parser_version",
+        input.parserVersion
       )
       .maybeSingle();
 
