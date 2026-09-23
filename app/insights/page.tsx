@@ -1,7 +1,9 @@
 import { CheckCircle2, TriangleAlert } from "lucide-react";
 import AttentionFeed from "@/components/AttentionFeed";
 import PageHeader from "@/components/PageHeader";
-import { getAttentionFeed, getFinancialHealth, getResearchAlerts } from "@/lib/intelligence";
+import { getCashFlowIntelligence } from "@/lib/cash-flow-intelligence";
+import { buildFinancialHealthEngine } from "@/lib/financial-health-engine";
+import { getAttentionFeed, getResearchAlerts } from "@/lib/intelligence";
 import { requireMoneyDataset } from "@/lib/money-data";
 import { loadResearchSnapshots } from "@/lib/research";
 
@@ -12,7 +14,8 @@ export default async function InsightsPage() {
   const data = context.dataset;
   const tickers = data.holdings.filter((holding) => holding.kind === "stock").map((holding) => holding.ticker);
   const research = await loadResearchSnapshots(tickers);
-  const health = getFinancialHealth(research.snapshots, data);
+  const cashFlowIntelligence = await getCashFlowIntelligence();
+  const health = buildFinancialHealthEngine(data, cashFlowIntelligence);
   const attention = getAttentionFeed(research.snapshots, data);
   const researchAlerts = getResearchAlerts(research.snapshots, data);
 
@@ -21,7 +24,7 @@ export default async function InsightsPage() {
       <PageHeader
         eyebrow="SOLPIENT INTELLIGENCE"
         title="What deserves your attention."
-        description="Financial calculations use the current household dataset; Research signals come from the separate live published Research contract."
+        description="Household financial health uses the V0.9.3 deterministic engine; Research signals remain a separate live published Research contract."
         action={<span className={"live-pill " + (research.connected ? "connected" : "disconnected")}>{research.connected ? "RESEARCH LIVE" : "RESEARCH UNAVAILABLE"}</span>}
       />
 
@@ -30,7 +33,7 @@ export default async function InsightsPage() {
           <span className="card-kicker">FINANCIAL HEALTH</span>
           <strong>{health.score}<small>/100</small></strong>
           <div className="health-track large"><span style={{ width: `${health.score}%` }} /></div>
-          <p>A transparent composite of liquidity, cash flow, debt, portfolio structure, Research confidence, and tracked goals.</p>
+          <p>A transparent composite of liquidity, cash flow, debt, portfolio structure, retirement trajectory, and tracked goals.</p>
         </section>
         <section className="health-components">
           {health.components.map((component) => (
