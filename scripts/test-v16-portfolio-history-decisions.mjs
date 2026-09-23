@@ -131,6 +131,16 @@ const checks = [
       files.engine.includes("position.researchVersion"),
   ],
   [
+    "JSONB review reasons are serialized for local PostgreSQL",
+    files.engine.includes("JSON.stringify(") &&
+      files.engine.includes("position.reviewReasons"),
+  ],
+  [
+    "decision baseline loads the complete evidence snapshot",
+    files.engine.includes('.select("*")') &&
+      files.engine.includes("baseline_snapshot:"),
+  ],
+  [
     "V1.5 carries Research version into V1.6",
     files.portfolioEngine.includes("researchVersion: number | null") &&
       files.portfolioEngine.includes(
