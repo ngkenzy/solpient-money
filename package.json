@@ -1,6 +1,6 @@
 {
   "name": "solpient-money",
-  "version": "1.7.0",
+  "version": "1.7.1",
   "private": true,
   "scripts": {
     "dev": "node scripts/local-dev.mjs",
@@ -49,9 +49,10 @@
     "local:autopilot:scheduled": "node scripts/run-scheduled-autopilot.mjs",
     "test:v14": "node scripts/test-v14-action-center-scheduler.mjs",
     "test:v15": "node scripts/test-v15-portfolio-intelligence.mjs",
-    "local:verify-release": "npm run local:doctor && npm run lint && npm run test:research && npm run test:money && npm run test:v13 && npm run test:v14 && npm run test:v15 && npm run test:v16 && npm run test:v17 && npm run build",
+    "local:verify-release": "npm run local:doctor && npm run lint && npm run test:research && npm run test:money && npm run test:v13 && npm run test:v14 && npm run test:v15 && npm run test:v16 && npm run test:v17 && npm run test:v171 && npm run build",
     "test:v16": "node scripts/test-v16-portfolio-history-decisions.mjs",
-    "test:v17": "node scripts/test-v17-military-tsp.mjs"
+    "test:v17": "node scripts/test-v17-military-tsp.mjs",
+    "test:v171": "node scripts/test-v171-tsp-daily-prices.mjs"
   },
   "dependencies": {
     "lucide-react": "^0.468.0",
