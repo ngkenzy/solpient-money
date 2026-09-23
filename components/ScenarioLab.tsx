@@ -553,6 +553,7 @@ export default function ScenarioLab({
       <section className="forecast-method-note">
         <ArrowDownRight size={14} />
         <span>
+          <strong>HOW THIS IS CALCULATED</strong><br />
           Debt uses highest-APR-first after each account&apos;s minimum payment. Property value is
           held constant. New borrowing, taxes, inflation, Social Security, pensions, and changing
           interest rates are not modeled.
