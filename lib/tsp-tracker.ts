@@ -85,6 +85,9 @@ export type TspTracker = {
   estimatedChange: number | null;
   estimatedChangePct: number | null;
   latestPriceDate: string | null;
+  mixedPriceDates: boolean;
+  newestPriceDate: string | null;
+  oldestPriceDate: string | null;
   priceAgeDays: number | null;
   estimatedFunds: Awaited<ReturnType<typeof getTspEstimatedCurrentValue>>["positions"];
   signals: TspSignal[];
@@ -477,14 +480,18 @@ export async function getTspTracker(
   const fundReconciliationDifference =
     (snapshot?.totalBalance ?? 0) - fundBalanceTotal;
 
+  const freshnessDate =
+    estimate.oldestPriceDate ??
+    estimate.priceDate;
+
   const priceAgeDays =
-    estimate.priceDate
+    freshnessDate
       ? Math.max(
           0,
           Math.floor(
             (now.getTime() -
               new Date(
-                `${estimate.priceDate}T12:00:00Z`
+                `${freshnessDate}T12:00:00Z`
               ).getTime()) /
               86_400_000
           )
@@ -495,7 +502,23 @@ export async function getTspTracker(
     profile &&
     snapshot &&
     funds.length > 0 &&
-    estimate.estimatedCurrentValue == null
+    estimate.mixedPriceDates
+  ) {
+    signals.push({
+      id: "tsp:mixed-price-dates",
+      level: "watch",
+      title: "Owned TSP funds have different official price dates",
+      detail:
+        "Solpient is showing each fund's latest official TSP share price, but it withholds the single total estimated value until all owned funds share one official as-of date.",
+    });
+  }
+
+  if (
+    profile &&
+    snapshot &&
+    funds.length > 0 &&
+    estimate.estimatedCurrentValue == null &&
+    !estimate.mixedPriceDates
   ) {
     signals.push({
       id: "tsp:prices-not-synced",
@@ -591,6 +614,12 @@ export async function getTspTracker(
       estimate.estimatedChangePct,
     latestPriceDate:
       estimate.priceDate,
+    mixedPriceDates:
+      estimate.mixedPriceDates,
+    newestPriceDate:
+      estimate.newestPriceDate,
+    oldestPriceDate:
+      estimate.oldestPriceDate,
     priceAgeDays,
     estimatedFunds:
       estimate.positions,
