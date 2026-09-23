@@ -49,6 +49,7 @@ export type FinancialHealthMetrics = {
   topThreeStockPct: number;
   portfolioCashPct: number;
   retirementProjectedAssets: number;
+  retirementMonthlyContribution: number;
   retirementTargetAssets: number;
   retirementFundingPct: number;
   retirementYears: number;
@@ -659,6 +660,7 @@ export function buildFinancialHealthEngine(
       topThreeStockPct,
       portfolioCashPct,
       retirementProjectedAssets,
+      retirementMonthlyContribution: positiveMonthlyContribution,
       retirementTargetAssets:
         householdPlan.targetRetirementAssets,
       retirementFundingPct,
