@@ -351,26 +351,53 @@ export async function syncTspSharePrices(
   const { supabase, householdId } =
     await requireActiveHousehold();
 
-  const { data: snapshot, error: snapshotError } =
-    await supabase
-      .from("tsp_snapshots")
-      .select("*")
-      .eq(
-        "household_id",
-        householdId
-      )
-      .order("snapshot_date", {
-        ascending: false,
-      })
-      .limit(1)
-      .maybeSingle();
+  const [profileResult, snapshotResult] =
+    await Promise.all([
+      supabase
+        .from("tsp_profiles")
+        .select("household_id")
+        .eq("household_id", householdId)
+        .maybeSingle(),
+      supabase
+        .from("tsp_snapshots")
+        .select("*")
+        .eq("household_id", householdId)
+        .order("snapshot_date", {
+          ascending: false,
+        })
+        .limit(1)
+        .maybeSingle(),
+    ]);
 
-  if (snapshotError) {
+  if (profileResult.error) {
     throw new Error(
-      `Unable to read TSP snapshot before price sync: ${snapshotError.message}`
+      `Unable to read TSP profile before price sync: ${profileResult.error.message}`
     );
   }
 
+  if (snapshotResult.error) {
+    throw new Error(
+      `Unable to read TSP snapshot before price sync: ${snapshotResult.error.message}`
+    );
+  }
+
+  const snapshot = snapshotResult.data;
+
+  if (!profileResult.data || !snapshot?.id) {
+    return {
+      ok: true,
+      fetchedRows: 0,
+      persistedRows: 0,
+      latestPriceDate: null,
+      sourceUrl: TSP_PRICE_SOURCE_URL,
+      warning: null,
+    };
+  }
+
+  /*
+   * Participant setup is required before Solpient downloads prices.
+   * This keeps non-TSP households from generating unnecessary network traffic.
+   */
   const today = now
     .toISOString()
     .slice(0, 10);
