@@ -1,6 +1,7 @@
 import Link from "next/link";
 import {
   BellRing,
+  BookOpenCheck,
   CheckCircle2,
   ChevronRight,
   CircleAlert,
@@ -25,6 +26,13 @@ function statusLabel(status: string) {
   if (status === "reviewed") return "Reviewed";
   if (status === "snoozed") return "Snoozed";
   return "Resolved";
+}
+
+function portfolioTicker(sourceKey: string) {
+  const match = sourceKey.match(
+    /^portfolio:([^:]+):/
+  );
+  return match?.[1]?.toUpperCase() ?? null;
 }
 
 function relativeTime(value: string) {
@@ -80,6 +88,16 @@ function ItemCard({
         <Link href={item.href} className="action-open-link">
           Open source <ChevronRight size={14} />
         </Link>
+
+        {item.category === "portfolio" && portfolioTicker(item.sourceKey) ? (
+          <Link
+            className="action-open-link"
+            href={`/decision-journal?ticker=${portfolioTicker(item.sourceKey)}&actionItemId=${item.id}`}
+          >
+            <BookOpenCheck size={13} />
+            Record decision
+          </Link>
+        ) : null}
 
         {item.status === "resolved" ? (
           <form action={reopenAction}>
