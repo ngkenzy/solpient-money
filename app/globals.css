@@ -10207,14 +10207,31 @@ a {
   margin-top: 10px;
 }
 
+.tsp-fund-price-date {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #718499;
+}
+
+.tsp-fund-price-date span {
+  font-size: 7px;
+  font-weight: 750;
+}
+
 .tsp-fund-row {
-  min-height: 60px;
+  min-height: 96px;
   border-top: 1px solid #e6edf3;
   display: grid;
-  grid-template-columns: 48px minmax(0, 1fr) 70px 100px;
-  gap: 10px;
+  grid-template-columns:
+    48px
+    minmax(220px, 1.5fr)
+    minmax(80px, .55fr)
+    minmax(110px, .75fr)
+    minmax(135px, .9fr);
+  gap: 12px;
   align-items: center;
-  padding: 8px 0;
+  padding: 10px 0 12px;
 }
 
 .tsp-fund-code {
@@ -10233,23 +10250,47 @@ a {
   min-width: 0;
 }
 
-.tsp-fund-row > div > strong {
+.tsp-fund-main > strong {
   display: block;
-  margin-bottom: 5px;
+  margin-bottom: 6px;
   color: #304960;
   font-size: 8px;
 }
 
-.tsp-fund-row > strong {
+.tsp-fund-metric {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  text-align: right;
+}
+
+.tsp-fund-metric > span,
+.tsp-fund-market-data span {
+  color: #8292a2;
+  font-size: 6px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.tsp-fund-metric > strong,
+.tsp-fund-market-data strong {
   color: #304960;
   font-size: 9px;
-  text-align: right;
 }
 
-.tsp-fund-row > span:last-child {
-  color: #718499;
-  font-size: 8px;
-  text-align: right;
+.tsp-fund-market-data {
+  grid-column: 2 / -1;
+  display: grid;
+  grid-template-columns: 1.4fr 1fr 1fr 1fr;
+  gap: 12px;
+  padding-top: 9px;
+  border-top: 1px dashed #e4eaf0;
+}
+
+.tsp-fund-market-data > div {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
 }
 
 .tsp-fund-track {
@@ -10334,12 +10375,22 @@ a {
   }
 
   .tsp-fund-row {
-    grid-template-columns: 48px minmax(0, 1fr) 70px;
+    grid-template-columns: 48px minmax(0, 1fr);
+    align-items: start;
   }
 
-  .tsp-fund-row > span:last-child {
+  .tsp-fund-main,
+  .tsp-fund-metric,
+  .tsp-fund-market-data {
     grid-column: 2;
+  }
+
+  .tsp-fund-metric {
     text-align: left;
+  }
+
+  .tsp-fund-market-data {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
@@ -10456,3 +10507,10 @@ a {
   }
 }
 
+
+
+@media (max-width: 520px) {
+  .tsp-fund-market-data {
+    grid-template-columns: 1fr;
+  }
+}
