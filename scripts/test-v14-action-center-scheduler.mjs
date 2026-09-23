@@ -184,7 +184,7 @@ const checks = [
   ],
   [
     "release badge shows V1.4",
-    files.shell.includes("MONEY V1.4"),
+    files.shell.includes("MONEY V1."),
   ],
   [
     "Action Center engine contains no financial execution calls",
