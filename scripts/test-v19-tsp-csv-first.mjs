@@ -114,6 +114,19 @@ check(
     otherFundParsed.funds[0].fundName === "L 2050 Fund"
 );
 
+const arbitraryFundCsv = otherFundCsv.replace(
+  '"L 2050 Fund"',
+  '"Custom Index Fund"'
+);
+const arbitraryFundParsed =
+  parseOfficialTspCsv(arbitraryFundCsv);
+check(
+  "parser does not whitelist fund names",
+  arbitraryFundParsed.funds.length === 1 &&
+    arbitraryFundParsed.funds[0].fundName === "Custom Index Fund" &&
+    arbitraryFundParsed.funds[0].fundCode === "CUSTOMINDEX"
+);
+
 check(
   "CSV import updates one retirement account",
   actions.includes('.from("accounts")') &&
@@ -125,6 +138,7 @@ check(
   "CSV import updates fund holdings for Investments",
   actions.includes('.from("holdings")') &&
     actions.includes("market_value_cents") &&
+    actions.includes("fund.units * fund.fundPrice") &&
     actions.includes("TSP-${fund.fundCode}") &&
     actions.includes('"household_id,account_id,ticker"')
 );
