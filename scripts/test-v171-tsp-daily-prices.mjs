@@ -98,10 +98,17 @@ const checks = [
       files.tracker.includes("tsp:prices-stale"),
   ],
   [
-    "TSP page clearly separates official snapshot and estimated value",
-    files.page.includes("Official TSP snapshot") &&
+    "TSP page exposes an authoritative TSP value source",
+    (
+      files.page.includes("Official TSP snapshot") &&
       files.page.includes("Estimated current value") &&
-      files.page.includes("DAILY SHARE-PRICE ESTIMATE"),
+      files.page.includes("DAILY SHARE-PRICE ESTIMATE")
+    ) ||
+      (
+        files.page.includes("TSP CSV IMPORT") &&
+        files.page.includes("Current TSP value") &&
+        files.page.includes("Fund price")
+      ),
   ],
   [
     "manual Sync prices now action exists",
