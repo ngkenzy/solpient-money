@@ -273,6 +273,9 @@ function smartCategory(
   }
   if (/interest/.test(text)) return "Interest";
   if (/mort|mortgage/.test(text)) return "Housing";
+  if (/\birs\b|dept of revenue|tax payment|taxpymt/.test(text)) return "Taxes";
+  if (/insurance|usaa p&c|steadily insur/.test(text)) return "Insurance";
+  if (/kids after hours|childcare|daycare/.test(text)) return "Childcare";
   if (/pepco|washington gas|electric|utility/.test(text)) return "Utilities";
   if (/commissary|supercenter|walmart|market|grocery/.test(text)) return "Groceries";
   if (/gas pump|fuel|shell|exxon|bp /.test(text)) return "Transportation";
