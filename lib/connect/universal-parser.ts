@@ -368,6 +368,10 @@ function parseChaseChecking(fileName: string, text: string): UniversalFileResult
       category: smartCategory(merchant),
       amount,
       type: transactionType(amount, merchant, explicitType),
+      externalId:
+        balance != null
+          ? [postedAt, amount, balance, merchant].join("|")
+          : undefined,
     });
 
     if (balance != null) {
@@ -426,17 +430,32 @@ function parseChaseCard(fileName: string, text: string): UniversalFileResult {
   const headers = headerMap(rows[0] ?? []);
   const mask = filenameDigits(fileName);
   const transactions: ParsedTransaction[] = [];
+  const occurrences = new Map<string, number>();
 
   for (const row of rows.slice(1)) {
+    const transactionDate = isoDate(
+      cell(row, headers, "Transaction Date")
+    );
     const postedAt =
       isoDate(cell(row, headers, "Post Date")) ||
-      isoDate(cell(row, headers, "Transaction Date"));
+      transactionDate;
     const merchant = cell(row, headers, "Description");
     if (!postedAt || !merchant) continue;
 
     const amount = money(cell(row, headers, "Amount"));
     const category = cell(row, headers, "Category");
     const explicitType = cell(row, headers, "Type");
+
+    const identityBase = [
+      transactionDate,
+      postedAt,
+      merchant,
+      amount,
+      cell(row, headers, "Memo"),
+    ].join("|");
+    const occurrence =
+      (occurrences.get(identityBase) ?? 0) + 1;
+    occurrences.set(identityBase, occurrence);
 
     transactions.push({
       postedAt,
@@ -447,6 +466,7 @@ function parseChaseCard(fileName: string, text: string): UniversalFileResult {
         explicitType.toLowerCase() === "payment"
           ? "transfer"
           : transactionType(amount, merchant, explicitType),
+      externalId: identityBase + "|" + occurrence,
     });
   }
 
