@@ -65,6 +65,21 @@ check(
   )
 );
 
+const chaseTransferGuard = parseUniversalFinancialFile(
+  "Chase4493_Activity_20260924.csv",
+  [
+    "Details,Posting Date,Description,Amount,Type,Balance,Check or Slip #",
+    'DEBIT,09/23/2026,"Vanguard Marketi PAYMENTS",-10000.00,ACH_DEBIT,10000.00,',
+    'DEBIT,09/22/2026,"AMERICAN EXPRESS ACH PMT W3612",-299.48,ACH_DEBIT,20000.00,',
+  ].join("\n")
+);
+check(
+  "Vanguard funding and American Express card payments are transfers",
+  chaseTransferGuard.datasets[0].parsed.transactions.every(
+    (row) => row.type === "transfer"
+  )
+);
+
 const chaseCard = [
   "Transaction Date,Post Date,Description,Category,Type,Amount,Memo",
   "09/22/2026,09/22/2026,Payment Thank You - Web,,Payment,16.30,",
@@ -241,6 +256,10 @@ const moneyData = await readFile(
   "lib/money-data.ts",
   "utf8"
 );
+const truthEngine = await readFile(
+  "lib/truth-engine.ts",
+  "utf8"
+);
 
 check(
   "universal workbench supports multi-file import",
@@ -268,6 +287,18 @@ check(
   "batch import triggers Truth Engine reconciliation",
   reconcileRoute.includes("runTruthEngineForHousehold") &&
     component.includes('"/api/connect/reconcile"')
+);
+check(
+  "Truth Engine ranks transfer candidates by account evidence",
+  truthEngine.includes("transferPairScore") &&
+    truthEngine.includes("foreignMasks") &&
+    truthEngine.includes("equallyStrong") &&
+    truthEngine.includes("directHint")
+);
+check(
+  "Truth Engine supports alphanumeric brokerage account masks",
+  truthEngine.includes('replace(/[^A-Z0-9]/g, "")') &&
+    truthEngine.includes("identityLastFour")
 );
 check(
   "partial multi-file failures trigger reverse-order rollback",
