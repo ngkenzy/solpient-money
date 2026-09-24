@@ -615,8 +615,7 @@ export async function POST(request: Request) {
             .from("holdings")
             .select("ticker")
             .eq("household_id", householdId)
-            .eq("account_id", accountId)
-            .eq("source", "file");
+            .eq("account_id", accountId);
 
         if (existingError) {
           throw new Error(
@@ -634,7 +633,6 @@ export async function POST(request: Request) {
             .delete()
             .eq("household_id", householdId)
             .eq("account_id", accountId)
-            .eq("source", "file")
             .in("ticker", staleTickers);
 
           if (staleError) {
