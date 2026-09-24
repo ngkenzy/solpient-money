@@ -139,10 +139,9 @@ const checks = [
       !files.engine.includes('.from("planning_assumptions")'),
   ],
   [
-    "GitHub build workflow remains manual-only",
+    "GitHub build workflow supports manual and pull-request verification",
     files.workflow.includes("workflow_dispatch:") &&
-      !files.workflow.includes("push:") &&
-      !files.workflow.includes("pull_request:"),
+      files.workflow.includes("pull_request:"),
   ],
   [
     "GitHub lockfile workflow remains manual-only",
