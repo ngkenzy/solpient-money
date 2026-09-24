@@ -138,12 +138,17 @@ export async function importOfficialTspCsv(
       .update(bytes)
       .digest("hex");
 
-    const liveImportTotal =
+    const liveImportTotalCents =
       statement.funds.reduce(
         (sum, fund) =>
-          sum + fund.units * fund.fundPrice,
+          sum +
+          cents(
+            fund.units * fund.fundPrice
+          ),
         0
       );
+    const liveImportTotal =
+      liveImportTotalCents / 100;
 
     const { database, householdId } =
       await requireActiveHousehold();
@@ -203,9 +208,7 @@ export async function importOfficialTspCsv(
           name: statement.plan,
           institution: "Thrift Savings Plan",
           account_type: "retirement",
-          balance_cents: cents(
-            liveImportTotal
-          ),
+          balance_cents: liveImportTotalCents,
           owner_scope: "Household",
           last_four: null,
           source: "file",
@@ -231,9 +234,7 @@ export async function importOfficialTspCsv(
           name: statement.plan,
           institution: "Thrift Savings Plan",
           account_type: "retirement",
-          balance_cents: cents(
-            liveImportTotal
-          ),
+          balance_cents: liveImportTotalCents,
           source: "file",
           last_file_import_at: now,
           updated_at: now,
