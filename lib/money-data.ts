@@ -237,7 +237,7 @@ export async function getMoneyContext(): Promise<MoneyContext> {
       .eq("household_id", householdId)
       .is("duplicate_of_transaction_id", null)
       .order("posted_at", { ascending: false })
-      .limit(500),
+      .limit(5000),
     supabase
       .from("goals")
       .select("*")
