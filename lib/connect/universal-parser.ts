@@ -226,7 +226,13 @@ function looksLikeInternalTransfer(
   const text = `${explicitType} ${description}`.toLowerCase();
 
   return (
-    /\b(transfer|xfer|sweep|reinvest|funds received|brokerage|investment)\b/.test(
+    /\b(sweep|reinvest|funds received|brokerage|investment)\b/.test(
+      text
+    ) ||
+    /\b(?:online(?: banking)?|realtime|real time|automatic|agent assisted)\b.*\btransfer\b/.test(
+      text
+    ) ||
+    /\btransfer\s+(?:to|from)\s+(?:sav|savings|checking|chk|bank|account|brokerage)\b/.test(
       text
     ) ||
     /\bvanguard\b.*\b(buy|payments?|transfer|sell)\b/.test(text) ||
@@ -234,7 +240,8 @@ function looksLikeInternalTransfer(
     /\bcard\s+ending\s+in\s+\d{4}\b/.test(text) ||
     /\bpayment\s+to\s+crd\s+\d{4}\b/.test(text) ||
     /\bpayment\s+from\s+chk\s+\d{4}\b/.test(text) ||
-    /\b(?:american express|amex)\b.*\bach\s+pmt\b/.test(text)
+    /\b(?:american express|amex)\b.*\bach\s+pmt\b/.test(text) ||
+    /\baccount\s+verification\b/.test(text)
   );
 }
 
