@@ -345,7 +345,25 @@ export default function UniversalImportWorkbench({
       }
     }
 
-    setFiles(next);
+    setFiles((current) => {
+      const merged = [...current];
+
+      for (const candidate of next) {
+        const duplicateIndex = merged.findIndex(
+          (existing) =>
+            Boolean(candidate.digest) &&
+            existing.digest === candidate.digest
+        );
+
+        if (duplicateIndex >= 0) {
+          merged[duplicateIndex] = candidate;
+        } else {
+          merged.push(candidate);
+        }
+      }
+
+      return merged;
+    });
     setTargetOverrides({});
     setBusy(null);
     setProgress("");
