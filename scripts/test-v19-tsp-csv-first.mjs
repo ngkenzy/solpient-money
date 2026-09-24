@@ -19,6 +19,9 @@ const actions = await readFile("app/tsp/actions.ts", "utf8");
 const page = await readFile("app/tsp/page.tsx", "utf8");
 const finance = await readFile("lib/finance.ts", "utf8");
 const moneyData = await readFile("lib/money-data.ts", "utf8");
+const liveData = await readFile("lib/tsp-official-data.ts", "utf8");
+const priceForm = await readFile("app/tsp/TspFundPriceForm.tsx", "utf8");
+const shell = await readFile("components/AppShell.tsx", "utf8");
 
 const csv = [
   '"Plan","Asset Class","Fund Name","Current Mix","Future Investments","Date Range","Opening Balance","Gains/Losses","Other Activity","Closing Balance","Units","Fund Price","Fund Return"',
@@ -99,6 +102,18 @@ check(
   )
 );
 
+const otherFundCsv = [
+  '"Plan","Asset Class","Fund Name","Current Mix","Future Investments","Date Range","Opening Balance","Gains/Losses","Other Activity","Closing Balance","Units","Fund Price","Fund Return"',
+  '"Thrift Savings Plan - Uniformed Services","Lifecycle","L 2050 Fund","100.0%","100.0%","January 1, 2026 - September 23, 2026","$1,000.00","$10.00","$0.00","$1,010.00","10.000000","$101.000000","1.00%"',
+].join("\n");
+const otherFundParsed = parseOfficialTspCsv(otherFundCsv);
+check(
+  "parser accepts imported funds beyond the core G/F/C/S/I set",
+  otherFundParsed.funds.length === 1 &&
+    otherFundParsed.funds[0].fundCode === "L2050" &&
+    otherFundParsed.funds[0].fundName === "L 2050 Fund"
+);
+
 check(
   "CSV import updates one retirement account",
   actions.includes('.from("accounts")') &&
@@ -127,12 +142,41 @@ check(
     actions.includes("JSON.stringify(")
 );
 check(
-  "TSP page is CSV-first and links to portfolio and accounts",
-  page.includes("TSP CSV IMPORT") &&
+  "Thrift Saving Plan page is CSV-first and linked to portfolio and net worth",
+  page.includes('eyebrow="THRIFT SAVING PLAN"') &&
+    page.includes('title="Thrift Saving Plan"') &&
+    page.includes("CSV IMPORT") &&
     page.includes('href="/portfolio"') &&
     page.includes('href="/"') &&
     page.includes("also appears under Accounts") &&
-    page.includes("Everything in the imported fund rows")
+    page.includes("All imported fund information") &&
+    shell.includes('label: "Thrift Saving Plan"')
+);
+check(
+  "only latest imported funds drive the visible fund list",
+  page.includes("liveFunds.map") &&
+    liveData.includes("parsed.funds.map") &&
+    actions.includes("staleTickers") &&
+    actions.includes('.delete()')
+);
+check(
+  "fund price editor recalculates holding and total plan value",
+  priceForm.includes('name="fundPrice"') &&
+    priceForm.includes('step="0.000001"') &&
+    actions.includes("const newValue = shares * price") &&
+    actions.includes("market_value_cents: cents(newValue)") &&
+    actions.includes('.select("market_value_cents")') &&
+    actions.includes("balance_cents: Math.round(totalCents)")
+);
+check(
+  "live display uses imported units plus editable prices",
+  liveData.includes("liveUnits") &&
+    liveData.includes("liveFundPrice") &&
+    liveData.includes("liveValue") &&
+    liveData.includes("liveMixPct") &&
+    page.includes("fund.liveUnits") &&
+    page.includes("fund.liveFundPrice") &&
+    page.includes("fund.liveValue")
 );
 check(
   "Net Worth is driven by accounts and Investments by holdings",
