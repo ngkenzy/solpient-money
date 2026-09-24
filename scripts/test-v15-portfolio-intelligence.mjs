@@ -121,9 +121,9 @@ const checks = [
       files.copilotUi.includes("Which holdings need review?"),
   ],
   [
-    "navigation exposes V1.5 workspace",
+    "navigation exposes Portfolio Intelligence workspace without a legacy version badge",
     files.shell.includes('href: "/portfolio-intelligence"') &&
-      files.shell.includes("MONEY V1."),
+      !files.shell.includes("MONEY V1."),
   ],
   [
     "portfolio engine contains no financial execution calls",
