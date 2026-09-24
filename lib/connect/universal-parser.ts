@@ -1037,62 +1037,140 @@ export function parseUniversalFinancialFile(
   text: string
 ): UniversalFileResult {
   const normalized = text.replace(/^\uFEFF/, "");
-  const firstLine = normalized.split(/\r?\n/, 1)[0] ?? "";
+  const rows = csvRows(normalized);
+
+  const normalizedHeader = (value: string) =>
+    value.toLowerCase().replace(/[^a-z0-9]/g, "");
+
+  const rowHas = (row: CsvRow, ...required: string[]) => {
+    const values = new Set(row.map(normalizedHeader));
+    return required.every((header) =>
+      values.has(normalizedHeader(header))
+    );
+  };
+
+  const first = rows[0] ?? [];
 
   if (
-    /Plan,Asset Class,Fund Name,Current Mix,Future Investments,Date Range/i.test(
-      firstLine
+    rowHas(
+      first,
+      "Plan",
+      "Asset Class",
+      "Fund Name",
+      "Current Mix",
+      "Future Investments",
+      "Date Range",
+      "Units",
+      "Fund Price"
     )
   ) {
     return parseTsp(fileName, normalized);
   }
 
   if (
-    /Account Number,Investment Name,Symbol,Shares,Share Price,Total Value/i.test(
-      firstLine
+    rowHas(
+      first,
+      "Account Number",
+      "Investment Name",
+      "Symbol",
+      "Shares",
+      "Share Price",
+      "Total Value"
     ) &&
-    /Account Number,Trade Date,Settlement Date,Transaction Type/i.test(normalized)
+    rows.some((row) =>
+      rowHas(
+        row,
+        "Account Number",
+        "Trade Date",
+        "Settlement Date",
+        "Transaction Type"
+      )
+    )
   ) {
     return parseVanguard(fileName, normalized);
   }
 
   if (
-    /COB Date.*Security #.*Symbol.*CUSIP #.*Security Description.*Quantity.*Price \(\$\).*Value \(\$\)/i.test(
-      firstLine
+    rowHas(
+      first,
+      "COB Date",
+      "Security #",
+      "Symbol",
+      "CUSIP #",
+      "Security Description",
+      "Quantity",
+      "Price ($)",
+      "Value ($)"
     )
   ) {
     return parseMerrillHoldings(fileName, normalized);
   }
 
   if (
-    /COB Date.*Account Registration.*Account #.*Cash Balance \(\$\).*Net Value \(\$\)/i.test(
-      firstLine
+    rowHas(
+      first,
+      "COB Date",
+      "Account Registration",
+      "Account #",
+      "Cash Balance ($)",
+      "Net Value ($)"
     )
   ) {
     return parseMerrillSummary(fileName, normalized);
   }
 
   if (
-    /^Details,Posting Date,Description,Amount,Type,Balance/i.test(firstLine)
+    rowHas(
+      first,
+      "Details",
+      "Posting Date",
+      "Description",
+      "Amount",
+      "Type",
+      "Balance"
+    )
   ) {
     return parseChaseChecking(fileName, normalized);
   }
 
   if (
-    /^Transaction Date,Post Date,Description,Category,Type,Amount/i.test(firstLine)
+    rowHas(
+      first,
+      "Transaction Date",
+      "Post Date",
+      "Description",
+      "Category",
+      "Type",
+      "Amount"
+    )
   ) {
     return parseChaseCard(fileName, normalized);
   }
 
   if (
-    /^Posted Date,Reference Number,Payee,Address,Amount/i.test(firstLine)
+    rowHas(
+      first,
+      "Posted Date",
+      "Reference Number",
+      "Payee",
+      "Address",
+      "Amount"
+    )
   ) {
     return parseBoaCard(fileName, normalized);
   }
 
   if (
-    /^Description,,Summary Amt\./i.test(firstLine) &&
-    /Date,Description,Amount,Running Bal\./i.test(normalized)
+    rowHas(first, "Description", "Summary Amt.") &&
+    rows.some((row) =>
+      rowHas(
+        row,
+        "Date",
+        "Description",
+        "Amount",
+        "Running Bal."
+      )
+    )
   ) {
     return parseBoaChecking(fileName, normalized);
   }
