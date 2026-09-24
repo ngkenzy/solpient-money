@@ -139,7 +139,7 @@ function parseMoney(raw: string, field: string) {
     cleaned = cleaned.slice(1).trim();
   }
 
-  if (!/^\d+(?:\.\d{1,2})?$/.test(cleaned)) {
+  if (!/^\d+(?:\.\d+)?$/.test(cleaned)) {
     throw new Error(`Unable to parse ${field}: ${raw}`);
   }
 
