@@ -147,7 +147,6 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
               <Link href="/research">Research</Link>
               <Link className={pathname === "/research" ? "" : "selected"} href="/">Money</Link>
             </div>
-            <span className="global-sandbox-badge">LOCAL POSTGRES · MONEY V1.8.1</span>
           </div>
 
           <div className="top-actions">
