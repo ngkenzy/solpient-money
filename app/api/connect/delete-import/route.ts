@@ -60,7 +60,7 @@ export async function POST(request: Request) {
     const { data: batch, error } = await database
       .from("file_import_batches")
       .select(
-        "id,file_name,file_digest,status,target_account_id,created_at"
+        "id,file_name,file_digest,status,target_account_id,record_type,created_at"
       )
       .eq("id", body.batchId)
       .eq("household_id", householdId)
@@ -88,6 +88,7 @@ export async function POST(request: Request) {
         .select("id,file_name,created_at")
         .eq("household_id", householdId)
         .eq("target_account_id", accountId)
+        .eq("record_type", batch.record_type)
         .eq("status", "imported")
         .gt("created_at", batch.created_at)
         .order("created_at", { ascending: false })
