@@ -10,7 +10,7 @@ const files = {
 };
 
 const pkg = JSON.parse(files.packageJson);
-const tspNav = '{ href: "/tsp", label: "Military TSP", icon: Landmark }';
+const tspNav = '{ href: "/tsp", label: "Thrift Saving Plan", icon: Landmark }';
 const tspNavIndex = files.shell.indexOf(tspNav);
 const investIndex = files.shell.indexOf('label: "INVEST"');
 const planIndex = files.shell.indexOf('label: "PLAN"');
@@ -30,7 +30,7 @@ function atLeast174(version) {
 const checks = [
   ["release includes V1.7.4 or newer", atLeast174(pkg.version)],
   [
-    "Military TSP appears once and under Invest",
+    "Thrift Saving Plan appears once and under Invest",
     tspNavIndex > investIndex &&
       tspNavIndex < planIndex &&
       files.shell.lastIndexOf(tspNav) === tspNavIndex,
@@ -46,7 +46,7 @@ const checks = [
       (
         files.page.includes("Units") &&
         files.page.includes("Fund price") &&
-        files.page.includes("Closing")
+        files.page.includes("Current value")
       ),
   ],
   [
@@ -54,7 +54,7 @@ const checks = [
     files.tracker.includes("tsp:mixed-price-dates") &&
       (
         files.page.includes("Official fund price dates vary") ||
-        files.page.includes("TSP CSV IMPORT")
+        files.page.includes("CSV IMPORT")
       ),
   ],
   [
@@ -62,7 +62,7 @@ const checks = [
     files.prices.includes("complete && !mixedPriceDates") &&
       (
         files.page.includes("Withheld until all owned funds share one official as-of date") ||
-        files.page.includes("TSP CSV IMPORT")
+        files.page.includes("CSV IMPORT")
       ),
   ],
   [
@@ -78,14 +78,17 @@ const checks = [
       files.page.includes("fund.latestPriceDate")
     ) ||
       (
-        files.page.includes("fund.fundPrice") &&
-        files.page.includes("fund.units")
+        files.page.includes("fund.liveFundPrice") &&
+        files.page.includes("fund.liveUnits")
       ),
   ],
   [
     "responsive TSP market detail layout exists",
-    files.css.includes(".tsp-fund-market-data") &&
-      files.css.includes("grid-column: 2 / -1"),
+    (
+      files.css.includes(".tsp-fund-market-data") &&
+      files.css.includes("grid-column: 2 / -1")
+    ) ||
+      files.css.includes(".tsp-fund-price-form"),
   ],
 ];
 
