@@ -8,7 +8,8 @@ import {
 import PageHeader from "@/components/PageHeader";
 import FileImportWorkbench from "@/components/FileImportWorkbench";
 import UniversalImportWorkbench from "@/components/UniversalImportWorkbench";
-import UndoImportButton from "@/components/UndoImportButton";
+import ImportHistoryActions from "@/components/ImportHistoryActions";
+import DeleteTspImportButton from "@/components/DeleteTspImportButton";
 import ConnectorRegistryPanel from "@/components/ConnectorRegistryPanel";
 import { requireActiveHousehold } from "@/lib/money-auth";
 import { getConnectorOverviews } from "@/lib/connect/registry";
@@ -79,6 +80,7 @@ export default async function ConnectPage() {
     { data: accounts },
     { data: batches },
     { data: profiles },
+    { data: tspImports },
   ] = await Promise.all([
     supabase
       .from("accounts")
@@ -92,11 +94,11 @@ export default async function ConnectPage() {
     supabase
       .from("file_import_batches")
       .select(
-        "id,file_name,file_format,record_type,total_records,imported_records,duplicate_records,status,created_at,target_account_id,statement_balance_cents,reconciliation_delta_cents,anomaly_count,undone_at,target_account:accounts(name,institution)"
+        "id,file_name,file_format,record_type,file_digest,total_records,imported_records,duplicate_records,status,created_at,target_account_id,statement_balance_cents,reconciliation_delta_cents,anomaly_count,undone_at,target_account:accounts(name,institution)"
       )
       .eq("household_id", householdId)
       .order("created_at", { ascending: false })
-      .limit(12),
+      .limit(100),
     supabase
       .from("file_import_profiles")
       .select(
@@ -104,6 +106,21 @@ export default async function ConnectPage() {
       )
       .eq("household_id", householdId)
       .order("last_used_at", { ascending: false }),
+    supabase
+      .from("tsp_statement_imports")
+      .select(
+        "id,source_filename,source_content_sha256,parser_version,parsed_statement_date,imported_at"
+      )
+      .eq("household_id", householdId)
+      .order("parsed_statement_date", {
+        ascending: false,
+        nullsFirst: false,
+      })
+      .order("imported_at", {
+        ascending: false,
+        nullsFirst: false,
+      })
+      .limit(100),
   ]);
 
   const importAccounts = (accounts ?? []).map((account) => ({
@@ -133,6 +150,19 @@ export default async function ConnectPage() {
       (sum, batch) => sum + Number(batch.anomaly_count ?? 0),
       0
     );
+
+  const connectDigests = new Set(
+    (batches ?? [])
+      .map((batch) => String(batch.file_digest ?? ""))
+      .filter(Boolean)
+  );
+
+  const standaloneTspImports = (tspImports ?? []).filter(
+    (item) =>
+      !connectDigests.has(
+        String(item.source_content_sha256 ?? "")
+      )
+  );
 
   return (
     <div className="page">
@@ -357,20 +387,11 @@ export default async function ConnectPage() {
                       ? "undone"
                       : reconciliation}
                   </span>
-                  {batch.status === "imported" ? (
-                    <UndoImportButton
-                      batchId={String(batch.id)}
-                      fileName={String(batch.file_name)}
-                    />
-                  ) : (
-                    <span className="small-muted">
-                      {batch.undone_at
-                        ? `Undone ${formatDate(
-                            String(batch.undone_at)
-                          )}`
-                        : batch.status}
-                    </span>
-                  )}
+                  <ImportHistoryActions
+                    batchId={String(batch.id)}
+                    fileName={String(batch.file_name)}
+                    status={String(batch.status)}
+                  />
                 </div>
               );
             })}
@@ -382,6 +403,75 @@ export default async function ConnectPage() {
             <span>
               Your first completed import will appear here with
               reconciliation and rollback status.
+            </span>
+          </div>
+        )}
+      </section>
+
+      <section className="card page-card">
+        <div className="section-title-row">
+          <div>
+            <span className="card-kicker">TSP CSV HISTORY</span>
+            <h2>Standalone TSP imports</h2>
+          </div>
+          <span className="small-muted">
+            {standaloneTspImports.length} import
+            {standaloneTspImports.length === 1 ? "" : "s"}
+          </span>
+        </div>
+
+        <p className="empty-copy">
+          These are TSP CSVs imported through the dedicated Thrift Saving Plan
+          page rather than Universal Import. Deleting the newest one restores
+          the previous TSP CSV when available.
+        </p>
+
+        {standaloneTspImports.length ? (
+          <div className="connect-history v11">
+            {standaloneTspImports.map((item) => (
+              <div className="connect-history-row tsp-history" key={item.id}>
+                <span className="connect-file-icon">
+                  <FileSpreadsheet size={17} />
+                </span>
+                <div>
+                  <strong>
+                    {item.source_filename ?? "TSP CSV"}
+                  </strong>
+                  <span>
+                    TSP CSV ·{" "}
+                    {item.parsed_statement_date
+                      ? `Statement ${item.parsed_statement_date}`
+                      : "Statement date unavailable"}{" "}
+                    · {formatDate(
+                      item.imported_at == null
+                        ? null
+                        : String(item.imported_at)
+                    )}
+                  </span>
+                </div>
+                <div>
+                  <span>Parser</span>
+                  <strong>{item.parser_version}</strong>
+                </div>
+                <span className="connection-status matched">
+                  stored
+                </span>
+                <DeleteTspImportButton
+                  importId={String(item.id)}
+                  fileName={String(
+                    item.source_filename ?? "TSP CSV"
+                  )}
+                />
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="empty-connection-state">
+            <FileSpreadsheet size={25} />
+            <strong>No standalone TSP CSV imports</strong>
+            <span>
+              TSP files imported through Universal Import are managed in
+              Import History above.
             </span>
           </div>
         )}
