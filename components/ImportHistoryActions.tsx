@@ -16,16 +16,16 @@ export default function ImportHistoryActions({
   const router = useRouter();
   const [busy, setBusy] = useState<"undo" | "delete" | "force" | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [confirming, setConfirming] = useState<"undo" | "delete" | "force" | null>(null);
 
   async function undo() {
-    if (
-      !window.confirm(
-        `Undo the import from "${fileName}"? Solpient will remove rows from this batch and restore the prior account state, but keep the audit record.`
-      )
-    ) {
+    if (confirming !== "undo") {
+      setConfirming("undo");
+      setError(null);
       return;
     }
 
+    setConfirming(null);
     setBusy("undo");
     setError(null);
 
@@ -56,14 +56,13 @@ export default function ImportHistoryActions({
   }
 
   async function forceDelete() {
-    if (
-      !window.confirm(
-        `Force-delete "${fileName}" and all financial rows still tagged to that import?\n\nThis bypasses rollback restoration for legacy/broken imports, then recalculates the affected account from remaining data. This cannot be undone.`
-      )
-    ) {
+    if (confirming !== "force") {
+      setConfirming("force");
+      setError(null);
       return;
     }
 
+    setConfirming(null);
     setBusy("force");
     setError(null);
 
@@ -98,14 +97,13 @@ export default function ImportHistoryActions({
   }
 
   async function permanentlyDelete() {
-    if (
-      !window.confirm(
-        `Permanently delete "${fileName}" and the data imported from it?\n\nThis removes the imported financial rows and its import-history record. This cannot be undone.`
-      )
-    ) {
+    if (confirming !== "delete") {
+      setConfirming("delete");
+      setError(null);
       return;
     }
 
+    setConfirming(null);
     setBusy("delete");
     setError(null);
 
@@ -179,7 +177,11 @@ export default function ImportHistoryActions({
           disabled={busy !== null}
         >
           <RotateCcw size={13} />
-          {busy === "undo" ? "Undoing..." : "Undo"}
+          {busy === "undo"
+            ? "Undoing..."
+            : confirming === "undo"
+              ? "Confirm undo"
+              : "Undo"}
         </button>
       ) : null}
 
@@ -190,7 +192,11 @@ export default function ImportHistoryActions({
         disabled={busy !== null}
       >
         <Trash2 size={13} />
-        {busy === "delete" ? "Deleting..." : "Delete"}
+        {busy === "delete"
+          ? "Deleting..."
+          : confirming === "delete"
+            ? "Confirm delete"
+            : "Delete"}
       </button>
 
       <button
@@ -200,10 +206,30 @@ export default function ImportHistoryActions({
         disabled={busy !== null}
       >
         <Trash2 size={13} />
-        {busy === "force" ? "Force deleting..." : "Force delete"}
+        {busy === "force"
+          ? "Force deleting..."
+          : confirming === "force"
+            ? "Confirm force delete"
+            : "Force delete"}
       </button>
 
-      {error ? <small>{error}</small> : null}
+      {confirming ? (
+        <div className="connect-action-confirmation">
+          Click the highlighted action again to confirm.
+          <button
+            type="button"
+            onClick={() => setConfirming(null)}
+            disabled={busy !== null}
+          >
+            Cancel
+          </button>
+        </div>
+      ) : null}
+      {error ? (
+        <div className="connect-action-error" role="alert">
+          {error}
+        </div>
+      ) : null}
     </div>
   );
 }
