@@ -767,6 +767,19 @@ export async function runTruthEngineForHousehold(): Promise<TruthEngineSummary> 
 
       if (!compatibility.compatible) continue;
 
+      const explicitlyTypedTransfer =
+        String(left.row.transaction_type ?? "") ===
+          "transfer" ||
+        String(right.row.transaction_type ?? "") ===
+          "transfer";
+
+      if (
+        !compatibility.directHint &&
+        !explicitlyTypedTransfer
+      ) {
+        continue;
+      }
+
       candidates.push({
         right,
         score: compatibility.score,
