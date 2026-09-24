@@ -12,7 +12,9 @@ export default function PageHeader({
   return (
     <div className="page-header">
       <div>
-        <div className="eyebrow">{eyebrow} <span className="demo-pill">DEMO DATA</span></div>
+        <div className="eyebrow">
+          {eyebrow} <span className="demo-pill persistent">LOCAL DATA</span>
+        </div>
         <h1>{title}</h1>
         <p>{description}</p>
       </div>

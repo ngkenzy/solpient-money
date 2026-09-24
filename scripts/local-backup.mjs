@@ -70,8 +70,11 @@ const dump = spawnSync(
 );
 
 if (dump.status !== 0) {
+  const spawnDetail = dump.error
+    ? `${dump.error.name}: ${dump.error.message}`
+    : `exit status ${String(dump.status)}${dump.signal ? `, signal ${dump.signal}` : ""}`;
   throw new Error(
-    `PostgreSQL backup failed: ${dump.stderr?.toString("utf8") ?? "unknown error"}`
+    `PostgreSQL backup failed (${spawnDetail}): ${dump.stderr?.toString("utf8") || "no stderr output"}`
   );
 }
 
