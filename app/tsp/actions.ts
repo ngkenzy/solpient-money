@@ -138,6 +138,13 @@ export async function importOfficialTspCsv(
       .update(bytes)
       .digest("hex");
 
+    const liveImportTotal =
+      statement.funds.reduce(
+        (sum, fund) =>
+          sum + fund.units * fund.fundPrice,
+        0
+      );
+
     const { database, householdId } =
       await requireActiveHousehold();
 
@@ -197,7 +204,7 @@ export async function importOfficialTspCsv(
           institution: "Thrift Savings Plan",
           account_type: "retirement",
           balance_cents: cents(
-            statement.totals.closingBalance
+            liveImportTotal
           ),
           owner_scope: "Household",
           last_four: null,
@@ -225,7 +232,7 @@ export async function importOfficialTspCsv(
           institution: "Thrift Savings Plan",
           account_type: "retirement",
           balance_cents: cents(
-            statement.totals.closingBalance
+            liveImportTotal
           ),
           source: "file",
           last_file_import_at: now,
@@ -267,7 +274,7 @@ export async function importOfficialTspCsv(
         price: fund.fundPrice,
         cost_basis_cents: 0,
         market_value_cents: cents(
-          fund.closingBalance
+          fund.units * fund.fundPrice
         ),
         day_change_pct: 0,
         ytd_return_pct:
@@ -401,13 +408,13 @@ export async function importOfficialTspCsv(
       ok: true,
       message:
         `Imported ${statement.funds.length} TSP funds. ` +
-        `The ${statement.totals.closingBalance.toLocaleString(
+        `The live ${liveImportTotal.toLocaleString(
           "en-US",
           {
             style: "currency",
             currency: "USD",
           }
-        )} balance is now included in Investments and Net Worth.`,
+        )} value (units × fund price) is now included in Investments and Net Worth.`,
     };
   } catch (error) {
     return {
