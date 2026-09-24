@@ -183,8 +183,9 @@ const checks = [
       !files.uninstall.includes("money_action_items"),
   ],
   [
-    "release badge shows V1.4",
-    files.shell.includes("MONEY V1."),
+    "global shell does not depend on a legacy release badge",
+    files.shell.includes('href: "/action-center"') &&
+      !files.shell.includes("MONEY V1."),
   ],
   [
     "Action Center engine contains no financial execution calls",
