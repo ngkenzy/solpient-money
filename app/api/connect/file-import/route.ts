@@ -2,6 +2,7 @@ import { createHash } from "node:crypto";
 import { NextResponse } from "next/server";
 import { ConnectAuthError, getConnectHouseholdContext } from "@/lib/connect/auth";
 import { analyzeConnectImport } from "@/lib/connect/reconciliation";
+import { TSP_OFFICIAL_CSV_VERSION } from "@/lib/tsp-official-csv";
 import type {
   ParsedFinancialFile,
   ParsedHolding,
@@ -662,6 +663,77 @@ export async function POST(request: Request) {
       throw new Error(
         `Unable to update imported account: ${accountUpdateError.message}`
       );
+    }
+
+    const tspStatement =
+      parsed!.universalMetadata?.tspStatement;
+
+    if (
+      tspStatement &&
+      typeof tspStatement === "object"
+    ) {
+      const { data: priorTsp, error: priorTspError } =
+        await supabase
+          .from("tsp_statement_imports")
+          .select("id")
+          .eq("household_id", householdId)
+          .eq("source_content_sha256", body.fileDigest)
+          .eq(
+            "parser_version",
+            TSP_OFFICIAL_CSV_VERSION
+          )
+          .limit(1)
+          .maybeSingle();
+
+      if (priorTspError) {
+        throw new Error(
+          `Unable to inspect TSP import history: ${priorTspError.message}`
+        );
+      }
+
+      if (!priorTsp) {
+        const statementRecord =
+          tspStatement as Record<string, unknown>;
+        const warnings = Array.isArray(
+          statementRecord.warnings
+        )
+          ? statementRecord.warnings
+          : [];
+
+        const { error: tspAuditError } =
+          await supabase
+            .from("tsp_statement_imports")
+            .insert({
+              household_id: householdId,
+              source_kind: "csv",
+              source_filename:
+                body.fileName.slice(0, 240),
+              source_content_sha256:
+                body.fileDigest,
+              source_size_bytes: null,
+              parser_version:
+                TSP_OFFICIAL_CSV_VERSION,
+              parsed_statement_date:
+                statementRecord.periodEnd ?? null,
+              parsed_candidate: tspStatement,
+              parser_warnings: JSON.stringify(
+                warnings.map((message) => ({
+                  code: "tsp_csv_warning",
+                  field: null,
+                  message: String(message),
+                }))
+              ),
+              parser_errors: JSON.stringify([]),
+              validation_state: "confirmed",
+              confirmed_at: now,
+            });
+
+        if (tspAuditError) {
+          throw new Error(
+            `Unable to save TSP import history: ${tspAuditError.message}`
+          );
+        }
+      }
     }
 
     const profileId = await saveProfile({
