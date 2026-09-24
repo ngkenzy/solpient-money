@@ -234,7 +234,7 @@ export default async function TspPage() {
               </Link>
 
               <Link
-                href="/accounts"
+                href="/"
                 className="tsp-csv-linked-card"
               >
                 <Landmark size={20} />
@@ -244,7 +244,7 @@ export default async function TspPage() {
                     TSP retirement account included
                   </strong>
                   <small>
-                    Account balance updates with each CSV import
+                    Account balance updates with each CSV import and also appears under Accounts
                   </small>
                 </div>
                 <ArrowRight size={16} />
