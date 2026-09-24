@@ -219,18 +219,30 @@ function accountKey(
   ].join("|");
 }
 
+function looksLikeInternalTransfer(
+  description: string,
+  explicitType = ""
+) {
+  const text = `${explicitType} ${description}`.toLowerCase();
+
+  return (
+    /\b(transfer|xfer|sweep|reinvest|funds received|brokerage|investment)\b/.test(
+      text
+    ) ||
+    /\bvanguard\b.*\b(buy|payment|transfer)\b/.test(text) ||
+    /\bpayment\s+to\s+.*\bcard\b/.test(text) ||
+    /\bcard\s+ending\s+in\s+\d{4}\b/.test(text) ||
+    /\bpayment\s+to\s+crd\s+\d{4}\b/.test(text) ||
+    /\bpayment\s+from\s+chk\s+\d{4}\b/.test(text)
+  );
+}
+
 function transactionType(
   amount: number,
   description: string,
   explicitType = ""
 ): ParsedTransaction["type"] {
-  const text = `${explicitType} ${description}`.toLowerCase();
-
-  if (
-    /\b(payment|pmt|transfer|xfer|sweep|buy|sell|reinvest|funds received|withdrawal|brokerage|investment)\b/.test(
-      text
-    )
-  ) {
+  if (looksLikeInternalTransfer(description, explicitType)) {
     return "transfer";
   }
 
@@ -245,7 +257,7 @@ function smartCategory(
 
   const text = description.toLowerCase();
 
-  if (/payment|\bpmt\b|transfer|xfer|sweep|vanguard buy|investment/.test(text)) {
+  if (looksLikeInternalTransfer(description)) {
     return "Transfer";
   }
   if (/dfas.*army act|payroll|salary|direct dep/.test(text)) {
