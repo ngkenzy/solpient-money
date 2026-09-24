@@ -375,9 +375,8 @@ function parseChaseChecking(fileName: string, text: string): UniversalFileResult
     }
   }
 
-  const ordered = [...balances].sort((a, b) => a.date.localeCompare(b.date));
-  const earliest = ordered[0];
-  const latest = ordered.at(-1);
+  const latest = balances[0];
+  const earliest = balances.at(-1);
   const name = mask ? `Chase Checking ••••${mask}` : "Chase Checking";
   const key = accountKey("Chase", "cash", mask, name);
   const parsed = makeParsed({
