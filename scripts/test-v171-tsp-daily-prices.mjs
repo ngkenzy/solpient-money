@@ -136,14 +136,14 @@ const checks = [
     files.doctor.includes("V1.7.1 TSP daily price cache present"),
   ],
   [
-    "release badge matches current package version",
-    files.shell.includes(`MONEY V${pkg.version}`),
+    "global shell no longer depends on a release-version badge",
+    !files.shell.includes("MONEY V1.") &&
+      !files.shell.includes(`MONEY V${pkg.version}`),
   ],
   [
-    "GitHub Build remains manual-only",
+    "GitHub Build supports manual and pull-request verification",
     files.workflow.includes("workflow_dispatch:") &&
-      !files.workflow.includes("push:") &&
-      !files.workflow.includes("pull_request:"),
+      files.workflow.includes("pull_request:"),
   ],
   [
     "GitHub Lockfile remains manual-only",
