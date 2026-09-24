@@ -233,7 +233,8 @@ function looksLikeInternalTransfer(
     /\bpayment\s+to\s+.*\bcard\b/.test(text) ||
     /\bcard\s+ending\s+in\s+\d{4}\b/.test(text) ||
     /\bpayment\s+to\s+crd\s+\d{4}\b/.test(text) ||
-    /\bpayment\s+from\s+chk\s+\d{4}\b/.test(text)
+    /\bpayment\s+from\s+chk\s+\d{4}\b/.test(text) ||
+    /\b(?:american express|amex)\b.*\bach\s+pmt\b/.test(text)
   );
 }
 
