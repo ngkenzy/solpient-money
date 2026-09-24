@@ -105,8 +105,8 @@ const checks = [
       files.page.includes("DAILY SHARE-PRICE ESTIMATE")
     ) ||
       (
-        files.page.includes("TSP CSV IMPORT") &&
-        files.page.includes("Current TSP value") &&
+        files.page.includes("CSV IMPORT") &&
+        files.page.includes("Current plan value") &&
         files.page.includes("Fund price")
       ),
   ],
