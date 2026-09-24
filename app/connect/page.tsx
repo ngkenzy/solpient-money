@@ -7,6 +7,7 @@ import {
 } from "lucide-react";
 import PageHeader from "@/components/PageHeader";
 import FileImportWorkbench from "@/components/FileImportWorkbench";
+import UniversalImportWorkbench from "@/components/UniversalImportWorkbench";
 import UndoImportButton from "@/components/UndoImportButton";
 import ConnectorRegistryPanel from "@/components/ConnectorRegistryPanel";
 import { requireActiveHousehold } from "@/lib/money-auth";
@@ -82,7 +83,7 @@ export default async function ConnectPage() {
     supabase
       .from("accounts")
       .select(
-        "id,name,institution,account_type,source,balance_cents,last_file_import_at,created_at"
+        "id,name,institution,account_type,source,balance_cents,last_four,last_file_import_at,created_at"
       )
       .eq("household_id", householdId)
       .eq("is_active", true)
@@ -111,6 +112,7 @@ export default async function ConnectPage() {
     institution: String(account.institution),
     type: String(account.account_type),
     source: String(account.source),
+    lastFour: String(account.last_four ?? ""),
   }));
 
   const fileAccounts = (accounts ?? []).filter(
@@ -135,12 +137,12 @@ export default async function ConnectPage() {
   return (
     <div className="page">
       <PageHeader
-        eyebrow="SOLPIENT CONNECT V1.4"
-        title="One connector layer. Every financial source."
-        description="Files, Plaid Sandbox, Direct OFX, and OAuth/FDX now share one Connector SDK. V1.4 validates OAuth consent and FDX-aligned sync in sandbox while keeping production FDX/FAPI behind institution onboarding."
+        eyebrow="SOLPIENT CONNECT"
+        title="One import center. Every financial account."
+        description="Drop bank, credit-card, brokerage, retirement, CSV, QFX, or OFX files together. Solpient detects the source, routes each file to the right account, normalizes holdings and transactions, reconciles transfers, and updates the financial model used across Money."
         action={
           <span className="live-pill connected">
-            OAUTH / FDX SANDBOX LIVE
+            UNIVERSAL IMPORT
           </span>
         }
       />
@@ -239,7 +241,17 @@ export default async function ConnectPage() {
         )}
       </section>
 
-      <FileImportWorkbench accounts={importAccounts} />
+      <UniversalImportWorkbench accounts={importAccounts} />
+
+      <details className="connect-advanced-import">
+        <summary>
+          Advanced single-file mapping
+        </summary>
+        <p>
+          Use this when Solpient does not recognize a new institution yet or when you need to teach it custom columns.
+        </p>
+        <FileImportWorkbench accounts={importAccounts} />
+      </details>
 
       <section className="card page-card">
         <div className="section-title-row">
