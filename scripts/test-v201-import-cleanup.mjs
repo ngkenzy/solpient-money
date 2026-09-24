@@ -42,11 +42,22 @@ function atLeast201(version) {
 const checks = [
   ["release includes V2.0.1 or newer", atLeast201(pkg.version)],
   [
-    "Connect delete endpoint requires prior undo",
+    "current Connect import still requires safe undo",
     files.connectDelete.includes('batch.status === "imported"') &&
+      files.connectDelete.includes("requiresUndo: true") &&
       files.connectDelete.includes(
-        "Undo this import before permanently deleting"
+        "This is the current import for the account"
       ),
+  ],
+  [
+    "superseded imports can be purged without rolling the account backward",
+    files.connectDelete.includes("historical/superseded") &&
+      files.connectDelete.includes("removeTaggedRows") &&
+      files.connectDelete.includes("historicalPurge"),
+  ],
+  [
+    "only a newer import of the same record type supersedes history",
+    files.connectDelete.includes('.eq("record_type", batch.record_type)'),
   ],
   [
     "permanent Connect delete removes batch history",
@@ -61,10 +72,16 @@ const checks = [
       files.connectDelete.includes("tspAuditDeleted"),
   ],
   [
-    "destructive UI undoes live data before history deletion",
+    "destructive UI tries historical delete before rollback",
+    files.actions.indexOf('"/api/connect/delete-import"') <
+      files.actions.indexOf('"/api/connect/undo"') &&
+      files.actions.includes("deleteBody.requiresUndo === true"),
+  ],
+  [
+    "current import falls back to undo and delete retry",
     files.actions.includes('status === "imported"') &&
       files.actions.includes('"/api/connect/undo"') &&
-      files.actions.includes('"/api/connect/delete-import"'),
+      files.actions.match(/\/api\/connect\/delete-import/g)?.length >= 2,
   ],
   [
     "delete confirmation is explicit and irreversible",
