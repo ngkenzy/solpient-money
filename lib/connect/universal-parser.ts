@@ -915,7 +915,12 @@ function parseTsp(fileName: string, text: string): UniversalFileResult {
     return {
       ticker,
       name: fund.fundName,
-      kind: cashHoldingKind(ticker, fund.assetClass),
+      kind:
+        fund.fundCode === "G"
+          ? "cash"
+          : fund.fundCode === "F"
+            ? "bond"
+            : "etf",
       shares: fund.units,
       price: fund.fundPrice,
       costBasis: 0,
