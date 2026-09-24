@@ -55,6 +55,10 @@ check(
     parsed.funds[1].fundReturnPct === 10
 );
 check(
+  "negative TSP currency written as -$amount parses correctly",
+  parsed.funds[0].otherActivity === -100
+);
+check(
   "statement totals reconcile",
   parsed.totals.openingBalance === 3000 &&
     parsed.totals.gainsLosses === 210 &&
