@@ -283,7 +283,7 @@ async function prepareImport(
     withinFileDuplicates +
     (parsed.kind === "transactions" ? existingDuplicates : 0);
 
-  const analysis = analyzeConnectImport({
+  let analysis = analyzeConnectImport({
     parsed: analyzedParsed,
     currentBalance,
     targetExists,
@@ -291,6 +291,22 @@ async function prepareImport(
     duplicateCount,
     totalRecords: total,
   });
+
+  if (parsed.balanceMode === "preserve") {
+    analysis = {
+      ...analysis,
+      projectedBalance: currentBalance,
+      postImportBalance: currentBalance,
+      reconciliationDelta: null,
+      reconciliationStatus:
+        currentBalance == null ? "unavailable" : "captured",
+      anomalies: analysis.anomalies.filter(
+        (anomaly) =>
+          anomaly.code !== "reconciliation_gap" &&
+          anomaly.code !== "large_balance_jump"
+      ),
+    };
+  }
 
   const { data: prior } = await supabase
     .from("file_import_batches")
@@ -470,15 +486,20 @@ export async function POST(request: Request) {
 
     let priorHoldings: Record<string, unknown>[] = [];
     if (parsed!.kind === "holdings" && holdingRows.length) {
-      const tickers = holdingRows.map((holding) =>
-        holding.ticker.toUpperCase()
-      );
-      const { data, error } = await supabase
+      let priorQuery = supabase
         .from("holdings")
         .select("*")
         .eq("household_id", householdId)
-        .eq("account_id", accountId)
-        .in("ticker", tickers);
+        .eq("account_id", accountId);
+
+      if (parsed!.snapshotMode !== "replace") {
+        const tickers = holdingRows.map((holding) =>
+          holding.ticker.toUpperCase()
+        );
+        priorQuery = priorQuery.in("ticker", tickers);
+      }
+
+      const { data, error } = await priorQuery;
 
       if (error) {
         throw new Error(`Unable to snapshot prior holdings: ${error.message}`);
@@ -582,6 +603,45 @@ export async function POST(request: Request) {
           throw new Error(`Holding import failed: ${error.message}`);
         }
         importedRecords = rows.length;
+      }
+
+      if (parsed!.snapshotMode === "replace") {
+        const currentTickers = holdingRows.map((holding) =>
+          holding.ticker.toUpperCase()
+        );
+        const { data: existingRows, error: existingError } =
+          await supabase
+            .from("holdings")
+            .select("ticker")
+            .eq("household_id", householdId)
+            .eq("account_id", accountId)
+            .eq("source", "file");
+
+        if (existingError) {
+          throw new Error(
+            `Unable to inspect stale holdings: ${existingError.message}`
+          );
+        }
+
+        const staleTickers = (existingRows ?? [])
+          .map((row) => String(row.ticker).toUpperCase())
+          .filter((ticker) => !currentTickers.includes(ticker));
+
+        if (staleTickers.length) {
+          const { error: staleError } = await supabase
+            .from("holdings")
+            .delete()
+            .eq("household_id", householdId)
+            .eq("account_id", accountId)
+            .eq("source", "file")
+            .in("ticker", staleTickers);
+
+          if (staleError) {
+            throw new Error(
+              `Unable to remove stale holdings: ${staleError.message}`
+            );
+          }
+        }
       }
     }
 
