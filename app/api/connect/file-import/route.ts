@@ -2,6 +2,7 @@ import { createHash } from "node:crypto";
 import { NextResponse } from "next/server";
 import { ConnectAuthError, getConnectHouseholdContext } from "@/lib/connect/auth";
 import { analyzeConnectImport } from "@/lib/connect/reconciliation";
+import { TSP_OFFICIAL_CSV_VERSION } from "@/lib/tsp-official-csv";
 import type {
   ParsedFinancialFile,
   ParsedHolding,
@@ -283,7 +284,7 @@ async function prepareImport(
     withinFileDuplicates +
     (parsed.kind === "transactions" ? existingDuplicates : 0);
 
-  const analysis = analyzeConnectImport({
+  let analysis = analyzeConnectImport({
     parsed: analyzedParsed,
     currentBalance,
     targetExists,
@@ -291,6 +292,22 @@ async function prepareImport(
     duplicateCount,
     totalRecords: total,
   });
+
+  if (parsed.balanceMode === "preserve") {
+    analysis = {
+      ...analysis,
+      projectedBalance: currentBalance,
+      postImportBalance: currentBalance,
+      reconciliationDelta: null,
+      reconciliationStatus:
+        currentBalance == null ? "unavailable" : "captured",
+      anomalies: analysis.anomalies.filter(
+        (anomaly) =>
+          anomaly.code !== "reconciliation_gap" &&
+          anomaly.code !== "large_balance_jump"
+      ),
+    };
+  }
 
   const { data: prior } = await supabase
     .from("file_import_batches")
@@ -470,15 +487,20 @@ export async function POST(request: Request) {
 
     let priorHoldings: Record<string, unknown>[] = [];
     if (parsed!.kind === "holdings" && holdingRows.length) {
-      const tickers = holdingRows.map((holding) =>
-        holding.ticker.toUpperCase()
-      );
-      const { data, error } = await supabase
+      let priorQuery = supabase
         .from("holdings")
         .select("*")
         .eq("household_id", householdId)
-        .eq("account_id", accountId)
-        .in("ticker", tickers);
+        .eq("account_id", accountId);
+
+      if (parsed!.snapshotMode !== "replace") {
+        const tickers = holdingRows.map((holding) =>
+          holding.ticker.toUpperCase()
+        );
+        priorQuery = priorQuery.in("ticker", tickers);
+      }
+
+      const { data, error } = await priorQuery;
 
       if (error) {
         throw new Error(`Unable to snapshot prior holdings: ${error.message}`);
@@ -583,6 +605,43 @@ export async function POST(request: Request) {
         }
         importedRecords = rows.length;
       }
+
+      if (parsed!.snapshotMode === "replace") {
+        const currentTickers = holdingRows.map((holding) =>
+          holding.ticker.toUpperCase()
+        );
+        const { data: existingRows, error: existingError } =
+          await supabase
+            .from("holdings")
+            .select("ticker")
+            .eq("household_id", householdId)
+            .eq("account_id", accountId);
+
+        if (existingError) {
+          throw new Error(
+            `Unable to inspect stale holdings: ${existingError.message}`
+          );
+        }
+
+        const staleTickers = (existingRows ?? [])
+          .map((row) => String(row.ticker).toUpperCase())
+          .filter((ticker) => !currentTickers.includes(ticker));
+
+        if (staleTickers.length) {
+          const { error: staleError } = await supabase
+            .from("holdings")
+            .delete()
+            .eq("household_id", householdId)
+            .eq("account_id", accountId)
+            .in("ticker", staleTickers);
+
+          if (staleError) {
+            throw new Error(
+              `Unable to remove stale holdings: ${staleError.message}`
+            );
+          }
+        }
+      }
     }
 
     const accountUpdate: Record<string, unknown> = {
@@ -602,6 +661,77 @@ export async function POST(request: Request) {
       throw new Error(
         `Unable to update imported account: ${accountUpdateError.message}`
       );
+    }
+
+    const tspStatement =
+      parsed!.universalMetadata?.tspStatement;
+
+    if (
+      tspStatement &&
+      typeof tspStatement === "object"
+    ) {
+      const { data: priorTsp, error: priorTspError } =
+        await supabase
+          .from("tsp_statement_imports")
+          .select("id")
+          .eq("household_id", householdId)
+          .eq("source_content_sha256", body.fileDigest)
+          .eq(
+            "parser_version",
+            TSP_OFFICIAL_CSV_VERSION
+          )
+          .limit(1)
+          .maybeSingle();
+
+      if (priorTspError) {
+        throw new Error(
+          `Unable to inspect TSP import history: ${priorTspError.message}`
+        );
+      }
+
+      if (!priorTsp) {
+        const statementRecord =
+          tspStatement as Record<string, unknown>;
+        const warnings = Array.isArray(
+          statementRecord.warnings
+        )
+          ? statementRecord.warnings
+          : [];
+
+        const { error: tspAuditError } =
+          await supabase
+            .from("tsp_statement_imports")
+            .insert({
+              household_id: householdId,
+              source_kind: "csv",
+              source_filename:
+                body.fileName.slice(0, 240),
+              source_content_sha256:
+                body.fileDigest,
+              source_size_bytes: null,
+              parser_version:
+                TSP_OFFICIAL_CSV_VERSION,
+              parsed_statement_date:
+                statementRecord.periodEnd ?? null,
+              parsed_candidate: tspStatement,
+              parser_warnings: JSON.stringify(
+                warnings.map((message) => ({
+                  code: "tsp_csv_warning",
+                  field: null,
+                  message: String(message),
+                }))
+              ),
+              parser_errors: JSON.stringify([]),
+              validation_state: "confirmed",
+              confirmed_at: now,
+            });
+
+        if (tspAuditError) {
+          throw new Error(
+            `Unable to save TSP import history: ${tspAuditError.message}`
+          );
+        }
+      }
     }
 
     const profileId = await saveProfile({

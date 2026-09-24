@@ -103,7 +103,8 @@ function buildAllocation(holdings: Holding[]) {
         .filter(
           (holding) =>
             (holding.kind === "stock" || holding.kind === "etf") &&
-            holding.sector !== "International"
+            holding.sector !== "International" &&
+            holding.sector !== "Lifecycle"
         )
         .reduce((sum, holding) => sum + holding.value, 0),
       tone: "navy",
@@ -237,7 +238,7 @@ export async function getMoneyContext(): Promise<MoneyContext> {
       .eq("household_id", householdId)
       .is("duplicate_of_transaction_id", null)
       .order("posted_at", { ascending: false })
-      .limit(500),
+      .limit(5000),
     supabase
       .from("goals")
       .select("*")

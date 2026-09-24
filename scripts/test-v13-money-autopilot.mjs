@@ -123,8 +123,9 @@ const checks = [
       files.shell.includes('{ href: "/autopilot"'),
   ],
   [
-    "release badge shows V1.3",
-    files.shell.includes("MONEY V1."),
+    "global shell does not depend on a legacy release badge",
+    files.shell.includes('{ href: "/autopilot"') &&
+      !files.shell.includes("MONEY V1."),
   ],
   [
     "engine contains no payment or trading connector calls",

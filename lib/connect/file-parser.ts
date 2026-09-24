@@ -62,6 +62,9 @@ export type ParsedFinancialFile = {
   transactions: ParsedTransaction[];
   holdings: ParsedHolding[];
   warnings: string[];
+  balanceMode?: "statement" | "preserve" | "holdings";
+  snapshotMode?: "replace" | "merge";
+  universalMetadata?: Record<string, unknown>;
 };
 
 const aliases = {
