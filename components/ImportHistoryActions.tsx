@@ -14,7 +14,7 @@ export default function ImportHistoryActions({
   status: string;
 }) {
   const router = useRouter();
-  const [busy, setBusy] = useState<"undo" | "delete" | null>(null);
+  const [busy, setBusy] = useState<"undo" | "delete" | "force" | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   async function undo() {
@@ -49,6 +49,48 @@ export default function ImportHistoryActions({
         undoError instanceof Error
           ? undoError.message
           : "Unable to undo this import."
+      );
+    } finally {
+      setBusy(null);
+    }
+  }
+
+  async function forceDelete() {
+    if (
+      !window.confirm(
+        `Force-delete "${fileName}" and all financial rows still tagged to that import?\n\nThis bypasses rollback restoration for legacy/broken imports, then recalculates the affected account from remaining data. This cannot be undone.`
+      )
+    ) {
+      return;
+    }
+
+    setBusy("force");
+    setError(null);
+
+    try {
+      const response = await fetch(
+        "/api/connect/force-delete-import",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ batchId }),
+        }
+      );
+      const body = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          body.error ??
+            "Unable to force-delete this import."
+        );
+      }
+
+      router.refresh();
+    } catch (deleteError) {
+      setError(
+        deleteError instanceof Error
+          ? deleteError.message
+          : "Unable to force-delete this import."
       );
     } finally {
       setBusy(null);
@@ -149,6 +191,16 @@ export default function ImportHistoryActions({
       >
         <Trash2 size={13} />
         {busy === "delete" ? "Deleting..." : "Delete"}
+      </button>
+
+      <button
+        type="button"
+        className="danger force"
+        onClick={forceDelete}
+        disabled={busy !== null}
+      >
+        <Trash2 size={13} />
+        {busy === "force" ? "Force deleting..." : "Force delete"}
       </button>
 
       {error ? <small>{error}</small> : null}
