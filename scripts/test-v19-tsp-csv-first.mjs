@@ -54,6 +54,18 @@ check(
     parsed.funds[1].fundPrice === 130 &&
     parsed.funds[1].fundReturnPct === 10
 );
+
+const precisionCsv = csv.replace(
+  '"$10.000000"',
+  '"$20.237200"'
+);
+const precisionParsed = parseOfficialTspCsv(
+  precisionCsv
+);
+check(
+  "TSP fund prices preserve six-decimal precision",
+  precisionParsed.funds[0].fundPrice === 20.2372
+);
 check(
   "negative TSP currency written as -$amount parses correctly",
   parsed.funds[0].otherActivity === -100
