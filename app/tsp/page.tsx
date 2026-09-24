@@ -11,6 +11,7 @@ import PageHeader from "@/components/PageHeader";
 import { money } from "@/lib/finance";
 import { getLatestTspOfficialImport } from "@/lib/tsp-official-data";
 import TspCsvUploadForm from "./TspCsvUploadForm";
+import TspFundPriceForm from "./TspFundPriceForm";
 
 export const dynamic = "force-dynamic";
 
@@ -58,20 +59,22 @@ export default async function TspPage() {
     await getLatestTspOfficialImport();
 
   const statement = latest?.statement ?? null;
+  const liveFunds = latest?.funds ?? [];
+  const currentValue = latest?.currentValue ?? 0;
 
   return (
     <div className="page tsp-csv-page">
       <PageHeader
-        eyebrow="MILITARY TSP"
-        title="Upload your TSP CSV. Solpient does the rest."
-        description="Import the fund-level CSV exported from TSP.gov. Solpient stores the statement details, updates your TSP retirement account, adds each TSP fund to Investments, and includes the account balance in Net Worth."
+        eyebrow="THRIFT SAVING PLAN"
+        title="Thrift Saving Plan"
+        description="Upload the fund-level CSV exported from TSP.gov. Solpient keeps the imported statement as the historical record, tracks only the funds in that file, and uses each fund's units and current fund price to calculate the live portfolio value."
       />
 
       <section className="card page-card tsp-csv-import-card">
         <div className="section-title-row">
           <div>
             <span className="card-kicker">
-              TSP CSV IMPORT
+              CSV IMPORT
             </span>
             <h2>
               Import the official fund export
@@ -81,7 +84,7 @@ export default async function TspPage() {
         </div>
 
         <p className="tsp-csv-copy">
-          Use the CSV with columns such as Fund Name, Current Mix, Future Investments, Opening Balance, Gains/Losses, Closing Balance, Units, Fund Price, and Fund Return.
+          Import any fund rows included in the TSP export. Solpient does not require a fixed G/F/C/S/I list; only funds present in the latest imported CSV are displayed.
         </p>
 
         <TspCsvUploadForm />
@@ -89,7 +92,7 @@ export default async function TspPage() {
         <div className="bottom-note">
           <CheckCircle2 size={15} />
           <span>
-            Uploading a newer TSP CSV updates the same retirement account and fund holdings. The raw CSV is not stored; Solpient retains the parsed statement data and file fingerprint.
+            Uploading a newer CSV refreshes the imported fund list, units, imported prices, and statement details. Funds omitted from the new import are removed from the live Thrift Saving Plan portfolio.
           </span>
         </div>
       </section>
@@ -97,16 +100,26 @@ export default async function TspPage() {
       {!statement ? (
         <section className="card page-card tsp-csv-empty">
           <FileSpreadsheet size={28} />
-          <h2>No TSP CSV imported yet</h2>
+          <h2>No Thrift Saving Plan CSV imported yet</h2>
           <p>
-            Upload your TSP fund CSV above. Your TSP value will then appear in Investments, Accounts, and Net Worth automatically.
+            Upload your fund CSV above. Its funds will then appear here and the live portfolio value will flow into Investments, Accounts, and Net Worth.
           </p>
         </section>
       ) : (
         <>
           <div className="metric-grid four">
             <div className="metric-card">
-              <span>Current TSP value</span>
+              <span>Current plan value</span>
+              <strong>
+                {money(currentValue, true)}
+              </strong>
+              <small>
+                Live units × current fund prices
+              </small>
+            </div>
+
+            <div className="metric-card">
+              <span>Imported closing value</span>
               <strong>
                 {money(
                   statement.totals.closingBalance,
@@ -114,7 +127,7 @@ export default async function TspPage() {
                 )}
               </strong>
               <small>
-                Through {statement.periodEnd}
+                Statement through {statement.periodEnd}
               </small>
             </div>
 
@@ -131,9 +144,7 @@ export default async function TspPage() {
                   statement.totals.gainsLosses
                 )}
               </strong>
-              <small>
-                Exported TSP period
-              </small>
+              <small>Imported statement period</small>
             </div>
 
             <div className="metric-card">
@@ -153,26 +164,13 @@ export default async function TspPage() {
                 Contributions, transfers, and other activity
               </small>
             </div>
-
-            <div className="metric-card">
-              <span>Opening balance</span>
-              <strong>
-                {money(
-                  statement.totals.openingBalance,
-                  true
-                )}
-              </strong>
-              <small>
-                {statement.periodStart}
-              </small>
-            </div>
           </div>
 
           <section className="card page-card">
             <div className="section-title-row">
               <div>
                 <span className="card-kicker">
-                  IMPORTED ACCOUNT
+                  PLAN ACCOUNT
                 </span>
                 <h2>{statement.plan}</h2>
               </div>
@@ -193,18 +191,12 @@ export default async function TspPage() {
                 </strong>
               </div>
               <div>
-                <span>Funds</span>
-                <strong>
-                  {statement.funds.length}
-                </strong>
+                <span>Imported funds</span>
+                <strong>{liveFunds.length}</strong>
               </div>
               <div>
-                <span>Current mix</span>
-                <strong>
-                  {pct(
-                    statement.totals.currentMixPct
-                  )}
-                </strong>
+                <span>Live portfolio</span>
+                <strong>{money(currentValue, true)}</strong>
               </div>
             </div>
 
@@ -217,17 +209,11 @@ export default async function TspPage() {
                 <div>
                   <span>Investments</span>
                   <strong>
-                    {money(
-                      statement.totals.closingBalance,
-                      true
-                    )}{" "}
-                    included
+                    {money(currentValue, true)} included
                   </strong>
                   <small>
-                    {statement.funds.length} TSP fund holding
-                    {statement.funds.length === 1
-                      ? ""
-                      : "s"}
+                    {liveFunds.length} imported fund holding
+                    {liveFunds.length === 1 ? "" : "s"}
                   </small>
                 </div>
                 <ArrowRight size={16} />
@@ -241,10 +227,10 @@ export default async function TspPage() {
                 <div>
                   <span>Net Worth</span>
                   <strong>
-                    TSP retirement account included
+                    Retirement account included
                   </strong>
                   <small>
-                    Account balance updates with each CSV import and also appears under Accounts
+                    The live plan value updates Net Worth and also appears under Accounts
                   </small>
                 </div>
                 <ArrowRight size={16} />
@@ -256,20 +242,20 @@ export default async function TspPage() {
             <div className="section-title-row">
               <div>
                 <span className="card-kicker">
-                  ALLOCATION
+                  FUND HOLDINGS
                 </span>
                 <h2>
-                  Current mix vs future investments
+                  Units, current price, value, and allocation
                 </h2>
               </div>
               <TrendingUp size={19} />
             </div>
 
             <div className="tsp-csv-allocation-grid">
-              {statement.funds.map((fund) => (
+              {liveFunds.map((fund) => (
                 <div
                   className="tsp-csv-allocation-card"
-                  key={fund.fundCode}
+                  key={fund.ticker}
                 >
                   <div className="tsp-csv-fund-title">
                     <span>{fund.fundCode}</span>
@@ -279,10 +265,42 @@ export default async function TspPage() {
                     </div>
                   </div>
 
+                  <div className="tsp-csv-live-values">
+                    <div>
+                      <span>Units</span>
+                      <strong>
+                        {units(fund.liveUnits)}
+                      </strong>
+                    </div>
+                    <div>
+                      <span>Current value</span>
+                      <strong>
+                        {money(fund.liveValue, true)}
+                      </strong>
+                    </div>
+                  </div>
+
+                  <div className="tsp-csv-price-editor">
+                    <span>Fund price</span>
+                    <TspFundPriceForm
+                      ticker={fund.ticker}
+                      price={fund.liveFundPrice}
+                    />
+                    {fund.priceEdited ? (
+                      <small>
+                        Imported price: {fundPrice(fund.fundPrice)}
+                      </small>
+                    ) : (
+                      <small>
+                        Imported price is current
+                      </small>
+                    )}
+                  </div>
+
                   <div className="tsp-csv-mix-row">
-                    <span>Current</span>
+                    <span>Live mix</span>
                     <strong>
-                      {pct(fund.currentMixPct)}
+                      {pct(fund.liveMixPct)}
                     </strong>
                   </div>
                   <div className="tsp-csv-mix-track">
@@ -290,17 +308,14 @@ export default async function TspPage() {
                       style={{
                         width: `${Math.min(
                           100,
-                          Math.max(
-                            0,
-                            fund.currentMixPct
-                          )
+                          Math.max(0, fund.liveMixPct)
                         )}%`,
                       }}
                     />
                   </div>
 
                   <div className="tsp-csv-mix-row">
-                    <span>Future</span>
+                    <span>Future investments</span>
                     <strong>
                       {pct(
                         fund.futureInvestmentsPct
@@ -320,16 +335,6 @@ export default async function TspPage() {
                       }}
                     />
                   </div>
-
-                  <div className="tsp-csv-allocation-value">
-                    <span>Closing value</span>
-                    <strong>
-                      {money(
-                        fund.closingBalance,
-                        true
-                      )}
-                    </strong>
-                  </div>
                 </div>
               ))}
             </div>
@@ -339,10 +344,10 @@ export default async function TspPage() {
             <div className="section-title-row">
               <div>
                 <span className="card-kicker">
-                  TSP CSV DETAIL
+                  IMPORTED STATEMENT DETAIL
                 </span>
                 <h2>
-                  Everything in the imported fund rows
+                  All imported fund information
                 </h2>
               </div>
               <span className="small-muted">
@@ -350,36 +355,37 @@ export default async function TspPage() {
               </span>
             </div>
 
+            <p className="tsp-csv-copy">
+              Imported closing values remain unchanged as statement history. Current values below are recalculated from imported units and your current editable fund prices.
+            </p>
+
             <div className="tsp-csv-table-wrap">
-              <div className="tsp-csv-table">
+              <div className="tsp-csv-table live">
                 <div className="tsp-csv-table-row head">
                   <span>Fund</span>
                   <span>Asset class</span>
-                  <span>Current mix</span>
+                  <span>Live mix</span>
                   <span>Future</span>
                   <span>Opening</span>
                   <span>Gains / losses</span>
                   <span>Other activity</span>
-                  <span>Closing</span>
+                  <span>Imported closing</span>
                   <span>Units</span>
-                  <span>Fund price</span>
+                  <span>Current price</span>
+                  <span>Current value</span>
                   <span>Fund return</span>
                 </div>
 
-                {statement.funds.map((fund) => (
+                {liveFunds.map((fund) => (
                   <div
                     className="tsp-csv-table-row"
-                    key={fund.fundCode}
+                    key={fund.ticker}
                   >
                     <span>
-                      <strong>
-                        {fund.fundName}
-                      </strong>
+                      <strong>{fund.fundName}</strong>
                     </span>
                     <span>{fund.assetClass}</span>
-                    <span>
-                      {pct(fund.currentMixPct)}
-                    </span>
+                    <span>{pct(fund.liveMixPct)}</span>
                     <span>
                       {pct(
                         fund.futureInvestmentsPct
@@ -414,18 +420,21 @@ export default async function TspPage() {
                       )}
                     </span>
                     <span>
-                      <strong>
-                        {money(
-                          fund.closingBalance,
-                          true
-                        )}
-                      </strong>
-                    </span>
-                    <span>{units(fund.units)}</span>
-                    <span>
-                      {fundPrice(
-                        fund.fundPrice
+                      {money(
+                        fund.closingBalance,
+                        true
                       )}
+                    </span>
+                    <span>
+                      <strong>{units(fund.liveUnits)}</strong>
+                    </span>
+                    <span>
+                      {fundPrice(fund.liveFundPrice)}
+                    </span>
+                    <span>
+                      <strong>
+                        {money(fund.liveValue, true)}
+                      </strong>
                     </span>
                     <span
                       className={
@@ -434,9 +443,7 @@ export default async function TspPage() {
                           : "negative-text"
                       }
                     >
-                      {fund.fundReturnPct >= 0
-                        ? "+"
-                        : ""}
+                      {fund.fundReturnPct >= 0 ? "+" : ""}
                       {pct(fund.fundReturnPct)}
                     </span>
                   </div>
