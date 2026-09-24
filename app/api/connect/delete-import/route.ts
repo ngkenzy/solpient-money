@@ -6,6 +6,42 @@ import {
 
 export const dynamic = "force-dynamic";
 
+async function removeTaggedRows({
+  database,
+  householdId,
+  batchId,
+}: {
+  database: Awaited<
+    ReturnType<typeof getConnectHouseholdContext>
+  >["database"];
+  householdId: string;
+  batchId: string;
+}) {
+  const [txDelete, holdingDelete] = await Promise.all([
+    database
+      .from("transactions")
+      .delete()
+      .eq("household_id", householdId)
+      .eq("import_batch_id", batchId),
+    database
+      .from("holdings")
+      .delete()
+      .eq("household_id", householdId)
+      .eq("import_batch_id", batchId),
+  ]);
+
+  if (txDelete.error) {
+    throw new Error(
+      `Unable to remove imported transactions: ${txDelete.error.message}`
+    );
+  }
+  if (holdingDelete.error) {
+    throw new Error(
+      `Unable to remove imported holdings: ${holdingDelete.error.message}`
+    );
+  }
+}
+
 export async function POST(request: Request) {
   try {
     const { database, householdId } =
@@ -24,7 +60,7 @@ export async function POST(request: Request) {
     const { data: batch, error } = await database
       .from("file_import_batches")
       .select(
-        "id,file_name,file_digest,status,target_account_id"
+        "id,file_name,file_digest,status,target_account_id,created_at"
       )
       .eq("id", body.batchId)
       .eq("household_id", householdId)
@@ -37,17 +73,67 @@ export async function POST(request: Request) {
       );
     }
 
-    if (batch.status === "imported") {
+    const accountId =
+      batch.target_account_id == null
+        ? null
+        : String(batch.target_account_id);
+
+    let newerImport:
+      | Record<string, unknown>
+      | null = null;
+
+    if (accountId) {
+      const newerResult = await database
+        .from("file_import_batches")
+        .select("id,file_name,created_at")
+        .eq("household_id", householdId)
+        .eq("target_account_id", accountId)
+        .eq("status", "imported")
+        .gt("created_at", batch.created_at)
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      if (newerResult.error) {
+        throw new Error(
+          `Unable to inspect newer imports: ${newerResult.error.message}`
+        );
+      }
+
+      newerImport = newerResult.data;
+    }
+
+    if (
+      batch.status === "imported" &&
+      !newerImport
+    ) {
       return NextResponse.json(
         {
           error:
-            "Undo this import before permanently deleting its history.",
+            "This is the current import for the account. Undo it first so Solpient can restore the prior account state safely.",
+          requiresUndo: true,
         },
         { status: 409 }
       );
     }
 
-    const digest = String(batch.file_digest ?? "");
+    // If a newer import already exists, this batch is historical/superseded.
+    // Purge any rows still tagged to it, but do not roll account balance or
+    // holdings backward to the old pre-import state.
+    if (
+      batch.status === "imported" &&
+      newerImport
+    ) {
+      await removeTaggedRows({
+        database,
+        householdId,
+        batchId: String(batch.id),
+      });
+    }
+
+    const digest = String(
+      batch.file_digest ?? ""
+    );
     let tspAuditDeleted = false;
 
     if (digest) {
@@ -102,6 +188,7 @@ export async function POST(request: Request) {
       ok: true,
       batchDeleted: true,
       tspAuditDeleted,
+      historicalPurge: Boolean(newerImport),
     });
   } catch (error) {
     const status =
