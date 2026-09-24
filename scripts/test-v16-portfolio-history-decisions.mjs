@@ -188,9 +188,9 @@ const checks = [
       files.copilotUi.includes("What changed since my last decision?"),
   ],
   [
-    "navigation exposes Decision Journal",
+    "navigation exposes Decision Journal without a legacy version badge",
     files.shell.includes('href: "/decision-journal"') &&
-      files.shell.includes("MONEY V1."),
+      !files.shell.includes("MONEY V1."),
   ],
   [
     "Local Doctor verifies V1.6 schema",
@@ -211,10 +211,9 @@ const checks = [
     ),
   ],
   [
-    "GitHub Build remains manual-only",
+    "GitHub Build supports manual and pull-request verification",
     files.workflow.includes("workflow_dispatch:") &&
-      !files.workflow.includes("push:") &&
-      !files.workflow.includes("pull_request:"),
+      files.workflow.includes("pull_request:"),
   ],
   [
     "GitHub Lockfile remains manual-only",
