@@ -121,6 +121,12 @@ check(
     !actions.includes("source_bytes:")
 );
 check(
+  "TSP parser warning/error columns receive JSON arrays",
+  actions.includes("parser_errors: JSON.stringify([])") &&
+    actions.includes("parser_warnings:") &&
+    actions.includes("JSON.stringify(")
+);
+check(
   "TSP page is CSV-first and links to portfolio and accounts",
   page.includes("TSP CSV IMPORT") &&
     page.includes('href="/portfolio"') &&
