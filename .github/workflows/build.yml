@@ -2,6 +2,10 @@ name: Build
 
 on:
   workflow_dispatch:
+  pull_request:
+    branches:
+      - main
+      - feature/tsp-csv-first-v19
 
 jobs:
   build:
@@ -68,4 +72,11 @@ jobs:
       - run: npm run test:v16
       - run: npm run test:v17
       - run: npm run test:v171
+      - run: npm run test:v172
+      - run: npm run test:v173
+      - run: npm run test:v174
+      - run: npm run test:v175
+      - run: npm run test:v18
+      - run: npm run test:v19
+      - run: npm run test:v20
       - run: npm run build
