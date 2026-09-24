@@ -46,9 +46,15 @@ const checks = [
       files.prices.includes("const today = localCalendarDateKey(now)"),
   ],
   [
-    "TSP snapshot form defaults to local calendar day",
-    files.page.includes('import { localCalendarDateKey } from "@/lib/local-calendar-date"') &&
-      files.page.includes("localCalendarDateKey(new Date())"),
+    "TSP date handling remains explicit",
+    (
+      files.page.includes('import { localCalendarDateKey } from "@/lib/local-calendar-date"') &&
+      files.page.includes("localCalendarDateKey(new Date())")
+    ) ||
+      (
+        files.page.includes("statement.periodEnd") &&
+        files.page.includes("statement.periodStart")
+      ),
   ],
   [
     "failed official fetch keeps newest cached price date",
@@ -79,9 +85,12 @@ const checks = [
       files.scheduled.includes("throw new Error"),
   ],
   [
-    "visible release labels match package version",
-    files.shell.includes(`MONEY V${pkg.version}`) &&
-      files.page.includes(`V${pkg.version} · MILITARY TSP TRACKER`),
+    "release-label removal does not remove the TSP workspace",
+    !files.shell.includes("global-sandbox-badge") &&
+      (
+        files.page.includes('eyebrow="THRIFT SAVING PLAN"') ||
+        files.page.includes(`V${pkg.version} · MILITARY TSP TRACKER`)
+      ),
   ],
 ];
 

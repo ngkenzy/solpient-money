@@ -105,16 +105,22 @@ const checks = [
   ],
   [
     "TSP workspace exists",
-    files.page.includes("MILITARY TSP TRACKER") &&
+    (
+      files.page.includes("MILITARY TSP TRACKER") &&
       files.page.includes("CONTRIBUTION PACE") &&
       files.page.includes("BRS MATCH") &&
-      files.page.includes("FUND ALLOCATION"),
+      files.page.includes("FUND ALLOCATION")
+    ) ||
+      (
+        files.page.includes('eyebrow="THRIFT SAVING PLAN"') &&
+        files.page.includes("FUND HOLDINGS") &&
+        files.page.includes("Current plan value")
+      ),
   ],
   [
     "TSP tracker is in navigation",
     files.shell.includes('href: "/tsp"') &&
-      files.shell.includes("Military TSP") &&
-      files.shell.includes(`MONEY V${pkg.version}`) &&
+      files.shell.includes("Thrift Saving Plan") &&
       files.shell.indexOf('label: "INVEST"') <
         files.shell.indexOf('href: "/tsp"') &&
       files.shell.indexOf('href: "/tsp"') <
@@ -144,9 +150,10 @@ const checks = [
     ),
   ],
   [
-    "TSP actions only write TSP tracker tables",
-    !files.actions.includes('.from("accounts")') &&
-      !files.actions.includes('.from("holdings")') &&
+    "CSV-first TSP actions update household-scoped account and holdings only",
+    files.actions.includes('.from("accounts")') &&
+      files.actions.includes('.from("holdings")') &&
+      files.actions.includes("householdId") &&
       !files.actions.includes('.from("transactions")'),
   ],
   [

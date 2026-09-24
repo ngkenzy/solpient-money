@@ -126,8 +126,12 @@ const checks = [
     ).length >= 2,
   ],
   [
-    "TSP UI exposes current revision",
-    files.page.includes("snapshot.revision"),
+    "TSP UI exposes authoritative imported history",
+    files.page.includes("snapshot.revision") ||
+      (
+        files.page.includes("Last imported") &&
+        files.page.includes("Source file")
+      ),
   ],
   [
     "local migration runner preserves migration checksum history",

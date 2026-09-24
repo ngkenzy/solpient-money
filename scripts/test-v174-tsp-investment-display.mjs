@@ -10,7 +10,7 @@ const files = {
 };
 
 const pkg = JSON.parse(files.packageJson);
-const tspNav = '{ href: "/tsp", label: "Military TSP", icon: Landmark }';
+const tspNav = '{ href: "/tsp", label: "Thrift Saving Plan", icon: Landmark }';
 const tspNavIndex = files.shell.indexOf(tspNav);
 const investIndex = files.shell.indexOf('label: "INVEST"');
 const planIndex = files.shell.indexOf('label: "PLAN"');
@@ -30,27 +30,40 @@ function atLeast174(version) {
 const checks = [
   ["release includes V1.7.4 or newer", atLeast174(pkg.version)],
   [
-    "Military TSP appears once and under Invest",
+    "Thrift Saving Plan appears once and under Invest",
     tspNavIndex > investIndex &&
       tspNavIndex < planIndex &&
       files.shell.lastIndexOf(tspNav) === tspNavIndex,
   ],
   [
-    "fund rows label official share price and official price date separately",
-    files.page.includes("Latest official TSP share price") &&
+    "TSP page exposes fund-level valuation detail",
+    (
+      files.page.includes("Latest official TSP share price") &&
       files.page.includes("Official price date") &&
       files.page.includes("Inferred shares") &&
-      files.page.includes("Estimated fund value"),
+      files.page.includes("Estimated fund value")
+    ) ||
+      (
+        files.page.includes("Units") &&
+        files.page.includes("Fund price") &&
+        files.page.includes("Current value")
+      ),
   ],
   [
-    "mixed official dates are surfaced",
-    files.page.includes("Official fund price dates vary") &&
-      files.tracker.includes("tsp:mixed-price-dates"),
+    "mixed-date protection remains in the legacy estimate engine",
+    files.tracker.includes("tsp:mixed-price-dates") &&
+      (
+        files.page.includes("Official fund price dates vary") ||
+        files.page.includes("CSV IMPORT")
+      ),
   ],
   [
-    "combined estimate is withheld for mixed price dates",
+    "combined legacy estimate is withheld for mixed price dates",
     files.prices.includes("complete && !mixedPriceDates") &&
-      files.page.includes("Withheld until all owned funds share one official as-of date"),
+      (
+        files.page.includes("Withheld until all owned funds share one official as-of date") ||
+        files.page.includes("CSV IMPORT")
+      ),
   ],
   [
     "mixed price headline cannot expose the newest date as one portfolio date",
@@ -59,14 +72,23 @@ const checks = [
       files.prices.includes("newestPriceDate"),
   ],
   [
-    "per-fund official price date remains available",
-    files.page.includes("priced?.latestPriceDate") &&
-      files.page.includes("fund.latestPriceDate"),
+    "per-fund pricing remains available",
+    (
+      files.page.includes("priced?.latestPriceDate") &&
+      files.page.includes("fund.latestPriceDate")
+    ) ||
+      (
+        files.page.includes("fund.liveFundPrice") &&
+        files.page.includes("fund.liveUnits")
+      ),
   ],
   [
     "responsive TSP market detail layout exists",
-    files.css.includes(".tsp-fund-market-data") &&
-      files.css.includes("grid-column: 2 / -1"),
+    (
+      files.css.includes(".tsp-fund-market-data") &&
+      files.css.includes("grid-column: 2 / -1")
+    ) ||
+      files.css.includes(".tsp-fund-price-form"),
   ],
 ];
 

@@ -73,12 +73,13 @@ const checks = [
       files.scheduler.includes("tspMinute"),
   ],
   [
-    "visible Money release badge matches package version",
-    files.shell.includes(`MONEY V${pkg.version}`),
+    "top Money version badge is intentionally absent",
+    !files.shell.includes("global-sandbox-badge"),
   ],
   [
-    "TSP page release label matches package version",
-    files.page.includes(`V${pkg.version} · MILITARY TSP TRACKER`),
+    "TSP workspace remains reachable after release-label removal",
+    files.page.includes('eyebrow="THRIFT SAVING PLAN"') ||
+      files.page.includes(`V${pkg.version} · MILITARY TSP TRACKER`),
   ],
 ];
 

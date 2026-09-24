@@ -60,7 +60,7 @@ const sections: Array<{ label?: string; items: NavItem[] }> = [
       { href: "/decision-journal", label: "Decision Journal", icon: BookOpenCheck },
       { href: "/performance", label: "Performance", icon: LineChart },
       { href: "/allocation", label: "Allocation", icon: BarChart3 },
-      { href: "/tsp", label: "Military TSP", icon: Landmark },
+      { href: "/tsp", label: "Thrift Saving Plan", icon: Landmark },
     ],
   },
   {
