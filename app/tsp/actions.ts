@@ -15,6 +15,11 @@ export type TspCsvImportState = {
   message: string;
 };
 
+export type TspFundPriceState = {
+  ok: boolean;
+  message: string;
+};
+
 const TSP_CSV_MAX_BYTES = 2 * 1024 * 1024;
 
 function cents(value: number) {
@@ -411,6 +416,203 @@ export async function importOfficialTspCsv(
         error instanceof Error
           ? error.message
           : "Unable to import the TSP CSV.",
+    };
+  }
+}
+
+export async function updateTspFundPrice(
+  _previousState: TspFundPriceState,
+  formData: FormData
+): Promise<TspFundPriceState> {
+  try {
+    const ticker = String(
+      formData.get("ticker") ?? ""
+    )
+      .trim()
+      .toUpperCase();
+
+    const rawPrice = String(
+      formData.get("fundPrice") ?? ""
+    )
+      .trim()
+      .replace(/^\$/, "")
+      .replace(/,/g, "");
+
+    const price = Number(rawPrice);
+
+    if (
+      !ticker.startsWith("TSP-") ||
+      ticker.length > 80
+    ) {
+      return {
+        ok: false,
+        message: "Invalid imported TSP fund.",
+      };
+    }
+
+    if (
+      !Number.isFinite(price) ||
+      price <= 0 ||
+      price > 1_000_000
+    ) {
+      return {
+        ok: false,
+        message: "Enter a valid fund price greater than $0.",
+      };
+    }
+
+    const { database, householdId } =
+      await requireActiveHousehold();
+
+    const holdingResult = await database
+      .from("holdings")
+      .select(
+        "id,account_id,ticker,name,shares,price,market_value_cents,source"
+      )
+      .eq("household_id", householdId)
+      .eq("ticker", ticker)
+      .eq("source", "file")
+      .limit(1)
+      .maybeSingle();
+
+    if (
+      holdingResult.error ||
+      !holdingResult.data
+    ) {
+      return {
+        ok: false,
+        message: "Imported TSP fund not found.",
+      };
+    }
+
+    const holding = holdingResult.data;
+    const accountId = String(
+      holding.account_id ?? ""
+    );
+
+    if (!accountId) {
+      return {
+        ok: false,
+        message: "This TSP fund is not linked to an account.",
+      };
+    }
+
+    const accountResult = await database
+      .from("accounts")
+      .select(
+        "id,institution,account_type,source"
+      )
+      .eq("id", accountId)
+      .eq("household_id", householdId)
+      .single();
+
+    if (
+      accountResult.error ||
+      !accountResult.data ||
+      String(accountResult.data.institution) !==
+        "Thrift Savings Plan" ||
+      String(accountResult.data.account_type) !==
+        "retirement"
+    ) {
+      return {
+        ok: false,
+        message: "This holding is not part of the Thrift Saving Plan account.",
+      };
+    }
+
+    const shares = Number(
+      holding.shares ?? 0
+    );
+
+    if (!Number.isFinite(shares) || shares < 0) {
+      return {
+        ok: false,
+        message: "The imported unit count is invalid.",
+      };
+    }
+
+    const now = new Date().toISOString();
+    const newValue = shares * price;
+
+    const holdingUpdate = await database
+      .from("holdings")
+      .update({
+        price,
+        market_value_cents: cents(newValue),
+        updated_at: now,
+      })
+      .eq("id", holding.id)
+      .eq("household_id", householdId);
+
+    if (holdingUpdate.error) {
+      throw new Error(
+        `Unable to update fund price: ${holdingUpdate.error.message}`
+      );
+    }
+
+    const portfolioResult = await database
+      .from("holdings")
+      .select("market_value_cents")
+      .eq("household_id", householdId)
+      .eq("account_id", accountId);
+
+    if (portfolioResult.error) {
+      throw new Error(
+        `Unable to recalculate TSP value: ${portfolioResult.error.message}`
+      );
+    }
+
+    const totalCents = (
+      portfolioResult.data ?? []
+    ).reduce(
+      (sum, row) =>
+        sum +
+        Number(row.market_value_cents ?? 0),
+      0
+    );
+
+    const accountUpdate = await database
+      .from("accounts")
+      .update({
+        balance_cents: Math.round(totalCents),
+        updated_at: now,
+      })
+      .eq("id", accountId)
+      .eq("household_id", householdId);
+
+    if (accountUpdate.error) {
+      throw new Error(
+        `Unable to update TSP account value: ${accountUpdate.error.message}`
+      );
+    }
+
+    for (const path of [
+      "/tsp",
+      "/",
+      "/accounts",
+      "/portfolio",
+      "/allocation",
+      "/health",
+    ]) {
+      revalidatePath(path);
+    }
+
+    return {
+      ok: true,
+      message:
+        `${String(holding.name)} updated to ${price.toFixed(6)}. ` +
+        `Fund value is now ${newValue.toLocaleString("en-US", {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2,
+        })}.`,
+    };
+  } catch (error) {
+    return {
+      ok: false,
+      message:
+        error instanceof Error
+          ? error.message
+          : "Unable to update the fund price.",
     };
   }
 }
