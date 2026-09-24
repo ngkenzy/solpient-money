@@ -227,7 +227,7 @@ function transactionType(
   const text = `${explicitType} ${description}`.toLowerCase();
 
   if (
-    /\b(payment|transfer|xfer|sweep|buy|sell|reinvest|funds received|withdrawal|brokerage|investment)\b/.test(
+    /\b(payment|pmt|transfer|xfer|sweep|buy|sell|reinvest|funds received|withdrawal|brokerage|investment)\b/.test(
       text
     )
   ) {
@@ -245,7 +245,7 @@ function smartCategory(
 
   const text = description.toLowerCase();
 
-  if (/payment|transfer|xfer|sweep|vanguard buy|investment/.test(text)) {
+  if (/payment|\bpmt\b|transfer|xfer|sweep|vanguard buy|investment/.test(text)) {
     return "Transfer";
   }
   if (/dfas.*army act|payroll|salary|direct dep/.test(text)) {
@@ -365,7 +365,7 @@ function parseChaseChecking(fileName: string, text: string): UniversalFileResult
     transactions.push({
       postedAt,
       merchant,
-      category: smartCategory(merchant, explicitType),
+      category: smartCategory(merchant),
       amount,
       type: transactionType(amount, merchant, explicitType),
     });
