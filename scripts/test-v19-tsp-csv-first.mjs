@@ -108,7 +108,8 @@ check(
   "TSP page is CSV-first and links to portfolio and accounts",
   page.includes("TSP CSV IMPORT") &&
     page.includes('href="/portfolio"') &&
-    page.includes('href="/accounts"') &&
+    page.includes('href="/"') &&
+    page.includes("also appears under Accounts") &&
     page.includes("Everything in the imported fund rows")
 );
 check(
