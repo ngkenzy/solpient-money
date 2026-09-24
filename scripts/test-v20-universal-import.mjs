@@ -50,6 +50,21 @@ check(
   )
 );
 
+const chaseExpenseGuard = parseUniversalFinancialFile(
+  "Chase4493_Activity_20260924.csv",
+  [
+    "Details,Posting Date,Description,Amount,Type,Balance,Check or Slip #",
+    'DEBIT,09/23/2026,"Mortgage Payment",-2100.00,ACH_DEBIT,10000.00,',
+    'DEBIT,09/22/2026,"PEPCO PAYMENTUS BILLPAY",-200.00,ACH_DEBIT,12100.00,',
+  ].join("\n")
+);
+check(
+  "ordinary mortgage and utility payments remain expenses",
+  chaseExpenseGuard.datasets[0].parsed.transactions.every(
+    (row) => row.type === "expense"
+  )
+);
+
 const chaseCard = [
   "Transaction Date,Post Date,Description,Category,Type,Amount,Memo",
   "09/22/2026,09/22/2026,Payment Thank You - Web,,Payment,16.30,",
@@ -253,6 +268,13 @@ check(
   "batch import triggers Truth Engine reconciliation",
   reconcileRoute.includes("runTruthEngineForHousehold") &&
     component.includes('"/api/connect/reconcile"')
+);
+check(
+  "partial multi-file failures trigger reverse-order rollback",
+  component.includes("completedBatchIds") &&
+    component.includes('"/api/connect/undo"') &&
+    component.includes(".reverse()") &&
+    component.includes("Rolling back completed batches")
 );
 check(
   "dashboard can consume full imported transaction history",
