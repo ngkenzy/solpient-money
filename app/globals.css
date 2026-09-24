@@ -11151,3 +11151,117 @@ a {
     grid-template-columns: 1fr;
   }
 }
+
+
+/* V1.9.1 Thrift Saving Plan live fund pricing */
+.tsp-csv-live-values {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.tsp-csv-live-values > div {
+  border: 1px solid #e3eaf0;
+  border-radius: 8px;
+  background: #fff;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.tsp-csv-live-values span,
+.tsp-csv-price-editor > span {
+  color: #8292a2;
+  font-size: 7px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.tsp-csv-live-values strong {
+  color: #304960;
+  font-size: 9px;
+}
+
+.tsp-csv-price-editor {
+  margin-bottom: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.tsp-fund-price-form {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 6px;
+  align-items: center;
+}
+
+.tsp-fund-price-form input {
+  min-width: 0;
+  height: 34px;
+  border: 1px solid #d8e2e9;
+  border-radius: 8px;
+  background: #fff;
+  color: #304960;
+  padding: 0 8px;
+  font: inherit;
+  font-size: 8px;
+}
+
+.tsp-fund-price-form button {
+  height: 34px;
+  border: 0;
+  border-radius: 8px;
+  background: #304960;
+  color: #fff;
+  padding: 0 10px;
+  font: inherit;
+  font-size: 8px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.tsp-fund-price-form button:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.tsp-fund-price-form small {
+  grid-column: 1 / -1;
+  font-size: 7px;
+  line-height: 1.35;
+}
+
+.tsp-csv-price-editor > small {
+  color: #7c8d9d;
+  font-size: 7px;
+}
+
+.tsp-csv-table.live {
+  min-width: 1460px;
+}
+
+.tsp-csv-table.live .tsp-csv-table-row {
+  grid-template-columns:
+    minmax(140px, 1.5fr)
+    100px
+    82px
+    82px
+    105px
+    110px
+    110px
+    115px
+    105px
+    105px
+    115px
+    90px;
+}
+
+@media (max-width: 680px) {
+  .tsp-csv-live-values {
+    grid-template-columns: 1fr;
+  }
+}
