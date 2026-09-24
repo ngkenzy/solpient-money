@@ -553,12 +553,30 @@ function parseBoaChecking(fileName: string, text: string): UniversalFileResult {
     const card = merchant.match(/payment to CRD\s+(\d{4})/i)?.[1];
     if (card) linkedCards.add(card);
 
+    const runningBalanceRaw = cell(
+      row,
+      headers,
+      "Running Bal."
+    );
+    const runningBalance = runningBalanceRaw
+      ? money(runningBalanceRaw)
+      : null;
+
     transactions.push({
       postedAt,
       merchant,
       category: smartCategory(merchant),
       amount,
       type: transactionType(amount, merchant),
+      externalId:
+        runningBalance != null
+          ? [
+              postedAt,
+              amount,
+              runningBalance,
+              merchant,
+            ].join("|")
+          : undefined,
     });
   }
 
@@ -706,6 +724,7 @@ function parseVanguard(fileName: string, text: string): UniversalFileResult {
 
   const txHeader = headerMap(rows[secondHeader]);
   const transactions: ParsedTransaction[] = [];
+  const occurrences = new Map<string, number>();
 
   for (const row of rows.slice(secondHeader + 1)) {
     const postedAt = isoDate(cell(row, txHeader, "Trade Date"));
@@ -728,6 +747,21 @@ function parseVanguard(fileName: string, text: string): UniversalFileResult {
           ? "expense"
           : "transfer";
 
+    const identityBase = [
+      accountNumber,
+      postedAt,
+      cell(row, txHeader, "Settlement Date"),
+      txType,
+      description,
+      symbol,
+      cell(row, txHeader, "Shares"),
+      cell(row, txHeader, "Share Price"),
+      amount,
+    ].join("|");
+    const occurrence =
+      (occurrences.get(identityBase) ?? 0) + 1;
+    occurrences.set(identityBase, occurrence);
+
     transactions.push({
       postedAt,
       merchant: symbol !== "UNKNOWN"
@@ -741,13 +775,8 @@ function parseVanguard(fileName: string, text: string): UniversalFileResult {
             : "Investment Activity",
       amount,
       type,
-      externalId: [
-        accountNumber,
-        postedAt,
-        txType,
-        symbol,
-        amount,
-      ].join("|"),
+      externalId:
+        identityBase + "|" + occurrence,
     });
   }
 
