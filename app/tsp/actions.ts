@@ -360,14 +360,16 @@ export async function importOfficialTspCsv(
             statement.periodEnd,
           parsed_candidate: statement,
           parser_warnings:
-            statement.warnings.map(
-              (message) => ({
-                code: "tsp_csv_warning",
-                field: null,
-                message,
-              })
+            JSON.stringify(
+              statement.warnings.map(
+                (message) => ({
+                  code: "tsp_csv_warning",
+                  field: null,
+                  message,
+                })
+              )
             ),
-          parser_errors: [],
+          parser_errors: JSON.stringify([]),
           validation_state: "confirmed",
           confirmed_at: now,
         });
