@@ -10797,3 +10797,357 @@ a {
     width: 100%;
   }
 }
+
+
+/* V1.9 Military TSP — official CSV first */
+.tsp-csv-import-card {
+  display: grid;
+  gap: 12px;
+}
+
+.tsp-csv-copy {
+  margin: 0;
+  max-width: 760px;
+  color: #6f8192;
+  font-size: 9px;
+  line-height: 1.6;
+}
+
+.tsp-csv-upload-form {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: end;
+  max-width: 820px;
+}
+
+.tsp-csv-upload-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.tsp-csv-upload-form label > span {
+  color: #718399;
+  font-size: 7px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.tsp-csv-upload-form input[type="file"] {
+  width: 100%;
+  min-height: 42px;
+  border: 1px solid #dbe5ed;
+  border-radius: 9px;
+  background: #fff;
+  color: #314b62;
+  padding: 8px;
+  font: inherit;
+  font-size: 9px;
+}
+
+.tsp-csv-upload-form .research-button {
+  min-height: 42px;
+}
+
+.tsp-csv-import-status {
+  grid-column: 1 / -1;
+  border-radius: 9px;
+  padding: 9px 11px;
+  font-size: 8px;
+  line-height: 1.45;
+}
+
+.tsp-csv-import-status.positive {
+  background: #f2faf5;
+  color: #286c50;
+  border: 1px solid #d7eee0;
+}
+
+.tsp-csv-import-status.critical {
+  background: #fff4f4;
+  color: #974a52;
+  border: 1px solid #f1dddd;
+}
+
+.tsp-csv-empty {
+  min-height: 220px;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 8px;
+  text-align: center;
+}
+
+.tsp-csv-empty h2,
+.tsp-csv-empty p {
+  margin: 0;
+}
+
+.tsp-csv-empty p {
+  max-width: 560px;
+  color: #718399;
+  font-size: 9px;
+  line-height: 1.55;
+}
+
+.tsp-csv-account-meta {
+  display: grid;
+  grid-template-columns: 1.4fr 1.4fr 0.7fr 0.7fr;
+  gap: 9px;
+  margin-top: 10px;
+}
+
+.tsp-csv-account-meta > div {
+  min-height: 70px;
+  border: 1px solid #e3eaf0;
+  border-radius: 9px;
+  background: #fbfcfe;
+  padding: 11px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.tsp-csv-account-meta span,
+.tsp-csv-linked-card span,
+.tsp-csv-allocation-value span,
+.tsp-csv-mix-row span {
+  color: #8292a2;
+  font-size: 7px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.tsp-csv-account-meta strong {
+  color: #304960;
+  font-size: 9px;
+}
+
+.tsp-csv-linked-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 9px;
+  margin-top: 10px;
+}
+
+.tsp-csv-linked-card {
+  min-height: 88px;
+  border: 1px solid #dfe8ee;
+  border-radius: 10px;
+  background: #fff;
+  display: grid;
+  grid-template-columns: 32px minmax(0, 1fr) 18px;
+  gap: 9px;
+  align-items: center;
+  padding: 12px;
+  color: inherit;
+  text-decoration: none;
+}
+
+.tsp-csv-linked-card:hover {
+  background: #fbfcfe;
+  border-color: #cad8e2;
+}
+
+.tsp-csv-linked-card > div {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.tsp-csv-linked-card strong {
+  color: #304960;
+  font-size: 10px;
+}
+
+.tsp-csv-linked-card small {
+  color: #77899a;
+  font-size: 8px;
+}
+
+.tsp-csv-allocation-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.tsp-csv-allocation-card {
+  min-width: 0;
+  border: 1px solid #e2e9ef;
+  border-radius: 10px;
+  background: #fbfcfe;
+  padding: 12px;
+}
+
+.tsp-csv-fund-title {
+  display: grid;
+  grid-template-columns: 38px minmax(0, 1fr);
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.tsp-csv-fund-title > span {
+  width: 36px;
+  height: 36px;
+  border-radius: 9px;
+  display: grid;
+  place-items: center;
+  background: #eaf1f6;
+  color: #2e4c66;
+  font-size: 10px;
+  font-weight: 900;
+}
+
+.tsp-csv-fund-title > div {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.tsp-csv-fund-title strong {
+  color: #304960;
+  font-size: 9px;
+}
+
+.tsp-csv-fund-title small {
+  color: #8292a2;
+  font-size: 7px;
+}
+
+.tsp-csv-mix-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 7px;
+}
+
+.tsp-csv-mix-row strong {
+  color: #304960;
+  font-size: 8px;
+}
+
+.tsp-csv-mix-track {
+  margin-top: 4px;
+  height: 6px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #e8eef3;
+}
+
+.tsp-csv-mix-track i {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: #466b89;
+}
+
+.tsp-csv-mix-track.future i {
+  background: #7d9db7;
+}
+
+.tsp-csv-allocation-value {
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px solid #e3eaf0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.tsp-csv-allocation-value strong {
+  color: #304960;
+  font-size: 11px;
+}
+
+.tsp-csv-table-wrap {
+  width: 100%;
+  overflow-x: auto;
+  margin-top: 10px;
+}
+
+.tsp-csv-table {
+  min-width: 1320px;
+}
+
+.tsp-csv-table-row {
+  display: grid;
+  grid-template-columns:
+    minmax(140px, 1.5fr)
+    100px
+    82px
+    82px
+    110px
+    110px
+    110px
+    115px
+    105px
+    105px
+    90px;
+  gap: 10px;
+  align-items: center;
+  min-height: 48px;
+  padding: 8px 0;
+  border-top: 1px solid #e6edf3;
+  color: #556d82;
+  font-size: 8px;
+}
+
+.tsp-csv-table-row.head {
+  min-height: 34px;
+  border-top: 0;
+  color: #8292a2;
+  font-size: 7px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.tsp-csv-table-row strong {
+  color: #304960;
+}
+
+.tsp-csv-warning-list {
+  display: grid;
+  gap: 7px;
+  margin-top: 10px;
+}
+
+.tsp-csv-warning-list > div {
+  border-radius: 9px;
+  background: #fff8e9;
+  color: #7d622c;
+  padding: 10px 11px;
+  font-size: 8px;
+}
+
+@media (max-width: 1000px) {
+  .tsp-csv-account-meta {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .tsp-csv-allocation-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 680px) {
+  .tsp-csv-upload-form {
+    grid-template-columns: 1fr;
+  }
+
+  .tsp-csv-upload-form .research-button {
+    width: 100%;
+  }
+
+  .tsp-csv-account-meta,
+  .tsp-csv-linked-grid,
+  .tsp-csv-allocation-grid {
+    grid-template-columns: 1fr;
+  }
+}
