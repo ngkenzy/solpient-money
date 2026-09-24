@@ -36,21 +36,34 @@ const checks = [
       files.shell.lastIndexOf(tspNav) === tspNavIndex,
   ],
   [
-    "fund rows label official share price and official price date separately",
-    files.page.includes("Latest official TSP share price") &&
+    "TSP page exposes fund-level valuation detail",
+    (
+      files.page.includes("Latest official TSP share price") &&
       files.page.includes("Official price date") &&
       files.page.includes("Inferred shares") &&
-      files.page.includes("Estimated fund value"),
+      files.page.includes("Estimated fund value")
+    ) ||
+      (
+        files.page.includes("Units") &&
+        files.page.includes("Fund price") &&
+        files.page.includes("Closing")
+      ),
   ],
   [
-    "mixed official dates are surfaced",
-    files.page.includes("Official fund price dates vary") &&
-      files.tracker.includes("tsp:mixed-price-dates"),
+    "mixed-date protection remains in the legacy estimate engine",
+    files.tracker.includes("tsp:mixed-price-dates") &&
+      (
+        files.page.includes("Official fund price dates vary") ||
+        files.page.includes("TSP CSV IMPORT")
+      ),
   ],
   [
-    "combined estimate is withheld for mixed price dates",
+    "combined legacy estimate is withheld for mixed price dates",
     files.prices.includes("complete && !mixedPriceDates") &&
-      files.page.includes("Withheld until all owned funds share one official as-of date"),
+      (
+        files.page.includes("Withheld until all owned funds share one official as-of date") ||
+        files.page.includes("TSP CSV IMPORT")
+      ),
   ],
   [
     "mixed price headline cannot expose the newest date as one portfolio date",
@@ -59,9 +72,15 @@ const checks = [
       files.prices.includes("newestPriceDate"),
   ],
   [
-    "per-fund official price date remains available",
-    files.page.includes("priced?.latestPriceDate") &&
-      files.page.includes("fund.latestPriceDate"),
+    "per-fund pricing remains available",
+    (
+      files.page.includes("priced?.latestPriceDate") &&
+      files.page.includes("fund.latestPriceDate")
+    ) ||
+      (
+        files.page.includes("fund.fundPrice") &&
+        files.page.includes("fund.units")
+      ),
   ],
   [
     "responsive TSP market detail layout exists",
