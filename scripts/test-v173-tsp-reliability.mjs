@@ -88,7 +88,7 @@ const checks = [
     "release-label removal does not remove the TSP workspace",
     !files.shell.includes("global-sandbox-badge") &&
       (
-        files.page.includes('eyebrow="MILITARY TSP"') ||
+        files.page.includes('eyebrow="THRIFT SAVING PLAN"') ||
         files.page.includes(`V${pkg.version} · MILITARY TSP TRACKER`)
       ),
   ],
