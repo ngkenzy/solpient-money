@@ -264,8 +264,13 @@ function numeric(value: unknown) {
 }
 
 function identityLastFour(value: unknown) {
-  const digits = String(value ?? "").replace(/\D/g, "");
-  return digits.length >= 4 ? digits.slice(-4) : "";
+  const normalized = String(value ?? "")
+    .toUpperCase()
+    .replace(/[^A-Z0-9]/g, "");
+
+  return normalized.length >= 4 && /\d/.test(normalized)
+    ? normalized.slice(-4)
+    : "";
 }
 
 export function deriveAccountIdentity(
@@ -347,6 +352,138 @@ function transferHint(transaction: TransactionRow, normalizedMerchant: string) {
   return /\b(transfer|xfer|payment|payoff|sweep|brokerage|ach)\b/.test(text);
 }
 
+function accountInstitutionAliases(account: AccountRow | undefined) {
+  const institution = simpleText(account?.institution ?? "");
+  if (!institution) return [];
+
+  if (institution.includes("bank of america")) {
+    return ["bank of america", "bofa"];
+  }
+  if (institution.includes("vanguard")) return ["vanguard"];
+  if (institution.includes("merrill")) return ["merrill"];
+  if (institution.includes("american express")) {
+    return ["american express", "amex"];
+  }
+  if (institution.includes("chase")) return ["chase"];
+  if (institution.includes("navy federal")) {
+    return ["navy federal", "nfcu"];
+  }
+  if (institution.includes("thrift savings plan")) {
+    return ["thrift savings plan", "tsp"];
+  }
+
+  return institution.length >= 5 ? [institution] : [];
+}
+
+function tokenAppears(text: string, token: string) {
+  const normalizedText = simpleText(text);
+  const normalizedToken = simpleText(token);
+  if (!normalizedToken) return false;
+
+  return (
+    normalizedText === normalizedToken ||
+    normalizedText.startsWith(normalizedToken + " ") ||
+    normalizedText.endsWith(" " + normalizedToken) ||
+    normalizedText.includes(" " + normalizedToken + " ")
+  );
+}
+
+function transferPairScore(
+  left: {
+    row: TransactionRow;
+    canonicalAccountId: string;
+    normalizedMerchant: string;
+  },
+  right: {
+    row: TransactionRow;
+    canonicalAccountId: string;
+    normalizedMerchant: string;
+  },
+  accountById: Map<string, AccountRow>,
+  accounts: AccountRow[]
+) {
+  const knownMasks = Array.from(
+    new Set(
+      accounts
+        .map((account) => identityLastFour(account.last_four))
+        .filter(Boolean)
+    )
+  );
+
+  let score = 1;
+  let directHint = false;
+
+  const directions = [
+    {
+      state: left,
+      source: accountById.get(left.canonicalAccountId),
+      target: accountById.get(right.canonicalAccountId),
+    },
+    {
+      state: right,
+      source: accountById.get(right.canonicalAccountId),
+      target: accountById.get(left.canonicalAccountId),
+    },
+  ];
+
+  for (const direction of directions) {
+    const text = [
+      direction.state.row.merchant,
+      direction.state.normalizedMerchant,
+      direction.state.row.category,
+    ].join(" ");
+
+    const sourceMask = identityLastFour(
+      direction.source?.last_four
+    );
+    const targetMask = identityLastFour(
+      direction.target?.last_four
+    );
+
+    const mentionedMasks = knownMasks.filter((mask) =>
+      tokenAppears(text, mask)
+    );
+    const foreignMasks = mentionedMasks.filter(
+      (mask) => mask !== sourceMask
+    );
+
+    if (foreignMasks.length) {
+      if (
+        targetMask &&
+        foreignMasks.includes(targetMask) &&
+        foreignMasks.every((mask) => mask === targetMask)
+      ) {
+        score += 6;
+        directHint = true;
+      } else {
+        return {
+          compatible: false,
+          score: -1,
+          directHint: false,
+        };
+      }
+    }
+
+    const targetAliases = accountInstitutionAliases(
+      direction.target
+    );
+    if (
+      targetAliases.some((alias) =>
+        tokenAppears(text, alias)
+      )
+    ) {
+      score += 3;
+      directHint = true;
+    }
+  }
+
+  return {
+    compatible: true,
+    score,
+    directHint,
+  };
+}
+
 function dayDistance(a: unknown, b: unknown) {
   const left = isoDate(a);
   const right = isoDate(b);
@@ -404,6 +541,12 @@ export async function runTruthEngineForHousehold(): Promise<TruthEngineSummary> 
   const accounts = (accountData ?? []) as AccountRow[];
   const transactions = (transactionData ?? []) as TransactionRow[];
   const rules = (ruleData ?? []) as MerchantRuleRow[];
+  const accountById = new Map(
+    accounts.map((account) => [
+      String(account.id),
+      account,
+    ])
+  );
   const now = new Date().toISOString();
 
   const ruleMap = new Map<string, MerchantRuleRow>();
@@ -569,36 +712,120 @@ export async function runTruthEngineForHousehold(): Promise<TruthEngineSummary> 
     const left = available[i];
     if (paired.has(String(left.row.id))) continue;
 
-    const leftAmount = Math.round(numeric(left.row.amount_cents));
+    const leftAmount = Math.round(
+      numeric(left.row.amount_cents)
+    );
     if (leftAmount === 0) continue;
+
+    const candidates: Array<{
+      right: (typeof available)[number];
+      score: number;
+      directHint: boolean;
+      distance: number;
+    }> = [];
 
     for (let j = i + 1; j < available.length; j += 1) {
       const right = available[j];
       if (paired.has(String(right.row.id))) continue;
-      if (left.canonicalAccountId === right.canonicalAccountId) continue;
-      if (dayDistance(left.row.posted_at, right.row.posted_at) > 3) break;
+      if (
+        left.canonicalAccountId ===
+        right.canonicalAccountId
+      ) {
+        continue;
+      }
 
-      const rightAmount = Math.round(numeric(right.row.amount_cents));
+      const distance = dayDistance(
+        left.row.posted_at,
+        right.row.posted_at
+      );
+      if (distance > 3) break;
+
+      const rightAmount = Math.round(
+        numeric(right.row.amount_cents)
+      );
       if (leftAmount + rightAmount !== 0) continue;
       if (Math.abs(leftAmount) < 1000) continue;
 
       const hinted =
-        transferHint(left.row, left.normalizedMerchant) ||
-        transferHint(right.row, right.normalizedMerchant);
+        transferHint(
+          left.row,
+          left.normalizedMerchant
+        ) ||
+        transferHint(
+          right.row,
+          right.normalizedMerchant
+        );
 
       if (!hinted) continue;
 
-      const groupId = randomUUID();
-      left.detectedTransfer = true;
-      right.detectedTransfer = true;
-      left.transferGroupId = groupId;
-      right.transferGroupId = groupId;
-      left.confidence = Math.max(left.confidence, 0.93);
-      right.confidence = Math.max(right.confidence, 0.93);
-      paired.add(String(left.row.id));
-      paired.add(String(right.row.id));
-      break;
+      const compatibility = transferPairScore(
+        left,
+        right,
+        accountById,
+        accounts
+      );
+
+      if (!compatibility.compatible) continue;
+
+      candidates.push({
+        right,
+        score: compatibility.score,
+        directHint: compatibility.directHint,
+        distance,
+      });
     }
+
+    if (!candidates.length) continue;
+
+    candidates.sort(
+      (a, b) =>
+        b.score - a.score ||
+        a.distance - b.distance ||
+        String(a.right.row.id).localeCompare(
+          String(b.right.row.id)
+        )
+    );
+
+    const best = candidates[0];
+    const equallyStrong = candidates.filter(
+      (candidate) =>
+        candidate.score === best.score &&
+        candidate.distance === best.distance
+    );
+
+    if (
+      !best.directHint &&
+      candidates.length !== 1
+    ) {
+      continue;
+    }
+
+    if (equallyStrong.length > 1) {
+      continue;
+    }
+
+    const right = best.right;
+    const groupId = randomUUID();
+    left.detectedTransfer = true;
+    right.detectedTransfer = true;
+    left.transferGroupId = groupId;
+    right.transferGroupId = groupId;
+
+    const confidence = best.directHint
+      ? 0.98
+      : 0.88;
+
+    left.confidence = Math.max(
+      left.confidence,
+      confidence
+    );
+    right.confidence = Math.max(
+      right.confidence,
+      confidence
+    );
+
+    paired.add(String(left.row.id));
+    paired.add(String(right.row.id));
   }
 
   for (const state of states) {
