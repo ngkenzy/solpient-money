@@ -283,6 +283,7 @@ export default async function TspPage() {
                   <div className="tsp-csv-price-editor">
                     <span>Fund price</span>
                     <TspFundPriceForm
+                      key={`${fund.ticker}-${fund.liveFundPrice}`}
                       ticker={fund.ticker}
                       price={fund.liveFundPrice}
                     />
