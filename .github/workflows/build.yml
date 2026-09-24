@@ -80,4 +80,5 @@ jobs:
       - run: npm run test:v19
       - run: npm run test:v20
       - run: npm run test:v201
+      - run: npm run test:v202
       - run: npm run build
