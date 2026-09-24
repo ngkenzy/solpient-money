@@ -80,6 +80,21 @@ check(
   )
 );
 
+const merchantTransferGuard = parseUniversalFinancialFile(
+  "Chase4493_Activity_20260924.csv",
+  [
+    "Details,Posting Date,Description,Amount,Type,Balance,Check or Slip #",
+    'DEBIT,09/23/2026,"PAYPAL TRANSFER STEADILY INSURA",-1171.11,ACH_DEBIT,10000.00,',
+    'DEBIT,09/22/2026,"PAYPAL INST XFER CEDIPLOMA DIGIT",-15.95,ACH_DEBIT,11171.11,',
+  ].join("\n")
+);
+check(
+  "merchant transfer wording does not hide real spending",
+  merchantTransferGuard.datasets[0].parsed.transactions.every(
+    (row) => row.type === "expense"
+  )
+);
+
 const chaseCard = [
   "Transaction Date,Post Date,Description,Category,Type,Amount,Memo",
   "09/22/2026,09/22/2026,Payment Thank You - Web,,Payment,16.30,",
