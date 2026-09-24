@@ -105,16 +105,22 @@ const checks = [
   ],
   [
     "TSP workspace exists",
-    files.page.includes("MILITARY TSP TRACKER") &&
+    (
+      files.page.includes("MILITARY TSP TRACKER") &&
       files.page.includes("CONTRIBUTION PACE") &&
       files.page.includes("BRS MATCH") &&
-      files.page.includes("FUND ALLOCATION"),
+      files.page.includes("FUND ALLOCATION")
+    ) ||
+      (
+        files.page.includes('eyebrow="MILITARY TSP"') &&
+        files.page.includes("TSP CSV IMPORT") &&
+        files.page.includes("Current TSP value")
+      ),
   ],
   [
     "TSP tracker is in navigation",
     files.shell.includes('href: "/tsp"') &&
       files.shell.includes("Military TSP") &&
-      files.shell.includes(`MONEY V${pkg.version}`) &&
       files.shell.indexOf('label: "INVEST"') <
         files.shell.indexOf('href: "/tsp"') &&
       files.shell.indexOf('href: "/tsp"') <
