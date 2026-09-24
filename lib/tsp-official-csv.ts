@@ -104,21 +104,52 @@ function parseCsvLine(line: string) {
 }
 
 function parseMoney(raw: string, field: string) {
-  const cleaned = raw
+  let cleaned = raw
     .trim()
-    .replace(/^\$/, "")
     .replace(/,/g, "");
 
-  if (!/^-?\d+(?:\.\d{1,2})?$/.test(cleaned)) {
+  let negative = false;
+
+  if (
+    cleaned.startsWith("(") &&
+    cleaned.endsWith(")")
+  ) {
+    negative = true;
+    cleaned = cleaned.slice(1, -1).trim();
+  }
+
+  if (
+    cleaned.startsWith("-") ||
+    cleaned.startsWith("+")
+  ) {
+    negative = cleaned[0] === "-" ? !negative : negative;
+    cleaned = cleaned.slice(1).trim();
+  }
+
+  if (cleaned.startsWith("$")) {
+    cleaned = cleaned.slice(1).trim();
+  }
+
+  // Some exports place the sign after the currency symbol.
+  if (
+    cleaned.startsWith("-") ||
+    cleaned.startsWith("+")
+  ) {
+    negative = cleaned[0] === "-" ? !negative : negative;
+    cleaned = cleaned.slice(1).trim();
+  }
+
+  if (!/^\d+(?:\.\d{1,2})?$/.test(cleaned)) {
     throw new Error(`Unable to parse ${field}: ${raw}`);
   }
 
   const value = Number(cleaned);
+
   if (!Number.isFinite(value)) {
     throw new Error(`Unable to parse ${field}: ${raw}`);
   }
 
-  return value;
+  return negative ? -value : value;
 }
 
 function parseNumber(raw: string, field: string) {
