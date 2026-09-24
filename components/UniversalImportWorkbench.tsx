@@ -148,7 +148,7 @@ function buildGroups(files: LoadedFile[]): AccountGroup[] {
   const groups = new Map<string, AccountGroup>();
 
   for (const result of reconciled) {
-    const current =
+    const current: AccountGroup =
       groups.get(result.accountKey) ??
       {
         key: result.accountKey,
