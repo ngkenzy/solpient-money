@@ -6895,7 +6895,7 @@ a {
 
 .health-engine-component-head {
   display: grid;
-  grid-template-columns: 34px minmax(0, 1fr) auto;
+  grid-template-columns: 34px minmax(0, 1fr) auto 30px;
   gap: 9px;
   align-items: center;
 }
@@ -11556,12 +11556,17 @@ a {
   }
 
   .universal-file-row {
-    grid-template-columns: 30px minmax(0, 1fr);
+    grid-template-columns: 30px minmax(0, 1fr) 30px;
   }
 
   .universal-file-row > .connection-status {
     grid-column: 2;
     justify-self: start;
+  }
+
+  .universal-file-remove {
+    grid-column: 3;
+    grid-row: 1;
   }
 
   .universal-actions {
