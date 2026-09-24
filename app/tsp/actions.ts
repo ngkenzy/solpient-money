@@ -145,6 +145,7 @@ export async function importOfficialTspCsv(
         .eq("household_id", householdId)
         .eq("name", statement.plan)
         .eq("account_type", "retirement")
+        .or("source.eq.manual,source.eq.file")
         .limit(1)
         .maybeSingle();
 
@@ -167,6 +168,7 @@ export async function importOfficialTspCsv(
             "Thrift Savings Plan"
           )
           .eq("account_type", "retirement")
+          .or("source.eq.manual,source.eq.file")
           .limit(1)
           .maybeSingle();
 
