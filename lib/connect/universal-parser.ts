@@ -993,7 +993,12 @@ function parseTsp(fileName: string, text: string): UniversalFileResult {
 
   const name = "Thrift Saving Plan";
   const key = accountKey("Thrift Savings Plan", "retirement", "", statement.plan);
-  const total = holdings.reduce((sum, holding) => sum + holding.marketValue, 0);
+  const total =
+    holdings.reduce(
+      (sum, holding) =>
+        sum + Math.round(holding.marketValue * 100),
+      0
+    ) / 100;
 
   return {
     fileName,
