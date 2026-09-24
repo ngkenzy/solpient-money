@@ -364,7 +364,6 @@ export default function UniversalImportWorkbench({
 
       return merged;
     });
-    setTargetOverrides({});
     setBusy(null);
     setProgress("");
   }
