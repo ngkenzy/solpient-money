@@ -229,7 +229,7 @@ function looksLikeInternalTransfer(
     /\b(transfer|xfer|sweep|reinvest|funds received|brokerage|investment)\b/.test(
       text
     ) ||
-    /\bvanguard\b.*\b(buy|payment|transfer)\b/.test(text) ||
+    /\bvanguard\b.*\b(buy|payments?|transfer|sell)\b/.test(text) ||
     /\bpayment\s+to\s+.*\bcard\b/.test(text) ||
     /\bcard\s+ending\s+in\s+\d{4}\b/.test(text) ||
     /\bpayment\s+to\s+crd\s+\d{4}\b/.test(text) ||
