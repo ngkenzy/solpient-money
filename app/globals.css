@@ -11672,3 +11672,53 @@ a {
     grid-column: 2;
   }
 }
+
+
+/* V2.0.4 reliable import actions */
+.connect-action-confirmation,
+.connect-action-error {
+  grid-column: 1 / -1;
+  width: min(100%, 440px);
+  margin-top: 6px;
+  padding: 9px 10px;
+  border-radius: 8px;
+  font-size: 8px;
+  line-height: 1.45;
+}
+
+.connect-action-confirmation {
+  border: 1px solid #efd9ab;
+  background: #fff9eb;
+  color: #805b16;
+}
+
+.connect-action-confirmation button {
+  margin-left: 8px;
+  min-height: 24px;
+  padding: 0 7px;
+  border: 1px solid #e6d3a6;
+  border-radius: 6px;
+  background: white;
+  color: #6d541f;
+  font-size: 8px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.connect-action-error {
+  border: 1px solid #efc9cd;
+  background: #fff3f4;
+  color: #9b3944;
+  font-weight: 750;
+}
+
+.connect-import-actions button.danger.force {
+  border-color: #e9b6bc;
+  background: #fff1f2;
+}
+
+.connect-import-actions button:has(+ .connect-action-confirmation),
+.connect-import-actions button:focus-visible {
+  outline: 2px solid rgba(26, 107, 204, .25);
+  outline-offset: 2px;
+}
