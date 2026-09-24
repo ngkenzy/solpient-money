@@ -14,16 +14,16 @@ export default function DeleteTspImportButton({
   const router = useRouter();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [confirming, setConfirming] = useState(false);
 
   async function remove() {
-    if (
-      !window.confirm(
-        `Permanently delete TSP import "${fileName}"?\n\nIf this is the newest TSP CSV, Solpient will restore the previous TSP import when one exists. This cannot be undone.`
-      )
-    ) {
+    if (!confirming) {
+      setConfirming(true);
+      setError(null);
       return;
     }
 
+    setConfirming(false);
     setBusy(true);
     setError(null);
 
@@ -68,9 +68,29 @@ export default function DeleteTspImportButton({
         disabled={busy}
       >
         <Trash2 size={13} />
-        {busy ? "Deleting..." : "Delete"}
+        {busy
+          ? "Deleting..."
+          : confirming
+            ? "Confirm delete"
+            : "Delete"}
       </button>
-      {error ? <small>{error}</small> : null}
+      {confirming ? (
+        <div className="connect-action-confirmation">
+          Click Confirm delete again to permanently remove this TSP import.
+          <button
+            type="button"
+            onClick={() => setConfirming(false)}
+            disabled={busy}
+          >
+            Cancel
+          </button>
+        </div>
+      ) : null}
+      {error ? (
+        <div className="connect-action-error" role="alert">
+          {error}
+        </div>
+      ) : null}
     </div>
   );
 }
