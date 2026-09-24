@@ -127,7 +127,7 @@ export default async function TspPage() {
                 )}
               </strong>
               <small>
-                Statement through {statement.periodEnd}
+                Statement period {statement.periodStart} → {statement.periodEnd}
               </small>
             </div>
 
