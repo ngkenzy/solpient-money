@@ -368,6 +368,14 @@ export default function UniversalImportWorkbench({
     setProgress("");
   }
 
+  function removeFile(fileId: string) {
+    setFiles((current) =>
+      current.filter((file) => file.id !== fileId)
+    );
+    setResult(null);
+    setError(null);
+  }
+
   function clearAll() {
     setFiles([]);
     setTargetOverrides({});
@@ -676,6 +684,15 @@ export default function UniversalImportWorkbench({
                 >
                   {file.error ? "needs review" : "recognized"}
                 </span>
+                <button
+                  type="button"
+                  className="icon-button universal-file-remove"
+                  aria-label={"Remove " + file.fileName}
+                  onClick={() => removeFile(file.id)}
+                  disabled={busy !== null}
+                >
+                  <X size={14} />
+                </button>
               </div>
             ))}
           </div>
