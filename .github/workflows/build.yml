@@ -2,6 +2,9 @@ name: Build
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - feature/universal-financial-import-v2
   pull_request:
     branches:
       - main
