@@ -103,7 +103,8 @@ function buildAllocation(holdings: Holding[]) {
         .filter(
           (holding) =>
             (holding.kind === "stock" || holding.kind === "etf") &&
-            holding.sector !== "International"
+            holding.sector !== "International" &&
+            holding.sector !== "Lifecycle"
         )
         .reduce((sum, holding) => sum + holding.value, 0),
       tone: "navy",
