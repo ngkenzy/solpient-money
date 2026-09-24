@@ -575,6 +575,20 @@ export default function UniversalImportWorkbench({
         Flow, Portfolio, Allocation, Debt, and Net Worth.
       </p>
 
+      <input
+        ref={inputRef}
+        type="file"
+        multiple
+        accept=".csv,.qfx,.ofx,text/csv,application/x-ofx"
+        hidden
+        onChange={(event) => {
+          if (event.target.files) {
+            void loadFiles(event.target.files);
+          }
+          event.currentTarget.value = "";
+        }}
+      />
+
       {!files.length ? (
         <div
           className={"connect-dropzone universal" + (dragging ? " dragging" : "")}
@@ -601,16 +615,6 @@ export default function UniversalImportWorkbench({
           </strong>
           <span>Multiple CSV · QFX · OFX files · up to 15 MB each</span>
           <button type="button">Choose financial files</button>
-          <input
-            ref={inputRef}
-            type="file"
-            multiple
-            accept=".csv,.qfx,.ofx,text/csv,application/x-ofx"
-            hidden
-            onChange={(event) => {
-              if (event.target.files) void loadFiles(event.target.files);
-            }}
-          />
         </div>
       ) : (
         <>
@@ -789,6 +793,15 @@ export default function UniversalImportWorkbench({
           ) : null}
 
           <div className="universal-actions">
+            <button
+              type="button"
+              className="research-button"
+              onClick={() => inputRef.current?.click()}
+              disabled={busy !== null}
+            >
+              <FileUp size={14} />
+              Add files
+            </button>
             <button
               type="button"
               className="research-button"
