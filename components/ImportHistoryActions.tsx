@@ -68,7 +68,21 @@ export default function ImportHistoryActions({
     setError(null);
 
     try {
-      if (status === "imported") {
+      let deleteResponse = await fetch(
+        "/api/connect/delete-import",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ batchId }),
+        }
+      );
+      let deleteBody = await deleteResponse.json();
+
+      if (
+        !deleteResponse.ok &&
+        deleteBody.requiresUndo === true &&
+        status === "imported"
+      ) {
         const undoResponse = await fetch("/api/connect/undo", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -82,17 +96,17 @@ export default function ImportHistoryActions({
               "Unable to remove this import's financial data."
           );
         }
-      }
 
-      const deleteResponse = await fetch(
-        "/api/connect/delete-import",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ batchId }),
-        }
-      );
-      const deleteBody = await deleteResponse.json();
+        deleteResponse = await fetch(
+          "/api/connect/delete-import",
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ batchId }),
+          }
+        );
+        deleteBody = await deleteResponse.json();
+      }
 
       if (!deleteResponse.ok) {
         throw new Error(
