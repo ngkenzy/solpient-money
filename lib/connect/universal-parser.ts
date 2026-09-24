@@ -3,8 +3,8 @@ import {
   type ParsedFinancialFile,
   type ParsedHolding,
   type ParsedTransaction,
-} from "@/lib/connect/file-parser";
-import { parseOfficialTspCsv } from "@/lib/tsp-official-csv";
+} from "./file-parser.ts";
+import { parseOfficialTspCsv } from "../tsp-official-csv.ts";
 
 export type UniversalProvider =
   | "Chase"
