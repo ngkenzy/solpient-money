@@ -303,6 +303,7 @@ function investmentSector(
   if (["VMFXX", "IIAXX", "CASH", "TSP-G"].includes(code) || /money market|cash/.test(text)) {
     return "Cash";
   }
+  if (code.startsWith("TSP-L")) return "Lifecycle";
   if (code === "TSP-F" || /bond|fixed income/.test(text)) return "Bonds";
   if (/total stock|s&p|dividend equity|small cap|common stock/.test(text)) {
     return "U.S. Equities";
