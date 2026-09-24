@@ -308,7 +308,8 @@ check(
   truthEngine.includes("transferPairScore") &&
     truthEngine.includes("foreignMasks") &&
     truthEngine.includes("equallyStrong") &&
-    truthEngine.includes("directHint")
+    truthEngine.includes("directHint") &&
+    truthEngine.includes("explicitlyTypedTransfer")
 );
 check(
   "Truth Engine supports alphanumeric brokerage account masks",
