@@ -163,10 +163,9 @@ const checks = [
     ),
   ],
   [
-    "GitHub Build remains manual-only",
+    "GitHub Build supports manual and pull-request verification",
     files.workflow.includes("workflow_dispatch:") &&
-      !files.workflow.includes("push:") &&
-      !files.workflow.includes("pull_request:"),
+      files.workflow.includes("pull_request:"),
   ],
   [
     "GitHub Lockfile remains manual-only",
