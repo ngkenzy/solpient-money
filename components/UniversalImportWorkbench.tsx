@@ -142,12 +142,11 @@ function buildGroups(files: LoadedFile[]): AccountGroup[] {
   );
 
   const reconciled = reconcileUniversalBundle(valid.map((file) => file.result));
-  const byFile = new Map(
-    valid.map((file) => [file.fileName, { digest: file.digest }])
-  );
   const groups = new Map<string, AccountGroup>();
 
-  for (const result of reconciled) {
+  for (let resultIndex = 0; resultIndex < reconciled.length; resultIndex += 1) {
+    const result = reconciled[resultIndex];
+    const sourceFile = valid[resultIndex];
     const current: AccountGroup =
       groups.get(result.accountKey) ??
       {
@@ -178,12 +177,11 @@ function buildGroups(files: LoadedFile[]): AccountGroup[] {
     }
 
     for (const dataset of result.datasets) {
-      const meta = byFile.get(result.fileName);
-      if (!meta) continue;
+      if (!sourceFile) continue;
 
       current.datasets.push({
         fileName: result.fileName,
-        digest: meta.digest,
+        digest: sourceFile.digest,
         dataset,
       });
 
@@ -389,6 +387,7 @@ export default function UniversalImportWorkbench({
     let duplicateRecords = 0;
     const accountIds = new Set<string>();
     const createdByGroup = new Map<string, string>();
+    const completedBatchIds: string[] = [];
     let completedDatasets = 0;
     const allDatasets = groups.reduce(
       (sum, group) => sum + group.datasets.length,
@@ -444,6 +443,11 @@ export default function UniversalImportWorkbench({
             );
           }
 
+          const batchId = String(body.batchId ?? "");
+          if (batchId) {
+            completedBatchIds.push(batchId);
+          }
+
           const accountId = String(body.accountId ?? "");
           if (accountId) {
             resolvedAccountId = accountId;
@@ -483,12 +487,53 @@ export default function UniversalImportWorkbench({
       setProgress("");
       router.refresh();
     } catch (importError) {
-      setError(
+      let rollbackFailures = 0;
+
+      if (completedBatchIds.length) {
+        setProgress(
+          "Import failed. Rolling back completed batches…"
+        );
+
+        for (
+          const batchId of [...completedBatchIds].reverse()
+        ) {
+          try {
+            const rollbackResponse = await fetch(
+              "/api/connect/undo",
+              {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ batchId }),
+              }
+            );
+
+            if (!rollbackResponse.ok) {
+              rollbackFailures += 1;
+            }
+          } catch {
+            rollbackFailures += 1;
+          }
+        }
+      }
+
+      const message =
         importError instanceof Error
           ? importError.message
-          : "Universal import failed."
+          : "Universal import failed.";
+
+      setError(
+        rollbackFailures > 0
+          ? message +
+              " Some completed batches could not be rolled back automatically; review Import History."
+          : completedBatchIds.length > 0
+            ? message +
+              " Completed batches were rolled back."
+            : message
       );
       setProgress("");
+      router.refresh();
     } finally {
       setBusy(null);
     }
