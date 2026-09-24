@@ -78,7 +78,7 @@ const checks = [
   ],
   [
     "TSP workspace remains reachable after release-label removal",
-    files.page.includes('eyebrow="MILITARY TSP"') ||
+    files.page.includes('eyebrow="THRIFT SAVING PLAN"') ||
       files.page.includes(`V${pkg.version} · MILITARY TSP TRACKER`),
   ],
 ];
