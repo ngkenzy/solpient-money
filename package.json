@@ -50,7 +50,8 @@
     "test:v201": "node scripts/test-v201-import-cleanup.mjs",
     "test:v202": "node scripts/test-v202-import-delete-fix.mjs",
     "test:v204": "node scripts/test-v204-import-action-reliability.mjs",
-    "test:v205": "node scripts/test-v205-data-backup-actions.mjs"
+    "test:v205": "node scripts/test-v205-data-backup-actions.mjs",
+    "test:v206": "node scripts/test-v206-tsp-price-pull.mjs"
   },
   "dependencies": {
     "lucide-react": "^0.468.0",

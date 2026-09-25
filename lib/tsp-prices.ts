@@ -200,6 +200,75 @@ export function parseOfficialTspPriceCsv(
   return records;
 }
 
+export type TspLatestOfficialPrice = {
+  fundCode: string;
+  fundName: string;
+  sharePrice: number;
+  date: string;
+};
+
+/*
+ * Fetches the newest official TSP share prices (one row per fund for the
+ * latest published date) without requiring a TSP profile or snapshot.
+ * Used by the one-click "pull latest prices" action on the TSP page.
+ */
+export async function fetchLatestOfficialTspPrices(): Promise<{
+  priceDate: string;
+  prices: TspLatestOfficialPrice[];
+}> {
+  const today = localCalendarDateKey(new Date());
+
+  const { records } = await fetchOfficialTspCsv({
+    startDate: addDays(today, -10),
+    endDate: today,
+  });
+
+  if (!records.length) {
+    throw new Error(
+      "Official TSP share-price feed returned no price rows."
+    );
+  }
+
+  let priceDate = records[0].date;
+
+  for (const record of records) {
+    if (record.date > priceDate) {
+      priceDate = record.date;
+    }
+  }
+
+  const latest = new Map<string, TspLatestOfficialPrice>();
+
+  for (const record of records) {
+    if (record.date !== priceDate) continue;
+
+    if (
+      !Number.isFinite(record.sharePrice) ||
+      record.sharePrice <= 0
+    ) {
+      continue;
+    }
+
+    latest.set(record.fundCode, {
+      fundCode: record.fundCode,
+      fundName: record.fundName,
+      sharePrice: record.sharePrice,
+      date: record.date,
+    });
+  }
+
+  if (!latest.size) {
+    throw new Error(
+      `Official TSP share-price feed had no usable prices for ${priceDate}.`
+    );
+  }
+
+  return {
+    priceDate,
+    prices: [...latest.values()],
+  };
+}
+
 function dateOnly(value: unknown) {
   if (!value) return null;
   if (value instanceof Date) {

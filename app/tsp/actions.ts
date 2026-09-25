@@ -8,7 +8,7 @@ import {
   TSP_OFFICIAL_CSV_VERSION,
   type TspOfficialFundRow,
 } from "@/lib/tsp-official-csv";
-import { syncTspSharePrices } from "@/lib/tsp-prices";
+import { syncTspSharePrices, fetchLatestOfficialTspPrices } from "@/lib/tsp-prices";
 
 export type TspCsvImportState = {
   ok: boolean;
@@ -16,6 +16,11 @@ export type TspCsvImportState = {
 };
 
 export type TspFundPriceState = {
+  ok: boolean;
+  message: string;
+};
+
+export type TspPullPricesState = {
   ok: boolean;
   message: string;
 };
@@ -818,4 +823,182 @@ export async function syncTspPricesNow() {
   }
 
   revalidatePath("/tsp");
+}
+
+/*
+ * One-click pull of the latest official TSP share prices. Fetches the newest
+ * published prices from tsp.gov and applies them to every imported TSP fund
+ * holding (ticker TSP-*, source file), then refreshes the affected pages.
+ */
+export async function pullLatestTspPrices(): Promise<TspPullPricesState> {
+  try {
+    const { priceDate, prices } =
+      await fetchLatestOfficialTspPrices();
+
+    const { database, householdId } =
+      await requireActiveHousehold();
+
+    const holdingsResult = await database
+      .from("holdings")
+      .select(
+        "id,account_id,ticker,shares"
+      )
+      .eq("household_id", householdId)
+      .eq("source", "file");
+
+    if (holdingsResult.error) {
+      throw new Error(
+        `Unable to read imported TSP funds: ${holdingsResult.error.message}`
+      );
+    }
+
+    const holdings = (holdingsResult.data ?? []).filter(
+      (holding) =>
+        String(holding.ticker ?? "").startsWith("TSP-")
+    );
+
+    if (!holdings.length) {
+      return {
+        ok: false,
+        message:
+          "No imported TSP funds found. Import your TSP statement CSV first.",
+      };
+    }
+
+    const now = new Date().toISOString();
+    const touchedAccounts = new Set<string>();
+    const missing: string[] = [];
+    let applied = 0;
+
+    for (const holding of holdings) {
+      const code = String(
+        holding.ticker ?? ""
+      )
+        .slice(4)
+        .toUpperCase();
+
+      const match = prices.find(
+        (price) => price.fundCode === code
+      );
+
+      if (!match) {
+        missing.push(code);
+        continue;
+      }
+
+      const shares = Number(
+        holding.shares ?? 0
+      );
+
+      if (
+        !Number.isFinite(shares) ||
+        shares < 0
+      ) {
+        continue;
+      }
+
+      const holdingUpdate = await database
+        .from("holdings")
+        .update({
+          price: match.sharePrice,
+          market_value_cents: cents(
+            shares * match.sharePrice
+          ),
+          updated_at: now,
+        })
+        .eq("id", holding.id)
+        .eq("household_id", householdId);
+
+      if (holdingUpdate.error) {
+        throw new Error(
+          `Unable to update ${code}: ${holdingUpdate.error.message}`
+        );
+      }
+
+      applied += 1;
+
+      if (holding.account_id) {
+        touchedAccounts.add(
+          String(holding.account_id)
+        );
+      }
+    }
+
+    for (const accountId of touchedAccounts) {
+      const portfolioResult =
+        await database
+          .from("holdings")
+          .select("market_value_cents")
+          .eq("household_id", householdId)
+          .eq("account_id", accountId);
+
+      if (portfolioResult.error) {
+        throw new Error(
+          `Unable to recalculate TSP value: ${portfolioResult.error.message}`
+        );
+      }
+
+      const totalCents = (
+        portfolioResult.data ?? []
+      ).reduce(
+        (sum, row) =>
+          sum +
+          Number(
+            row.market_value_cents ?? 0
+          ),
+        0
+      );
+
+      const accountUpdate = await database
+        .from("accounts")
+        .update({
+          balance_cents: Math.round(totalCents),
+          updated_at: now,
+        })
+        .eq("id", accountId)
+        .eq("household_id", householdId);
+
+      if (accountUpdate.error) {
+        throw new Error(
+          `Unable to update TSP account value: ${accountUpdate.error.message}`
+        );
+      }
+    }
+
+    for (const path of [
+      "/tsp",
+      "/",
+      "/accounts",
+      "/portfolio",
+      "/allocation",
+    ]) {
+      revalidatePath(path);
+    }
+
+    if (!applied) {
+      return {
+        ok: false,
+        message: `Official prices for ${priceDate} did not match any imported fund (${missing.join(", ")}).`,
+      };
+    }
+
+    const missingNote = missing.length
+      ? ` No official price for: ${missing.join(", ")}.`
+      : "";
+
+    return {
+      ok: true,
+      message:
+        `Pulled official TSP prices for ${priceDate}: ` +
+        `updated ${applied} fund${applied === 1 ? "" : "s"}.${missingNote}`,
+    };
+  } catch (error) {
+    return {
+      ok: false,
+      message:
+        error instanceof Error
+          ? error.message
+          : "Unable to pull TSP prices.",
+    };
+  }
 }

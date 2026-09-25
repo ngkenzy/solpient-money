@@ -72,4 +72,5 @@ jobs:
       - run: npm run test:v202
       - run: npm run test:v204
       - run: npm run test:v205
+      - run: npm run test:v206
       - run: npm run build

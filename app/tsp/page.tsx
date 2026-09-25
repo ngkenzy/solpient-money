@@ -4,7 +4,6 @@ import {
   CheckCircle2,
   FileSpreadsheet,
   Landmark,
-  TrendingUp,
   WalletCards,
 } from "lucide-react";
 import PageHeader from "@/components/PageHeader";
@@ -12,6 +11,7 @@ import { money } from "@/lib/finance";
 import { getLatestTspOfficialImport } from "@/lib/tsp-official-data";
 import TspCsvUploadForm from "./TspCsvUploadForm";
 import TspFundPriceForm from "./TspFundPriceForm";
+import TspPullPricesButton from "./TspPullPricesButton";
 
 export const dynamic = "force-dynamic";
 
@@ -248,7 +248,7 @@ export default async function TspPage() {
                   Units, current price, value, and allocation
                 </h2>
               </div>
-              <TrendingUp size={19} />
+              <TspPullPricesButton />
             </div>
 
             <div className="tsp-csv-allocation-grid">

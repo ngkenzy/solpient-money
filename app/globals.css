@@ -10449,6 +10449,46 @@ a {
   cursor: default;
 }
 
+.tsp-pull-prices {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+}
+
+.tsp-pull-prices-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  height: 36px;
+  border: 1px solid #d8e2e9;
+  border-radius: 9px;
+  background: #fff;
+  color: #304960;
+  padding: 0 13px;
+  font: inherit;
+  font-size: 8px;
+  font-weight: 800;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.tsp-pull-prices-button:hover:not(:disabled) {
+  border-color: #304960;
+}
+
+.tsp-pull-prices-button:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.tsp-pull-prices small {
+  font-size: 7px;
+  line-height: 1.35;
+  text-align: right;
+  max-width: 260px;
+}
+
 .tsp-fund-price-form small {
   grid-column: 1 / -1;
   font-size: 7px;
