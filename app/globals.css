@@ -9827,7 +9827,7 @@ a {
   padding: 16px;
 }
 
-.decision-entry-form {
+.ticker-note-form {
   margin-top: 12px;
   display: grid;
   grid-template-columns: minmax(180px, .7fr) minmax(170px, .6fr) minmax(260px, 1.4fr) auto;
@@ -9835,21 +9835,21 @@ a {
   align-items: end;
 }
 
-.decision-entry-form label {
+.ticker-note-form label {
   display: flex;
   flex-direction: column;
   gap: 5px;
 }
 
-.decision-entry-form label > span {
+.ticker-note-form label > span {
   color: #718399;
   font-size: 7px;
   font-weight: 800;
   text-transform: uppercase;
 }
 
-.decision-entry-form select,
-.decision-entry-form textarea {
+.ticker-note-form select,
+.ticker-note-form textarea {
   width: 100%;
   border: 1px solid #dbe5ed;
   border-radius: 8px;
@@ -9859,15 +9859,38 @@ a {
   font-size: 8px;
 }
 
-.decision-entry-form select {
+.ticker-note-form select {
   min-height: 36px;
   padding: 0 10px;
 }
 
-.decision-entry-form textarea {
+.ticker-note-form textarea {
   min-height: 66px;
   padding: 9px 10px;
   resize: vertical;
+}
+
+.ticker-note-current {
+  border: 1px solid #dbe5ed;
+  border-radius: 8px;
+  background: #f7fafd;
+  padding: 10px 12px;
+  margin-bottom: 12px;
+}
+
+.ticker-note-current p {
+  margin: 0 0 6px;
+  white-space: pre-wrap;
+  color: #314b62;
+}
+
+.ticker-note-current small {
+  color: #718399;
+  font-size: 11px;
+}
+
+.ticker-note-form button {
+  margin-top: 10px;
 }
 
 .decision-journal-layout {
@@ -10032,7 +10055,7 @@ a {
 }
 
 @media (max-width: 1120px) {
-  .decision-entry-form {
+  .ticker-note-form {
     grid-template-columns: 1fr 1fr;
   }
 
@@ -10046,7 +10069,7 @@ a {
 }
 
 @media (max-width: 720px) {
-  .decision-entry-form,
+  .ticker-note-form,
   .decision-context-grid {
     grid-template-columns: 1fr;
   }

@@ -1,3 +1,5 @@
+import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
 import AllocationDonut from "@/components/AllocationDonut";
 import PageHeader from "@/components/PageHeader";
 import { getPortfolioMetrics, money } from "@/lib/finance";
@@ -18,6 +20,7 @@ export default async function AllocationPage() {
 
   return (
     <div className="page">
+      <Link className="back-link" href="/portfolio"><ArrowLeft size={15} /> Back to portfolio</Link>
       <PageHeader
         eyebrow="ALLOCATION"
         title="See where portfolio risk actually lives."

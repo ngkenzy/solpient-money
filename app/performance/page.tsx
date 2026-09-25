@@ -1,3 +1,5 @@
+import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
 import InteractiveLineChart from "@/components/InteractiveLineChart";
 import PageHeader from "@/components/PageHeader";
 import { requireMoneyDataset } from "@/lib/money-data";
@@ -11,6 +13,7 @@ export default async function PerformancePage() {
 
   return (
     <div className="page">
+      <Link className="back-link" href="/portfolio"><ArrowLeft size={15} /> Back to portfolio</Link>
       <PageHeader
         eyebrow="PERFORMANCE"
         title="Measure the portfolio, not the noise."
