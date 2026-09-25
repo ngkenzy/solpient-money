@@ -30,10 +30,6 @@ const files = {
     "app/api/connect/undo/route.ts",
     "utf8"
   ),
-  forceDeleteRoute: await readFile(
-    "app/api/connect/force-delete-import/route.ts",
-    "utf8"
-  ),
 };
 
 const pkg = JSON.parse(files.packageJson);
@@ -118,12 +114,6 @@ const checks = [
   [
     "undo backend still posts rollback behavior",
     files.undoRoute.includes("export async function POST"),
-  ],
-  [
-    "force-delete backend still purges import rows",
-    files.forceDeleteRoute.includes(
-      'export async function POST'
-    ) && files.forceDeleteRoute.includes(".delete()"),
   ],
   [
     "history delete keeps undo-fallback for requiresUndo",

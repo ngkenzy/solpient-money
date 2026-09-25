@@ -8,7 +8,7 @@ import {
   ImportActionConfirm,
 } from "./ImportActionConfirm";
 
-type Action = "undo" | "delete" | "force";
+type Action = "undo" | "delete";
 
 const CONFIRM_COPY: Record<
   Action,
@@ -23,11 +23,6 @@ const CONFIRM_COPY: Record<
     title: "Permanently delete this import?",
     confirmLabel: "Confirm delete",
     busyLabel: "Deleting…",
-  },
-  force: {
-    title: "Force-delete this import?",
-    confirmLabel: "Confirm force delete",
-    busyLabel: "Force deleting…",
   },
 };
 
@@ -54,9 +49,6 @@ export default function ImportHistoryActions({
   function detailFor(action: Action): string {
     if (action === "undo") {
       return `Undo the import from "${fileName}"? Solpient will remove rows from this batch and restore the prior account state, but keep the audit record.`;
-    }
-    if (action === "force") {
-      return `Force-delete "${fileName}" and all financial rows still tagged to that import? This bypasses rollback restoration for legacy/broken imports, then recalculates the affected account from remaining data. This cannot be undone.`;
     }
     return `Permanently delete "${fileName}" and the data imported from it? This removes the imported financial rows and its import-history record. This cannot be undone.`;
   }
@@ -101,11 +93,6 @@ export default function ImportHistoryActions({
         await postJson("/api/connect/undo", {
           batchId,
         });
-      } else if (action === "force") {
-        await postJson(
-          "/api/connect/force-delete-import",
-          { batchId }
-        );
       } else {
         // Permanent delete keeps the original undo-fallback: when the
         // history endpoint reports requiresUndo, undo the batch first,
@@ -183,19 +170,6 @@ export default function ImportHistoryActions({
           >
             <Trash2 size={13} />
             Delete
-          </button>
-
-          <button
-            type="button"
-            className="danger force"
-            onClick={() => {
-              setError(null);
-              setArmed("force");
-            }}
-            disabled={executing}
-          >
-            <Trash2 size={13} />
-            Force delete
           </button>
         </>
       ) : (
