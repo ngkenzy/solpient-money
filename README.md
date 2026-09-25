@@ -45,6 +45,10 @@ Day to day: `npm run dev` (with Docker running). Diagnose: `npm run local:doctor
 
 Local-first means your Mac holds the only copy. The app nags you about it on the Data page.
 
+Easiest: on the **Data** page, **Download backup** saves an encrypted copy to your machine; **Restore from backup** puts one back (it checks the file is genuine before touching your data). Backups are compressed and encrypted (AES-256-GCM).
+
+Terminal alternative:
+
 ```bash
 npm run local:backup    # encrypted, AES-256-GCM, into backups/
 npm run local:restore -- backups/solpient-money-<timestamp>.sql.gz.enc

@@ -38,6 +38,10 @@ Go to **Connect**. Drop in a CSV, QFX, or OFX from your bank, credit card, or br
 
 Your Mac holds the only copy of your data. The **Data** page shows your last backup and nags you when it's stale.
 
+Easiest: on the **Data** page, **Download backup** saves an encrypted copy to your machine; **Restore from backup** puts one back (it checks the file is genuine before touching your data).
+
+Terminal alternative:
+
 ```bash
 npm run local:backup
 npm run local:restore -- backups/solpient-money-<timestamp>.sql.gz.enc
