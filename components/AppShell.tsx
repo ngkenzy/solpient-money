@@ -7,7 +7,6 @@ import {
   BarChart3,
   BrainCircuit,
   BriefcaseBusiness,
-  ChevronDown,
   CircleDollarSign,
   Goal,
   Home,
@@ -117,21 +116,6 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
       </aside>
 
       <section className="workspace">
-        <header className="topbar">
-          <div className="topbar-product-group">
-            <div className="product-switch">
-              <Link className="selected" href="/">Money</Link>
-            </div>
-          </div>
-
-          <div className="top-actions">
-            <div className="profile">
-              <span className="avatar">SM</span>
-              <span>Money Household</span>
-              <ChevronDown size={15} />
-            </div>
-          </div>
-        </header>
         {children}
       </section>
     </main>

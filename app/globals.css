@@ -177,60 +177,6 @@ button {
   min-width: 0;
 }
 
-.topbar {
-  height: 64px;
-  position: sticky;
-  top: 0;
-  z-index: 2;
-  background: rgba(255,255,255,.93);
-  backdrop-filter: blur(14px);
-  border-bottom: 1px solid #e7edf4;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0 28px;
-}
-
-.product-switch {
-  display: flex;
-  align-self: stretch;
-  align-items: center;
-  gap: 34px;
-  font-size: 13px;
-  color: #4b5f79;
-}
-
-.product-switch a {
-  height: 100%;
-  display: flex;
-  align-items: center;
-  position: relative;
-}
-
-.product-switch .selected {
-  color: var(--ink);
-  font-weight: 700;
-}
-
-.product-switch .selected::after {
-  content: "";
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 3px;
-  border-radius: 3px 3px 0 0;
-  background: #1f6fe5;
-}
-
-.top-actions {
-  position: absolute;
-  right: 26px;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
 .icon-button {
   width: 34px;
   height: 34px;
@@ -240,25 +186,6 @@ button {
   border-radius: 9px;
   background: white;
   color: #536780;
-}
-
-.profile {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 12px;
-  font-weight: 600;
-}
-
-.avatar {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  display: grid;
-  place-items: center;
-  color: white;
-  background: var(--ink);
-  font-size: 11px;
 }
 
 .dashboard {
@@ -935,15 +862,6 @@ button {
     place-items: center;
   }
 
-  .topbar {
-    justify-content: flex-start;
-  }
-
-  .profile span:not(.avatar),
-  .profile svg {
-    display: none;
-  }
-
   .dashboard {
     padding: 20px 14px;
   }
@@ -991,20 +909,8 @@ button {
     display: none;
   }
 
-  .top-actions {
-    right: 14px;
-  }
-
   .dashboard {
     padding: 17px 10px;
-  }
-
-  .topbar {
-    padding: 0 14px;
-  }
-
-  .product-switch {
-    gap: 20px;
   }
 
   .card-head {
@@ -1034,7 +940,6 @@ button {
   }
 }
 
-
 /* V0.2 functional surfaces */
 a {
   color: inherit;
@@ -1042,7 +947,6 @@ a {
 
 .brand,
 .side-item,
-.product-switch a,
 .text-button,
 .attention-button,
 .research-button,
@@ -1056,13 +960,6 @@ a {
 
 .side-item {
   cursor: pointer;
-}
-
-.product-switch a {
-  height: 100%;
-  display: flex;
-  align-items: center;
-  position: relative;
 }
 
 .page {
@@ -1828,7 +1725,6 @@ a {
   }
 }
 
-
 /* V0.3 live Solpient Research integration */
 .live-pill {
   display: inline-flex;
@@ -2411,7 +2307,6 @@ a {
     grid-template-columns: 1fr 1fr;
   }
 }
-
 
 /* V0.4 financial intelligence */
 .homepage-attention {
@@ -3079,7 +2974,6 @@ a {
   }
 }
 
-
 /* V0.5 auth, onboarding, persistence */
 .demo-pill.persistent {
   background: #e5f5ee;
@@ -3632,13 +3526,7 @@ a {
   }
 }
 
-
 /* V0.6.1 Sandbox hardening */
-.topbar-product-group {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
 
 .global-sandbox-badge,
 .source-badge {
@@ -3702,10 +3590,6 @@ a {
 }
 
 @media (max-width: 780px) {
-  .topbar-product-group {
-    gap: 6px;
-  }
-
   .global-sandbox-badge {
     padding: 4px 6px;
     font-size: 6px;
@@ -3716,7 +3600,6 @@ a {
     flex-direction: column;
   }
 }
-
 
 /* Solpient Connect V1 */
 .source-badge.file-import {
@@ -4172,7 +4055,6 @@ a {
   }
 }
 
-
 /* Solpient Connect V1.1 */
 .connect-recognized,
 .connect-prior-file {
@@ -4537,7 +4419,6 @@ a {
   }
 }
 
-
 /* Solpient Connect V1.2 Connector SDK */
 .connector-sdk-grid {
   display: grid;
@@ -4810,7 +4691,6 @@ a {
   }
 }
 
-
 /* Solpient Connect V1.3 Direct OFX */
 .source-badge.direct-ofx {
   color: #315e88;
@@ -5033,7 +4913,6 @@ a {
   flex: 0 0 auto;
 }
 
-
 @media (max-width: 1050px) {
   .direct-ofx-row {
     grid-template-columns: 42px minmax(220px, 1fr) 140px;
@@ -5069,7 +4948,6 @@ a {
     width: 100%;
   }
 }
-
 
 /* Solpient Connect V1.3.1 institution profiles */
 .direct-ofx-known-grid {
@@ -5256,7 +5134,6 @@ a {
     grid-template-columns: 1fr;
   }
 }
-
 
 /* Solpient Connect V1.4 OAuth / FDX */
 .source-badge.fdx-source {
@@ -5516,7 +5393,6 @@ a {
     grid-column: 2;
   }
 }
-
 
 /* Solpient Money V0.9 Truth Engine */
 .truth-run-button {
@@ -5852,7 +5728,6 @@ a {
   }
 }
 
-
 /* Solpient Money V0.9.1 Review & Reconcile */
 .truth-account-row.inactive {
   opacity: .68;
@@ -6106,7 +5981,6 @@ a {
     grid-column: 2;
   }
 }
-
 
 /* Solpient Money V0.9.2 Cash-Flow Intelligence */
 .cash-intel-hero {
@@ -6468,7 +6342,6 @@ a {
     text-align: left;
   }
 }
-
 
 /* Solpient Money V0.9.3 Financial Health Engine */
 .health-engine-hero {
@@ -6884,7 +6757,6 @@ a {
   }
 }
 
-
 /* Solpient Money V0.9.4 Forecast & Scenario Engine */
 .forecast-baseline-hero {
   margin-bottom: 12px;
@@ -7234,7 +7106,6 @@ a {
     grid-template-columns: 1fr;
   }
 }
-
 
 /* Solpient Money V1.0 Local Money Copilot */
 .copilot-layout {
@@ -7673,7 +7544,6 @@ a {
     grid-template-columns: 1fr;
   }
 }
-
 
 /* Solpient Money V1.1 Household Financial Plan */
 .plan-hero {
@@ -8254,7 +8124,6 @@ a {
   }
 }
 
-
 .plan-policy-form {
   margin-top: 14px;
   padding-top: 12px;
@@ -8306,7 +8175,6 @@ a {
     grid-template-columns: 1fr;
   }
 }
-
 
 /* Solpient Money V1.2 Continuous Plan Monitoring */
 .plan-header-actions {
@@ -9526,7 +9394,6 @@ a {
   }
 }
 
-
 /* Solpient Money V1.7 Military TSP Tracker */
 .tsp-page {
   display: flex;
@@ -9952,14 +9819,11 @@ a {
   }
 }
 
-
-
 @media (max-width: 520px) {
   .tsp-fund-market-data {
     grid-template-columns: 1fr;
   }
 }
-
 
 /* Solpient Money V1.8 TSP Statement Import */
 .tsp-header-actions {
@@ -10242,7 +10106,6 @@ a {
     width: 100%;
   }
 }
-
 
 /* V1.9 Military TSP — official CSV first */
 .tsp-csv-import-card {
@@ -10597,7 +10460,6 @@ a {
   }
 }
 
-
 /* V1.9.1 Thrift Saving Plan live fund pricing */
 .tsp-csv-live-values {
   display: grid;
@@ -10710,7 +10572,6 @@ a {
     grid-template-columns: 1fr;
   }
 }
-
 
 /* Universal Financial Import */
 .universal-import {
@@ -11022,7 +10883,6 @@ a {
     width: 100%;
   }
 }
-
 
 /* V2.0.1 Import cleanup */
 .connect-import-actions {
