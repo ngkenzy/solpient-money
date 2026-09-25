@@ -231,20 +231,6 @@ button {
   gap: 12px;
 }
 
-.searchbox {
-  width: 185px;
-  height: 36px;
-  border: 1px solid #dce4ee;
-  border-radius: 9px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 0 11px;
-  color: #7a8ba2;
-  background: #f8fafd;
-  font-size: 12px;
-}
-
 .icon-button {
   width: 34px;
   height: 34px;
@@ -917,10 +903,6 @@ button {
   }
 
   .ask-prompts {
-    display: none;
-  }
-
-  .searchbox {
     display: none;
   }
 }
