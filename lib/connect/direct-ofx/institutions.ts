@@ -91,7 +91,6 @@ export const directOfxInstitutionProfiles: DirectOfxInstitutionProfile[] = [
     appVer: "0100",
     notes: [
       "Use CSV import as the no-aggregator fallback.",
-      "For live automation, target OAuth/FDX or an aggregator connector.",
     ],
     evidence: [
       {

@@ -9,7 +9,6 @@ import {
   BriefcaseBusiness,
   ChevronDown,
   CircleDollarSign,
-  CreditCard,
   Goal,
   Home,
   LineChart,
@@ -20,6 +19,7 @@ import {
   Search,
   Settings,
   ShieldCheck,
+  Wallet,
   WalletCards,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
@@ -51,12 +51,12 @@ const sections: Array<{ label?: string; items: NavItem[] }> = [
     ],
   },
   {
-    label: "PLAN",
+    label: "BUDGETING",
     items: [
+      { href: "/budget", label: "Budget", icon: Wallet },
       { href: "/plan", label: "Financial Plan", icon: ListChecks },
       { href: "/monitor", label: "Plan Monitor", icon: Activity },
       { href: "/goals", label: "Goals", icon: Goal },
-      { href: "/debt", label: "Debt", icon: CreditCard },
     ],
   },
   {

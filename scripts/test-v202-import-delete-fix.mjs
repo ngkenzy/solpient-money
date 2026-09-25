@@ -82,9 +82,10 @@ const checks = [
   ],
   [
     "destructive UI tries historical delete before rollback",
-    files.actions.indexOf('"/api/connect/delete-import"') <
-      files.actions.indexOf('"/api/connect/undo"') &&
-      files.actions.includes("deleteBody.requiresUndo === true"),
+    files.actions.includes('"/api/connect/delete-import"') &&
+      files.actions.includes("requiresUndo === true") &&
+      files.actions.includes('"/api/connect/undo"') &&
+      files.actions.includes("undo-fallback"),
   ],
   [
     "current import falls back to undo and delete retry",

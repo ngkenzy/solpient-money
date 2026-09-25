@@ -1,3 +1,6 @@
+import Link from "next/link";
+import { ArrowLeft, LineChart } from "lucide-react";
+import EmptyState from "@/components/EmptyState";
 import InteractiveLineChart from "@/components/InteractiveLineChart";
 import PageHeader from "@/components/PageHeader";
 import { requireMoneyDataset } from "@/lib/money-data";
@@ -9,8 +12,29 @@ export default async function PerformancePage() {
   const data = context.dataset;
   const latest = data.portfolioPerformance.at(-1) ?? { portfolio: 0, benchmark: 0 };
 
+  if (!data.holdings.length) {
+    return (
+      <div className="page">
+        <Link className="back-link" href="/portfolio"><ArrowLeft size={15} /> Back to portfolio</Link>
+        <PageHeader
+          eyebrow="PERFORMANCE"
+          title="Measure the portfolio, not the noise."
+          description="Track total return against your benchmark over time."
+        />
+        <EmptyState
+          icon={LineChart}
+          title="No holdings yet"
+          copy="Import a brokerage CSV and Solpient starts tracking your portfolio against its benchmark."
+          actionHref="/connect"
+          actionLabel="Import holdings"
+        />
+      </div>
+    );
+  }
+
   return (
     <div className="page">
+      <Link className="back-link" href="/portfolio"><ArrowLeft size={15} /> Back to portfolio</Link>
       <PageHeader
         eyebrow="PERFORMANCE"
         title="Measure the portfolio, not the noise."

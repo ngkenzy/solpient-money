@@ -44,7 +44,7 @@ export default async function CashFlowPage() {
   return (
     <div className="page">
       <PageHeader
-        eyebrow="V0.9.2 · CASH-FLOW INTELLIGENCE"
+        eyebrow="CASH FLOW"
         title="Understand where the money really goes."
         description="Reconciled transactions are converted into recurring income, fixed obligations, subscriptions, category trends, savings rates, and unusual-spending signals. Transfers and confirmed duplicates are excluded."
       />

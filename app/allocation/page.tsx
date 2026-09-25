@@ -1,4 +1,7 @@
+import Link from "next/link";
+import { ArrowLeft, PieChart } from "lucide-react";
 import AllocationDonut from "@/components/AllocationDonut";
+import EmptyState from "@/components/EmptyState";
 import PageHeader from "@/components/PageHeader";
 import { getPortfolioMetrics, money } from "@/lib/finance";
 import { requireMoneyDataset } from "@/lib/money-data";
@@ -18,11 +21,21 @@ export default async function AllocationPage() {
 
   return (
     <div className="page">
+      <Link className="back-link" href="/portfolio"><ArrowLeft size={15} /> Back to portfolio</Link>
       <PageHeader
         eyebrow="ALLOCATION"
         title="See where portfolio risk actually lives."
         description="Asset-class and exposure views are calculated from the current household holdings dataset."
       />
+      {!data.holdings.length ? (
+        <EmptyState
+          icon={PieChart}
+          title="No holdings yet"
+          copy="Import a brokerage CSV to see your asset mix and sector exposures."
+          actionHref="/connect"
+          actionLabel="Import holdings"
+        />
+      ) : (
       <div className="allocation-page-grid">
         <section className="card page-card allocation-center">
           <AllocationDonut items={data.allocation} totalLabel={money(metrics.total / 1000) + "K"} />
@@ -47,6 +60,7 @@ export default async function AllocationPage() {
           </div>
         </section>
       </div>
+      )}
     </div>
   );
 }

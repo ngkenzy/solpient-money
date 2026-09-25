@@ -31,9 +31,9 @@ function lineIcon(kind: PlanLineKind) {
 
 function lineHref(kind: PlanLineKind) {
   if (kind === "reserve") return "/accounts";
-  if (kind === "high_interest_debt") return "/debt";
+  if (kind === "high_interest_debt") return "/plan#debt-payoff";
   if (kind === "goal") return "/goals";
-  if (kind === "retirement") return "/plan";
+  if (kind === "retirement") return "/plan#plan-lines";
   return "/cash-flow";
 }
 
@@ -75,7 +75,7 @@ export default async function PlanPage() {
   return (
     <div className="page">
       <PageHeader
-        eyebrow="V1.1 · HOUSEHOLD FINANCIAL PLAN"
+        eyebrow="FINANCIAL PLAN"
         title="Give the next dollar a job."
         description="Solpient converts the observed monthly surplus into a transparent household plan: reserve catch-up, high-interest debt, dated goals, retirement funding, then flexible cash. Each dollar is allocated once."
         action={
@@ -135,7 +135,7 @@ export default async function PlanPage() {
         </div>
       </section>
 
-      <section className="card page-card">
+      <section className="card page-card" id="plan-lines">
         <div className="section-title-row">
           <div>
             <span className="card-kicker">PRIORITY WATERFALL</span>
@@ -193,7 +193,7 @@ export default async function PlanPage() {
       </section>
 
       <section className="plan-two-column">
-        <section className="card page-card">
+        <section className="card page-card" id="debt-payoff">
           <div className="section-title-row">
             <div>
               <span className="card-kicker">DEBT PAYOFF PLAN</span>
@@ -238,7 +238,7 @@ export default async function PlanPage() {
           </div>
         </section>
 
-        <section className="card page-card">
+        <section className="card page-card" id="goal-funding">
           <div className="section-title-row">
             <div>
               <span className="card-kicker">GOAL FUNDING</span>
@@ -247,6 +247,9 @@ export default async function PlanPage() {
                 Solpient does not invent a monthly requirement for an undated goal.
               </p>
             </div>
+            <Link className="text-button" href="/goals">
+              Manage goals <ArrowRight size={14} />
+            </Link>
           </div>
 
           <div className="plan-goal-list">
@@ -306,7 +309,7 @@ export default async function PlanPage() {
             <span className="card-kicker">HOUSEHOLD POLICY</span>
             <h2>The rules behind the plan</h2>
             <p className="empty-copy">
-              Household assumptions are editable. V1.1 engine policies such as the 12-month reserve
+              Household assumptions are editable. Engine policies such as the 12-month reserve
               catch-up and high-interest payoff horizon remain explicit system rules.
             </p>
           </div>

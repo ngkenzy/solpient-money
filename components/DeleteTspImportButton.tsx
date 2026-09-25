@@ -3,27 +3,31 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Trash2 } from "lucide-react";
+import {
+  ImportActionAlert,
+  ImportActionConfirm,
+} from "./ImportActionConfirm";
 
 export default function DeleteTspImportButton({
   importId,
   fileName,
+  isStatementImport,
 }: {
   importId: string;
   fileName: string;
+  /** True for v1.8 statement imports: delete removes the import and its
+   *  confirmed snapshot revision. Live holdings are never touched by the
+   *  statement flow, so there is no previous-import restore. */
+  isStatementImport?: boolean;
 }) {
   const router = useRouter();
+  const [armed, setArmed] = useState(false);
   const [busy, setBusy] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(
+    null
+  );
 
-  async function remove() {
-    if (
-      !window.confirm(
-        `Permanently delete TSP import "${fileName}"?\n\nIf this is the newest TSP CSV, Solpient will restore the previous TSP import when one exists. This cannot be undone.`
-      )
-    ) {
-      return;
-    }
-
+  async function execute() {
     setBusy(true);
     setError(null);
 
@@ -47,6 +51,7 @@ export default function DeleteTspImportButton({
         );
       }
 
+      setArmed(false);
       router.refresh();
     } catch (deleteError) {
       setError(
@@ -59,18 +64,39 @@ export default function DeleteTspImportButton({
     }
   }
 
+  const detail = isStatementImport
+    ? `Permanently delete TSP statement import "${fileName}"? This removes the import and its confirmed snapshot revision. Your live holdings are not affected. This cannot be undone.`
+    : `Permanently delete TSP import "${fileName}"? If this is the newest TSP CSV, Solpient will restore the previous TSP import when one exists. This cannot be undone.`;
+
   return (
     <div className="connect-import-actions tsp-delete">
-      <button
-        type="button"
-        className="danger"
-        onClick={remove}
-        disabled={busy}
-      >
-        <Trash2 size={13} />
-        {busy ? "Deleting..." : "Delete"}
-      </button>
-      {error ? <small>{error}</small> : null}
+      {!armed ? (
+        <button
+          type="button"
+          className="danger"
+          onClick={() => {
+            setError(null);
+            setArmed(true);
+          }}
+          disabled={busy}
+        >
+          <Trash2 size={13} />
+          Delete
+        </button>
+      ) : (
+        <ImportActionConfirm
+          title="Delete this TSP import?"
+          detail={detail}
+          confirmLabel="Confirm delete"
+          busyLabel="Deleting…"
+          busy={busy}
+          onConfirm={() => void execute()}
+          onCancel={() => setArmed(false)}
+        />
+      )}
+      {error ? (
+        <ImportActionAlert message={error} />
+      ) : null}
     </div>
   );
 }

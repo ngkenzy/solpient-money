@@ -11,19 +11,6 @@ export type HealthComponent = {
   calculation: string;
 };
 
-export type AttentionItem = {
-  id: string;
-  priority: number;
-  category: "critical" | "review" | "opportunity" | "healthy";
-  title: string;
-  detail: string;
-  why: string;
-  inputs: string[];
-  calculation: string;
-  href?: string;
-  ticker?: string;
-};
-
 function average(values: number[]) {
   return values.length ? values.reduce((sum, value) => sum + value, 0) / values.length : 0;
 }
@@ -205,106 +192,6 @@ export function getFinancialHealth(
 
   const totalScore = Math.round(components.reduce((sum, component) => sum + component.score, 0));
   return { score: totalScore, components, metrics: m };
-}
-
-export function getAttentionFeed(
-  dataset: MoneyDataset = demoMoneyDataset
-): AttentionItem[] {
-  const { accounts, holdings, householdPlan } = dataset;
-  const health = getFinancialHealth(dataset);
-  const m = health.metrics;
-  const items: AttentionItem[] = [];
-
-  if (m.highInterestDebt > 0) {
-    const highest = accounts
-      .filter((account) => account.type === "debt")
-      .sort((a, b) => (b.apr ?? 0) - (a.apr ?? 0))[0];
-
-    items.push({
-      id: "high-interest-debt",
-      priority: 100,
-      category: "critical",
-      title: "High-interest debt deserves review",
-      detail: `$${m.highInterestDebt.toLocaleString("en-US", { maximumFractionDigits: 0 })} of demo debt is above the ${householdPlan.highInterestDebtAprPct}% review threshold.`,
-      why: "High borrowing costs can compound against household cash flow.",
-      inputs: [
-        `Highest APR: ${highest?.apr?.toFixed(2) ?? "—"}%`,
-        `High-interest balance: $${m.highInterestDebt.toLocaleString("en-US", { maximumFractionDigits: 0 })}`,
-      ],
-      calculation: `Balances with APR ≥ ${householdPlan.highInterestDebtAprPct}%`,
-      href: "/debt",
-    });
-  }
-
-  if (m.topThreeStockPct > householdPlan.topThreeStockReviewPct) {
-    items.push({
-      id: "top-three-concentration",
-      priority: 62,
-      category: "review",
-      title: "Top-three stock concentration crossed the review line",
-      detail: `The three largest direct stocks equal ${m.topThreeStockPct.toFixed(1)}% of invested assets.`,
-      why: "A few positions can drive a disproportionate share of portfolio outcomes.",
-      inputs: [
-        `Top three weight: ${m.topThreeStockPct.toFixed(1)}%`,
-        `Review line: ${householdPlan.topThreeStockReviewPct}%`,
-      ],
-      calculation: "Sum of three largest direct-stock weights",
-      href: "/portfolio",
-    });
-  }
-
-  if (m.excessBankCash > 0) {
-    items.push({
-      id: "cash-above-reserve",
-      priority: 48,
-      category: "opportunity",
-      title: "Cash sits above the demo reserve target",
-      detail: `Bank cash exceeds the ${householdPlan.emergencyFundTargetMonths}-month reserve target by about $${m.excessBankCash.toLocaleString("en-US", { maximumFractionDigits: 0 })}.`,
-      why: "Cash above a deliberate reserve can be assigned to a goal, kept for near-term spending, used for debt, or invested depending on household priorities.",
-      inputs: [
-        `Bank cash: $${m.bankCash.toLocaleString("en-US", { maximumFractionDigits: 0 })}`,
-        `Reserve target: $${m.reserveTarget.toLocaleString("en-US", { maximumFractionDigits: 0 })}`,
-      ],
-      calculation: "Bank cash − six-month average spending reserve",
-      href: "/plan",
-    });
-  }
-
-  if (m.savingsRate >= 20) {
-    items.push({
-      id: "savings-rate-healthy",
-      priority: 20,
-      category: "healthy",
-      title: "Cash flow is creating financial capacity",
-      detail: `The six-month average savings rate is ${m.savingsRate.toFixed(1)}%.`,
-      why: "Positive recurring household surplus improves flexibility across goals.",
-      inputs: [
-        `Average income: $${m.averageMonthlyIncome.toLocaleString("en-US", { maximumFractionDigits: 0 })}/mo`,
-        `Average spending: $${m.averageMonthlySpending.toLocaleString("en-US", { maximumFractionDigits: 0 })}/mo`,
-      ],
-      calculation: "(Average income − average spending) ÷ average income",
-      href: "/cash-flow",
-    });
-  }
-
-  if (m.emergencyFundMonths >= householdPlan.emergencyFundTargetMonths) {
-    items.push({
-      id: "reserve-healthy",
-      priority: 18,
-      category: "healthy",
-      title: "Emergency reserve meets the demo target",
-      detail: `Bank cash covers about ${m.emergencyFundMonths.toFixed(1)} months of average spending.`,
-      why: "The demo target is six months of average spending.",
-      inputs: [
-        `Bank cash: $${m.bankCash.toLocaleString("en-US", { maximumFractionDigits: 0 })}`,
-        `Average spending: $${m.averageMonthlySpending.toLocaleString("en-US", { maximumFractionDigits: 0 })}/mo`,
-      ],
-      calculation: "Bank cash ÷ average monthly spending",
-      href: "/accounts",
-    });
-  }
-
-  return items.sort((a, b) => b.priority - a.priority);
 }
 
 export function getDebtPriority(dataset: MoneyDataset = demoMoneyDataset) {

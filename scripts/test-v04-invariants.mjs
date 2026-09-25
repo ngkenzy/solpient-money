@@ -11,7 +11,7 @@ const checks = [
   ["demo holdings do not contain synthetic researchScore", !files.demo.includes("researchScore")],
   ["demo holdings do not contain synthetic fairValue", !files.demo.includes("fairValue")],
   ["intelligence exports financial health", files.intelligence.includes("export function getFinancialHealth")],
-  ["intelligence exports attention feed", files.intelligence.includes("export function getAttentionFeed")],
+  ["attention feed removed from intelligence", !files.intelligence.includes("getAttentionFeed")],
   ["README uses canonical repo name", files.readme.includes("ngkenzy/solpient-money.git")],
 ];
 

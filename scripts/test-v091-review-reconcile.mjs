@@ -37,7 +37,7 @@ const checks = [
   ["account merge review action", files.actions.includes("reviewAccountDuplicate")],
   ["manual transfer pairing", files.actions.includes("manuallyPairTransfer")],
   ["merchant rule action", files.actions.includes("createMerchantRule")],
-  ["interactive reconciliation page", files.page.includes("REVIEW & RECONCILE")],
+  ["interactive reconciliation page", files.page.includes("DATA HEALTH")],
   ["Money hides suppressed holdings", files.money.includes('.eq("truth_suppressed", false)')],
   ["Money uses derived category", files.money.includes("row.truth_category ?? row.category")],
   ["local client allows merchant rules", files.client.includes('"truth_merchant_rules"')],

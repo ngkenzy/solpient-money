@@ -4,7 +4,9 @@ import { notFound } from "next/navigation";
 import PageHeader from "@/components/PageHeader";
 import { demoMoneyDataset } from "@/lib/demo-data";
 import { findHolding, getPortfolioMetrics, money } from "@/lib/finance";
+import { requireAuthenticatedMoneyUser } from "@/lib/money-auth";
 import { requireMoneyDataset } from "@/lib/money-data";
+import { saveTickerNote } from "./actions";
 
 export const dynamic = "force-dynamic";
 
@@ -27,6 +29,25 @@ export default async function HoldingPage({
   const weight = metrics.total ? (holding.value / metrics.total) * 100 : 0;
   const unrealized = holding.value - holding.costBasis;
   const totalReturn = holding.costBasis ? (unrealized / holding.costBasis) * 100 : 0;
+
+  let latestNote: { note: string; decided_at: string } | null = null;
+  if (context.source === "database" && context.household) {
+    const { supabase } = await requireAuthenticatedMoneyUser();
+    const { data: noteRow } = await supabase
+      .from("investment_decisions")
+      .select("note, decided_at")
+      .eq("household_id", context.household.id)
+      .eq("ticker", holding.ticker.toUpperCase())
+      .order("decided_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    if (noteRow?.note) {
+      latestNote = {
+        note: String(noteRow.note),
+        decided_at: String(noteRow.decided_at),
+      };
+    }
+  }
 
   return (
     <div className="page">
@@ -54,6 +75,47 @@ export default async function HoldingPage({
           <div><span>Sector</span><strong>{holding.sector || "—"}</strong></div>
           <div><span>Source</span><strong>{holding.source === "file" ? "File import" : holding.source === "ofx_direct" ? "Direct OFX" : holding.source}</strong></div>
         </div>
+      </section>
+
+      <section className="card page-card">
+        <div className="section-title-row">
+          <div><span className="card-kicker">POSITION NOTES</span><h2>Notes</h2></div>
+        </div>
+        {context.source === "database" ? (
+          <>
+            {latestNote ? (
+              <div className="ticker-note-current">
+                <p>{latestNote.note}</p>
+                <small>
+                  Last updated{" "}
+                  {new Date(latestNote.decided_at).toLocaleDateString("en-US", {
+                    month: "short",
+                    day: "numeric",
+                    year: "numeric",
+                  })}
+                </small>
+              </div>
+            ) : (
+              <p className="small-muted">No notes yet. Record why you hold this position.</p>
+            )}
+            <form action={saveTickerNote.bind(null, ticker)} className="ticker-note-form">
+              <label>
+                <span>{latestNote ? "Update note" : "Add a note"}</span>
+                <textarea
+                  name="note"
+                  rows={3}
+                  maxLength={2000}
+                  defaultValue={latestNote?.note ?? ""}
+                  placeholder="Why do you hold this? What would change your mind?"
+                />
+              </label>
+              <button className="primary-auth-button" type="submit">Save note</button>
+            </form>
+            <p className="small-muted">Notes record intent only. They never execute trades.</p>
+          </>
+        ) : (
+          <p className="small-muted">Notes are saved per ticker when Money persistence is connected.</p>
+        )}
       </section>
     </div>
   );

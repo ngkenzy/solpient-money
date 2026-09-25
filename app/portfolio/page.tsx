@@ -1,11 +1,15 @@
 import Link from "next/link";
-import { ArrowRight, CheckCircle2, TriangleAlert } from "lucide-react";
+import { ArrowRight, BriefcaseBusiness, CheckCircle2, TriangleAlert } from "lucide-react";
 import AllocationDonut from "@/components/AllocationDonut";
+import EmptyState from "@/components/EmptyState";
 import InteractiveLineChart from "@/components/InteractiveLineChart";
 import PageHeader from "@/components/PageHeader";
 import { getPortfolioMetrics, money } from "@/lib/finance";
 import { requireMoneyDataset } from "@/lib/money-data";
-import { buildPortfolioIntelligence } from "@/lib/portfolio-intelligence";
+import {
+  aggregateHoldingsByTicker,
+  buildPortfolioIntelligence,
+} from "@/lib/portfolio-intelligence";
 
 export const dynamic = "force-dynamic";
 
@@ -14,6 +18,26 @@ export default async function PortfolioPage() {
   const data = context.dataset;
   const metrics = getPortfolioMetrics(data);
   const portfolioIntelligence = buildPortfolioIntelligence(data);
+  const holdings = aggregateHoldingsByTicker(data.holdings);
+
+  if (!data.holdings.length) {
+    return (
+      <div className="page">
+        <PageHeader
+          eyebrow="PORTFOLIO"
+          title="Your investments."
+          description="Persisted household holdings with deterministic exposure review."
+        />
+        <EmptyState
+          icon={BriefcaseBusiness}
+          title="No holdings yet"
+          copy="Import a brokerage CSV or add your first holding to see allocation, performance, and exposure review."
+          actionHref="/connect"
+          actionLabel="Import holdings"
+        />
+      </div>
+    );
+  }
 
   return (
     <div className="page">
@@ -71,7 +95,7 @@ export default async function PortfolioPage() {
           <div className="table-row table-head-row">
             <span>Holding</span><span>Value</span><span>Weight</span><span>YTD</span>
           </div>
-          {data.holdings.map((holding) => {
+          {holdings.map((holding) => {
             const weight = metrics.total ? (holding.value / metrics.total) * 100 : 0;
             return (
               <Link className="table-row table-link" href={`/portfolio/${holding.ticker.toLowerCase()}`} key={holding.ticker}>

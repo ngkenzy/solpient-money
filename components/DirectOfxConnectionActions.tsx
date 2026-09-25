@@ -2,13 +2,11 @@
 
 import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
+import { KeyRound, RefreshCw, Unplug, X } from "lucide-react";
 import {
-  AlertTriangle,
-  KeyRound,
-  RefreshCw,
-  Unplug,
-  X,
-} from "lucide-react";
+  ImportActionAlert,
+  ImportActionConfirm,
+} from "./ImportActionConfirm";
 
 export default function DirectOfxConnectionActions({
   connectionId,
@@ -22,6 +20,8 @@ export default function DirectOfxConnectionActions({
     "sync" | "repair" | "disconnect" | null
   >(null);
   const [showRepair, setShowRepair] = useState(false);
+  const [disconnectArmed, setDisconnectArmed] =
+    useState(false);
   const [error, setError] = useState<string | null>(null);
 
   async function sync() {
@@ -100,14 +100,6 @@ export default function DirectOfxConnectionActions({
   }
 
   async function disconnect() {
-    if (
-      !window.confirm(
-        "Disconnect this Direct OFX connection and remove its imported OFX data?"
-      )
-    ) {
-      return;
-    }
-
     setBusy("disconnect");
     setError(null);
 
@@ -126,6 +118,7 @@ export default function DirectOfxConnectionActions({
           body.error ?? "Unable to disconnect Direct OFX."
         );
       }
+      setDisconnectArmed(false);
       router.refresh();
     } catch (disconnectError) {
       setError(
@@ -163,13 +156,28 @@ export default function DirectOfxConnectionActions({
         <button
           className="danger"
           type="button"
-          onClick={() => void disconnect()}
+          onClick={() => {
+            setError(null);
+            setDisconnectArmed(true);
+          }}
           disabled={!configured || busy !== null}
         >
           <Unplug size={13} />
           Disconnect
         </button>
       </div>
+
+      {disconnectArmed ? (
+        <ImportActionConfirm
+          title="Disconnect Direct OFX?"
+          detail="Disconnect this Direct OFX connection and remove its imported OFX data? This cannot be undone."
+          confirmLabel="Confirm disconnect"
+          busyLabel="Disconnecting…"
+          busy={busy !== null}
+          onConfirm={() => void disconnect()}
+          onCancel={() => setDisconnectArmed(false)}
+        />
+      ) : null}
 
       {showRepair ? (
         <form className="direct-ofx-repair" onSubmit={repair}>
@@ -220,10 +228,7 @@ export default function DirectOfxConnectionActions({
       ) : null}
 
       {error ? (
-        <small className="direct-ofx-action-error">
-          <AlertTriangle size={12} />
-          {error}
-        </small>
+        <ImportActionAlert message={error} />
       ) : null}
     </div>
   );

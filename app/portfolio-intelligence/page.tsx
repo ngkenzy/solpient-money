@@ -1,5 +1,6 @@
 import Link from "next/link";
 import {
+  ArrowLeft,
   ArrowRight,
   BrainCircuit,
   CheckCircle2,
@@ -47,6 +48,7 @@ export default async function PortfolioIntelligencePage() {
 
   return (
     <div className="page portfolio-intelligence-page">
+      <Link className="back-link" href="/portfolio"><ArrowLeft size={15} /> Back to portfolio</Link>
       <PageHeader
         eyebrow="PORTFOLIO INTELLIGENCE"
         title="Where portfolio exposure deserves review."

@@ -22,7 +22,8 @@ function isoDate(value: string) {
   return new Date(value).toISOString().slice(0, 10);
 }
 
-export async function createHouseholdWithDemoData(formData: FormData) {
+/** Creates the household shell: profile, household row, active preference, planning assumptions. */
+async function createHouseholdShell(formData: FormData): Promise<string> {
   const { supabase, userId, email } = await requireAuthenticatedMoneyUser();
   const requestedName = String(formData.get("household_name") ?? "").trim();
   const householdName = requestedName || "My Household";
@@ -86,6 +87,20 @@ export async function createHouseholdWithDemoData(formData: FormData) {
     high_interest_debt_apr_pct: householdPlan.highInterestDebtAprPct,
   });
   if (planError) throw new Error(planError.message);
+
+  return householdId;
+}
+
+/** Guided setup path 2: empty household, straight to importing real files. */
+export async function createHouseholdEmpty(formData: FormData) {
+  await createHouseholdShell(formData);
+  revalidatePath("/", "layout");
+  redirect("/connect");
+}
+
+export async function createHouseholdWithDemoData(formData: FormData) {
+  const householdId = await createHouseholdShell(formData);
+  const { supabase } = await requireAuthenticatedMoneyUser();
 
   const { data: insertedAccounts, error: accountsError } = await supabase
     .from("accounts")

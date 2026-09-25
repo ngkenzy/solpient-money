@@ -394,6 +394,51 @@ async function restorePreviousTspImport({
   }
 }
 
+async function deleteConfirmedSnapshot({
+  database,
+  householdId,
+  snapshotId,
+}: {
+  database: Awaited<ReturnType<typeof requireActiveHousehold>>["database"];
+  householdId: string;
+  snapshotId: string | null;
+}) {
+  if (!snapshotId) return;
+  const snapshotDelete = await database
+    .from("tsp_snapshots")
+    .delete()
+    .eq("id", snapshotId)
+    .eq("household_id", householdId);
+
+  if (snapshotDelete.error) {
+    throw new Error(
+      `Unable to remove linked TSP snapshot: ${snapshotDelete.error.message}`
+    );
+  }
+}
+
+async function deleteImportRecord({
+  database,
+  householdId,
+  importId,
+}: {
+  database: Awaited<ReturnType<typeof requireActiveHousehold>>["database"];
+  householdId: string;
+  importId: string;
+}) {
+  const deleteAudit = await database
+    .from("tsp_statement_imports")
+    .delete()
+    .eq("id", importId)
+    .eq("household_id", householdId);
+
+  if (deleteAudit.error) {
+    throw new Error(
+      `Unable to delete TSP import history: ${deleteAudit.error.message}`
+    );
+  }
+}
+
 export async function POST(request: Request) {
   try {
     const { database, householdId } =
@@ -426,6 +471,36 @@ export async function POST(request: Request) {
     }
 
     const target = targetResult.data;
+
+    // v1.8 statement imports only ever create an immutable snapshot
+    // revision on confirm — the statement flow never touches live
+    // holdings or accounts. Undo is therefore just snapshot + import
+    // record removal; there is no previous-import holdings restore.
+    if (
+      String(target.parser_version ?? "") !==
+      TSP_OFFICIAL_CSV_VERSION
+    ) {
+      await deleteConfirmedSnapshot({
+        database,
+        householdId,
+        snapshotId:
+          target.confirmed_snapshot_id == null
+            ? null
+            : String(target.confirmed_snapshot_id),
+      });
+      await deleteImportRecord({
+        database,
+        householdId,
+        importId: String(target.id),
+      });
+
+      return NextResponse.json({
+        ok: true,
+        restoredPrevious: false,
+        liveDataChanged: false,
+      });
+    }
+
     const parsed = candidate(target.parsed_candidate);
 
     if (!parsed) {
@@ -512,31 +587,16 @@ export async function POST(request: Request) {
         ? null
         : String(target.confirmed_snapshot_id);
 
-    if (confirmedSnapshotId) {
-      const snapshotDelete = await database
-        .from("tsp_snapshots")
-        .delete()
-        .eq("id", confirmedSnapshotId)
-        .eq("household_id", householdId);
-
-      if (snapshotDelete.error) {
-        throw new Error(
-          `Unable to remove linked TSP snapshot: ${snapshotDelete.error.message}`
-        );
-      }
-    }
-
-    const deleteAudit = await database
-      .from("tsp_statement_imports")
-      .delete()
-      .eq("id", body.importId)
-      .eq("household_id", householdId);
-
-    if (deleteAudit.error) {
-      throw new Error(
-        `Unable to delete TSP import history: ${deleteAudit.error.message}`
-      );
-    }
+    await deleteConfirmedSnapshot({
+      database,
+      householdId,
+      snapshotId: confirmedSnapshotId,
+    });
+    await deleteImportRecord({
+      database,
+      householdId,
+      importId: String(body.importId),
+    });
 
     return NextResponse.json({
       ok: true,

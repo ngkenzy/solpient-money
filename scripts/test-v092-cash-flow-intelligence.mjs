@@ -18,7 +18,7 @@ const checks = [
   ["category history comparison", files.engine.includes("priorAverage")],
   ["merchant anomaly detection", files.engine.includes("historicalByMerchant")],
   ["income stability metric", files.engine.includes("incomeStability")],
-  ["cash-flow intelligence page", files.page.includes("CASH-FLOW INTELLIGENCE")],
+  ["cash-flow intelligence page", files.page.includes("CASH FLOW")],
   ["recurring money surface", files.page.includes("RECURRING MONEY")],
   ["spending watch surface", files.page.includes("SPENDING WATCH")],
   ["existing reconciled Money layer remains active", files.money.includes('is("duplicate_of_transaction_id", null)')],

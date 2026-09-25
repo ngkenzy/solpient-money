@@ -76,7 +76,7 @@ export default async function DataHealthPage() {
   return (
     <div className="page">
       <PageHeader
-        eyebrow="V0.9.1 · REVIEW & RECONCILE"
+        eyebrow="DATA HEALTH"
         title="Financial data health"
         description="Review Truth Engine decisions, merge confirmed duplicate accounts, pair transfers, and teach Solpient persistent merchant and category rules."
         action={

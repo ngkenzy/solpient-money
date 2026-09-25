@@ -13,6 +13,7 @@ import DeleteTspImportButton from "@/components/DeleteTspImportButton";
 import ConnectorRegistryPanel from "@/components/ConnectorRegistryPanel";
 import { requireActiveHousehold } from "@/lib/money-auth";
 import { getConnectorOverviews } from "@/lib/connect/registry";
+import { TSP_OFFICIAL_CSV_VERSION } from "@/lib/tsp-official-csv";
 
 export const dynamic = "force-dynamic";
 
@@ -461,6 +462,10 @@ export default async function ConnectPage() {
                   fileName={String(
                     item.source_filename ?? "TSP CSV"
                   )}
+                  isStatementImport={
+                    String(item.parser_version ?? "") !==
+                    TSP_OFFICIAL_CSV_VERSION
+                  }
                 />
               </div>
             ))}
