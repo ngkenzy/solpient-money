@@ -540,7 +540,7 @@ export async function getTspTracker(
       level: "watch",
       title: "Daily TSP prices are not synced yet",
       detail:
-        "Use Sync prices now or let the local Autopilot fetch the official TSP share-price feed. The official account snapshot remains unchanged.",
+        "Use Sync prices now to refresh the official TSP share-price feed. The official account snapshot remains unchanged.",
     });
   } else if (
     profile &&

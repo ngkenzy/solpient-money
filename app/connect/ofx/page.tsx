@@ -75,7 +75,7 @@ export default async function DirectOfxPage() {
       </section>
 
       {!status.configured ? (
-        <section className="card page-card plaid-config-card">
+        <section className="card page-card ofx-config-card">
           <KeyRound size={23} />
           <div>
             <span className="card-kicker">
@@ -202,7 +202,7 @@ export default async function DirectOfxPage() {
         )}
       </section>
 
-      <div className="plaid-security-grid">
+      <div className="ofx-security-grid">
         <section className="card page-card">
           <LockKeyhole size={20} />
           <div>

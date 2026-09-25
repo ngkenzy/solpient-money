@@ -1,5 +1,4 @@
 import { demoMoneyDataset, type MoneyDataset } from "@/lib/demo-data";
-import type { ResearchSnapshot } from "@/lib/research";
 
 export const money = (value: number, decimals = false) =>
   new Intl.NumberFormat("en-US", {
@@ -61,7 +60,6 @@ export function getPortfolioMetrics(dataset: MoneyDataset = demoMoneyDataset) {
 }
 
 export function getPortfolioInsights(
-  snapshots: Record<string, ResearchSnapshot> = {},
   dataset: MoneyDataset = demoMoneyDataset
 ) {
   const metrics = getPortfolioMetrics(dataset);
@@ -102,19 +100,6 @@ export function getPortfolioInsights(
       detail: `The top three individual stocks represent ${metrics.topThreeDirectStockWeight.toFixed(1)}% of the investment portfolio.`,
     });
   }
-
-  const directStocks = holdings.filter((holding) => holding.kind === "stock");
-  const directValue = directStocks.reduce((sum, holding) => sum + holding.value, 0);
-  const coveredValue = directStocks
-    .filter((holding) => snapshots[holding.ticker])
-    .reduce((sum, holding) => sum + holding.value, 0);
-  const coveragePct = directValue ? (coveredValue / directValue) * 100 : 0;
-
-  insights.push({
-    level: coveragePct >= 80 ? "good" : "watch",
-    title: "Research coverage",
-    detail: `${coveragePct.toFixed(0)}% of direct-stock value is connected to live published Solpient Research.`,
-  });
 
   if (metrics.cashWeight > householdPlan.portfolioCashReviewPct) {
     insights.push({

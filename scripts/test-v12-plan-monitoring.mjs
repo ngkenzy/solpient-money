@@ -10,8 +10,6 @@ const files = {
   actions: await readFile("app/monitor/actions.ts", "utf8"),
   client: await readFile("lib/local-db/client.ts", "utf8"),
   live: await readFile("scripts/test-local-db-live.mjs", "utf8"),
-  copilotRoute: await readFile("app/api/copilot/route.ts", "utf8"),
-  copilotUi: await readFile("components/MoneyCopilot.tsx", "utf8"),
   shell: await readFile("components/AppShell.tsx", "utf8"),
 };
 
@@ -46,11 +44,7 @@ const checks = [
   ["monitor page exposes baseline reset control", files.page.includes("Reset monthly baseline")],
   ["monitor page shows material changes", files.page.includes("MATERIAL CHANGES")],
   ["monitor page shows monthly history", files.page.includes("MONTHLY BASELINE HISTORY")],
-  ["Copilot monitoring path is deterministic", files.copilotRoute.includes('intent: "plan_monitoring"')],
-  ["Copilot monitoring path is read-only", files.copilotRoute.includes("createBaseline: false")],
-  ["Copilot has monitoring quick prompt", files.copilotUi.includes("What changed from my financial plan?")],
   ["Plan Monitor is navigable", files.shell.includes('href: "/monitor"')],
-  ["release label remains on V1 release line", files.shell.includes("MONEY V1.")],
 ];
 
 const failed = checks.filter(([, ok]) => !ok);

@@ -25,7 +25,7 @@ export default async function DataPage() {
         title={persistent ? context.household?.name ?? "Household data" : "Demo data mode"}
         description={
           persistent
-            ? "Authenticated household data is being read from the dedicated Solpient Money database. Manual entry is available before Plaid."
+            ? "Authenticated household data is being read from the dedicated Solpient Money database. Manual entry is always available."
             : "The dedicated Money Supabase project is not connected yet. The application is running against deterministic demo data and persistence controls are disabled."
         }
         action={

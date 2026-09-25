@@ -400,7 +400,6 @@ export async function importOfficialTspCsv(
       "/accounts",
       "/portfolio",
       "/allocation",
-      "/health",
     ]) {
       revalidatePath(path);
     }
@@ -600,7 +599,6 @@ export async function updateTspFundPrice(
       "/accounts",
       "/portfolio",
       "/allocation",
-      "/health",
     ]) {
       revalidatePath(path);
     }
@@ -820,6 +818,4 @@ export async function syncTspPricesNow() {
   }
 
   revalidatePath("/tsp");
-  revalidatePath("/autopilot");
-  revalidatePath("/action-center");
 }

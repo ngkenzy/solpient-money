@@ -10,7 +10,6 @@ const files = {
   tracker: await readFile("lib/tsp-tracker.ts", "utf8"),
   actions: await readFile("app/tsp/actions.ts", "utf8"),
   page: await readFile("app/tsp/page.tsx", "utf8"),
-  autopilot: await readFile("lib/money-autopilot.ts", "utf8"),
   shell: await readFile("components/AppShell.tsx", "utf8"),
   client: await readFile("lib/local-db/client.ts", "utf8"),
   doctor: await readFile("scripts/local-doctor.mjs", "utf8"),
@@ -114,11 +113,6 @@ const checks = [
     "manual Sync prices now action exists",
     files.actions.includes("syncTspPricesNow") &&
       files.actions.includes("syncTspSharePrices"),
-  ],
-  [
-    "Autopilot refreshes TSP prices locally",
-    files.autopilot.includes("syncTspSharePrices(now)") &&
-      files.autopilot.includes('tspPriceSyncVersion: "1.7.1"'),
   ],
   [
     "TSP pricing does not write accounts or holdings",
