@@ -6078,6 +6078,15 @@ a {
   text-align: right;
 }
 
+.cash-radar-jump {
+  display: inline-flex !important;
+  align-items: center;
+  gap: 4px;
+  margin-top: 3px;
+  color: #a3541f !important;
+  font-weight: 700;
+}
+
 .cash-category-row {
   min-height: 60px;
   border-top: 1px solid #e7edf3;

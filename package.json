@@ -51,7 +51,8 @@
     "test:v202": "node scripts/test-v202-import-delete-fix.mjs",
     "test:v204": "node scripts/test-v204-import-action-reliability.mjs",
     "test:v205": "node scripts/test-v205-data-backup-actions.mjs",
-    "test:v206": "node scripts/test-v206-tsp-price-pull.mjs"
+    "test:v206": "node scripts/test-v206-tsp-price-pull.mjs",
+    "test:v207": "node scripts/test-v207-bills-radar.mjs"
   },
   "dependencies": {
     "lucide-react": "^0.468.0",

@@ -12,7 +12,9 @@ import {
 import InteractiveLineChart from "@/components/InteractiveLineChart";
 import PageHeader from "@/components/PageHeader";
 import { getCashFlowIntelligence } from "@/lib/cash-flow-intelligence";
+import { buildBillsRadar } from "@/lib/bills-radar";
 import { money } from "@/lib/finance";
+import { localCalendarDateKey } from "@/lib/local-calendar-date";
 
 export const dynamic = "force-dynamic";
 
@@ -34,12 +36,26 @@ function cadenceLabel(value: string) {
 export default async function CashFlowPage() {
   const intelligence = await getCashFlowIntelligence();
   const { health } = intelligence;
+  const radar = buildBillsRadar(
+    intelligence.recurring,
+    localCalendarDateKey()
+  );
   const recurringExpenses = intelligence.recurring.filter(
     (item) => item.kind !== "income"
   );
   const recurringIncome = intelligence.recurring.filter(
     (item) => item.kind === "income"
   );
+
+  function dueLabel(daysUntil: number, expectedDate: string) {
+    if (daysUntil < 0) {
+      const days = Math.abs(daysUntil);
+      return `Expected ${days} day${days === 1 ? "" : "s"} ago · not seen yet`;
+    }
+    if (daysUntil === 0) return `Due today · ${expectedDate}`;
+    if (daysUntil === 1) return `Due tomorrow · ${expectedDate}`;
+    return `In ${daysUntil} days · ${expectedDate}`;
+  }
 
   return (
     <div className="page">
@@ -92,6 +108,82 @@ export default async function CashFlowPage() {
           <span>Discretionary spend</span>
           <strong>{money(health.discretionarySpending)}</strong>
           <small>latest spending less recurring obligations</small>
+        </div>
+      </section>
+
+      <section className="card page-card">
+        <div className="section-title-row">
+          <div>
+            <span className="card-kicker">
+              BILLS RADAR
+            </span>
+            <h2>What&apos;s due next</h2>
+            <p className="empty-copy">
+              Projected from your detected recurring bills and subscriptions.
+              Expected {money(radar.dueSoonTotal)} over the next 14 days.
+            </p>
+          </div>
+          <CalendarClock size={19} />
+        </div>
+
+        <div className="cash-recurring-list">
+          {radar.dueSoon.map((bill) => (
+            <div
+              className="cash-recurring-row"
+              key={bill.key}
+            >
+              <span
+                className={`cash-recurring-icon ${bill.kind}`}
+              >
+                {bill.kind === "subscription" ? (
+                  <Sparkles size={15} />
+                ) : (
+                  <ArrowDownRight size={15} />
+                )}
+              </span>
+              <div>
+                <strong>{bill.merchant}</strong>
+                <span>
+                  {bill.category} ·{" "}
+                  {cadenceLabel(bill.cadence)} ·{" "}
+                  {dueLabel(
+                    bill.daysUntil,
+                    bill.expectedDate
+                  )}
+                </span>
+                {bill.priceJumpPct !== null &&
+                bill.priorAmount !== null ? (
+                  <span className="cash-radar-jump">
+                    <AlertTriangle size={12} />
+                    Up{" "}
+                    {bill.priceJumpPct.toFixed(0)}%
+                    from{" "}
+                    {money(bill.priorAmount)}
+                  </span>
+                ) : null}
+              </div>
+              <div className="cash-recurring-amount">
+                <strong>
+                  {money(bill.expectedAmount)}
+                </strong>
+                <span>expected</span>
+              </div>
+            </div>
+          ))}
+
+          {!radar.dueSoon.length ? (
+            <div className="cash-empty">
+              <CalendarClock size={25} />
+              <strong>
+                Nothing due in the next 14 days
+              </strong>
+              <span>
+                Upcoming charges appear here once
+                a bill or subscription is detected
+                with a steady rhythm.
+              </span>
+            </div>
+          ) : null}
         </div>
       </section>
 

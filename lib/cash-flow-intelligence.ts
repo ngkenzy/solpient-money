@@ -48,6 +48,8 @@ export type RecurringCashFlow = {
   medianGapDays: number;
   amountVariationPct: number;
   lastDate: string;
+  lastAmount: number;
+  priorAverageAmount: number | null;
 };
 
 export type CategorySpend = {
@@ -328,6 +330,11 @@ function buildRecurring(transactions: CleanTransaction[]) {
       medianGapDays,
       amountVariationPct,
       lastDate: ordered.at(-1)?.date ?? "",
+      lastAmount: ordered.at(-1)?.amount ?? 0,
+      priorAverageAmount:
+        ordered.length > 1
+          ? mean(amounts.slice(0, -1))
+          : null,
     });
   }
 
