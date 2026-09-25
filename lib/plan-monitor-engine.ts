@@ -548,7 +548,7 @@ function buildSignals({
       )}, up ${money(
         drift.retirementRequiredMonthlyDelta
       )} from the saved monthly baseline.`,
-      href: "/retirement",
+      href: "/plan",
     });
   } else if (drift.retirementRequiredMonthlyDelta < -100) {
     signals.push({
@@ -559,7 +559,7 @@ function buildSignals({
       detail: `The modeled monthly requirement improved by ${money(
         Math.abs(drift.retirementRequiredMonthlyDelta)
       )} versus the saved baseline.`,
-      href: "/retirement",
+      href: "/plan",
     });
   }
 

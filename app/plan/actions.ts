@@ -74,10 +74,6 @@ export async function updatePlanPolicy(formData: FormData) {
   if (error) throw new Error(error.message);
 
   revalidatePath("/plan");
-  revalidatePath("/health");
-  revalidatePath("/retirement");
   revalidatePath("/debt");
-  revalidatePath("/scenario-lab");
-  revalidatePath("/copilot");
   revalidatePath("/", "layout");
 }

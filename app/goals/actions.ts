@@ -32,8 +32,6 @@ function priority(value: string) {
 function refresh() {
   revalidatePath("/goals");
   revalidatePath("/plan");
-  revalidatePath("/health");
-  revalidatePath("/copilot");
   revalidatePath("/", "layout");
 }
 

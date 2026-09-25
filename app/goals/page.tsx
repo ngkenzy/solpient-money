@@ -173,7 +173,7 @@ export default async function GoalsPage() {
         <div className="plan-note">
           <CalendarClock size={15} />
           <span>
-            Goal edits automatically recalculate Financial Health, V1.1 Plan, and Money Copilot
+            Goal edits automatically recalculate Financial Health and the V1.1 Plan
             context on the next page load.
           </span>
         </div>

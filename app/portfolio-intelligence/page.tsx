@@ -14,17 +14,8 @@ import {
   buildPortfolioIntelligence,
   type PortfolioSignalLevel,
 } from "@/lib/portfolio-intelligence";
-import { loadResearchSnapshots } from "@/lib/research";
 
 export const dynamic = "force-dynamic";
-
-function pct(
-  value: number | null,
-  digits = 1
-) {
-  if (value == null) return "—";
-  return `${value >= 0 ? "+" : ""}${value.toFixed(digits)}%`;
-}
 
 function signalIcon(
   level: PortfolioSignalLevel
@@ -49,104 +40,65 @@ function signalLabel(
 
 export default async function PortfolioIntelligencePage() {
   const context = await requireMoneyDataset();
-  const tickers = context.dataset.holdings
-    .filter(
-      (holding) =>
-        holding.kind === "stock"
-    )
-    .map((holding) => holding.ticker);
-
-  const research =
-    await loadResearchSnapshots(tickers);
   const report =
     buildPortfolioIntelligence(
-      context.dataset,
-      research
+      context.dataset
     );
 
   return (
     <div className="page portfolio-intelligence-page">
       <PageHeader
-        eyebrow="V1.5 · PORTFOLIO INTELLIGENCE"
-        title="Where portfolio exposure and Research evidence conflict."
-        description="V1.5 combines position size, household concentration limits, published valuation, thesis health, evidence confidence, decision readiness, and evidence age. It prioritizes review; it does not issue trades."
-        action={
-          <span
-            className={
-              "live-pill " +
-              (report.researchConnected
-                ? "connected"
-                : "disconnected")
-            }
-          >
-            {report.researchConnected
-              ? "RESEARCH LIVE"
-              : "RESEARCH UNAVAILABLE"}
-          </span>
-        }
+        eyebrow="PORTFOLIO INTELLIGENCE"
+        title="Where portfolio exposure deserves review."
+        description="Deterministic exposure review: position size against household concentration limits. It prioritizes review; it does not issue trades."
       />
-
-      {!report.researchConnected ? (
-        <section className="card page-card error-card">
-          <strong>
-            Portfolio Research connection unavailable
-          </strong>
-          <p>
-            {report.researchError ??
-              "Solpient cannot currently verify published Research context."}
-          </p>
-        </section>
-      ) : null}
 
       <div className="metric-grid four">
         <div className="metric-card">
-          <span>Direct-stock coverage</span>
+          <span>Direct-stock value</span>
           <strong>
-            {report.coveragePct.toFixed(0)}%
-          </strong>
-          <small>
-            {money(report.coveredValue)} of{" "}
             {money(report.directStockValue)}
-          </small>
-        </div>
-        <div className="metric-card">
-          <span>Weighted Research score</span>
-          <strong>
-            {report.weightedResearchScore?.toFixed(
-              0
-            ) ?? "—"}
           </strong>
           <small>
-            Position-value weighted
+            {report.positions.length} positions
           </small>
         </div>
         <div className="metric-card">
-          <span>Evidence confidence</span>
+          <span>Largest position</span>
           <strong>
-            {report.weightedEvidenceConfidence?.toFixed(
-              0
-            ) ?? "—"}
-          </strong>
-          <small>
-            Covered direct-stock value
-          </small>
-        </div>
-        <div className="metric-card">
-          <span>Weighted valuation gap</span>
-          <strong
-            className={
-              (report.weightedValuationGapPct ??
-                0) >= 0
-                ? "positive-text"
-                : "negative-text"
-            }
-          >
-            {pct(
-              report.weightedValuationGapPct
+            {report.largestStockWeightPct.toFixed(
+              1
             )}
+            %
           </strong>
           <small>
-            Research base value vs holding price
+            Of invested assets
+          </small>
+        </div>
+        <div className="metric-card">
+          <span>Top-three weight</span>
+          <strong>
+            {report.topThreeStockWeightPct.toFixed(
+              1
+            )}
+            %
+          </strong>
+          <small>
+            Review line{" "}
+            {
+              context.dataset.householdPlan
+                .topThreeStockReviewPct
+            }
+            %
+          </small>
+        </div>
+        <div className="metric-card">
+          <span>Sectors</span>
+          <strong>
+            {report.sectors.length}
+          </strong>
+          <small>
+            Direct-stock exposure
           </small>
         </div>
       </div>
@@ -174,9 +126,9 @@ export default async function PortfolioIntelligencePage() {
         </div>
         <Link
           className="research-button"
-          href="/action-center"
+          href="/portfolio"
         >
-          Open Action Center{" "}
+          Open Portfolio{" "}
           <ArrowRight size={15} />
         </Link>
       </section>
@@ -229,47 +181,10 @@ export default async function PortfolioIntelligencePage() {
                     </strong>
                   </div>
                   <div className="portfolio-review-metric">
-                    <span>Base gap</span>
-                    <strong
-                      className={
-                        (position.valuationGapPct ??
-                          0) >= 0
-                          ? "positive-text"
-                          : "negative-text"
-                      }
-                    >
-                      {pct(
-                        position.valuationGapPct
-                      )}
-                    </strong>
-                  </div>
-                  <div className="portfolio-review-metric">
-                    <span>Evidence</span>
+                    <span>Priority</span>
                     <strong>
-                      {position.evidenceConfidence?.toFixed(
-                        0
-                      ) ?? "—"}
-                    </strong>
-                  </div>
-                  <div className="portfolio-review-state">
-                    <span
-                      className={
-                        "thesis-pill " +
-                        (position.thesisHealth ??
-                          "none")
-                      }
-                    >
-                      {position.thesisHealth
-                        ? position.thesisHealth.replaceAll(
-                            "_",
-                            " "
-                          )
-                        : "No coverage"}
-                    </span>
-                    <small>
-                      Priority{" "}
                       {position.reviewPriority}
-                    </small>
+                    </strong>
                   </div>
                   <ArrowRight size={15} />
                 </Link>
@@ -327,7 +242,7 @@ export default async function PortfolioIntelligencePage() {
         <div className="section-title-row">
           <div>
             <span className="card-kicker">
-              PORTFOLIO + RESEARCH SIGNALS
+              PORTFOLIO SIGNALS
             </span>
             <h2>What deserves attention now</h2>
           </div>
@@ -368,8 +283,8 @@ export default async function PortfolioIntelligencePage() {
         <BrainCircuit size={15} />
         <span>
           Review priority is deterministic and
-          based on portfolio exposure plus
-          published Research context. It is not a
+          based on portfolio exposure against
+          household concentration limits. It is not a
           buy/sell recommendation and does not
           execute trades.
         </span>

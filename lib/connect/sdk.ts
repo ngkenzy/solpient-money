@@ -2,8 +2,6 @@ import type { SolpientDbClient } from "@/lib/local-db/client";
 
 export type ConnectorId =
   | "files"
-  | "plaid"
-  | "fdx"
   | "ofx-direct";
 
 export type ConnectorKind =

@@ -5,8 +5,6 @@ import {
   CreditCard,
   Gauge,
   Landmark,
-  ShieldCheck,
-  Sparkles,
   TrendingUp,
   TriangleAlert,
 } from "lucide-react";
@@ -14,12 +12,9 @@ import AllocationDonut from "@/components/AllocationDonut";
 import AttentionFeed from "@/components/AttentionFeed";
 import InteractiveLineChart from "@/components/InteractiveLineChart";
 import { dataAsOf, demoRefresh } from "@/lib/demo-data";
-import { getCashFlowIntelligence } from "@/lib/cash-flow-intelligence";
-import { buildFinancialHealthEngine } from "@/lib/financial-health-engine";
 import { getFinancialSummary, getPortfolioMetrics, money } from "@/lib/finance";
-import { getAttentionFeed } from "@/lib/intelligence";
+import { getAttentionFeed, getFinancialHealth } from "@/lib/intelligence";
 import { requireMoneyDataset } from "@/lib/money-data";
-import { loadResearchSnapshots, summarizeResearchCoverage } from "@/lib/research";
 
 export const dynamic = "force-dynamic";
 
@@ -28,14 +23,8 @@ export default async function HomePage() {
   const data = context.dataset;
   const summary = getFinancialSummary(data);
   const portfolio = getPortfolioMetrics(data);
-  const directTickers = data.holdings
-    .filter((holding) => holding.kind === "stock")
-    .map((holding) => holding.ticker);
-  const research = await loadResearchSnapshots(directTickers);
-  const researchSummary = summarizeResearchCoverage(data.holdings, research.snapshots);
-  const cashFlowIntelligence = await getCashFlowIntelligence();
-  const health = buildFinancialHealthEngine(data, cashFlowIntelligence);
-  const attention = getAttentionFeed(research.snapshots, data);
+  const health = getFinancialHealth(data);
+  const attention = getAttentionFeed(data);
   const recent = data.transactions.slice(0, 5);
   const latestCashFlow = data.monthlyCashFlow.at(-1) ?? { label: "Current", income: 0, spending: 0 };
   const latestSaved = latestCashFlow.income - latestCashFlow.spending;
@@ -46,6 +35,7 @@ export default async function HomePage() {
   const primaryDebt = debtAccounts[0];
   const otherDebt = debtAccounts.slice(1).reduce((sum, account) => sum + Math.abs(account.balance), 0);
   const healthScore = health.score;
+  const healthMax = health.components.reduce((sum, item) => sum + item.maxScore, 0);
   const persistent = context.source === "database";
 
   return (
@@ -61,8 +51,8 @@ export default async function HomePage() {
           <h1>{persistent ? context.household?.name ?? "Your household" : "Good evening, Phuoc."}</h1>
           <p>
             {persistent
-              ? "Household financial data is private and persistent. Research intelligence remains live and read-only."
-              : "Household data is demo-only until the dedicated Money Supabase project is connected."}
+              ? "Household financial data is private and persistent."
+              : "Household data is demo-only until the local Money database is connected."}
           </p>
         </div>
         <div className="asof">
@@ -96,9 +86,9 @@ export default async function HomePage() {
               <span className="card-kicker">SOLPIENT INTELLIGENCE</span>
               <h2>Financial health</h2>
             </div>
-            <strong className="health-score">{healthScore} <span>/ 100</span></strong>
+            <strong className="health-score">{healthScore} <span>/ {healthMax}</span></strong>
           </div>
-          <div className="health-track"><div className="health-fill" style={{ width: `${healthScore}%` }} /></div>
+          <div className="health-track"><div className="health-fill" style={{ width: `${healthMax ? (healthScore / healthMax) * 100 : 0}%` }} /></div>
           <div className="health-list">
             {health.components.slice(0, 4).map((item) => (
               <div className="health-row" key={item.key}>
@@ -112,10 +102,6 @@ export default async function HomePage() {
               </div>
             ))}
           </div>
-          <Link className="attention-button" href="/health">
-            <span>Open financial health</span>
-            <ArrowRight size={17} />
-          </Link>
         </section>
 
         <section className="card mini-card">
@@ -199,49 +185,18 @@ export default async function HomePage() {
           <Link className="text-button portfolio-link" href="/portfolio">View portfolio <ArrowRight size={15} /></Link>
         </section>
 
-        <section className="card research-card live-research-card">
-          <div className="research-icon"><ShieldCheck size={21} /></div>
-          <div>
-            <div className="research-live-line">
-              <span className="card-kicker">SOLPIENT RESEARCH</span>
-              <span className={"live-pill " + (research.connected ? "connected" : "disconnected")}>{research.connected ? "LIVE" : "UNAVAILABLE"}</span>
-            </div>
-            <h2>{researchSummary.coveragePct.toFixed(0)}% direct-stock value covered</h2>
-            <p>
-              {research.connected
-                ? `${researchSummary.coveredCount} of ${researchSummary.totalDirectStockCount} direct-stock holdings match a latest published Research package. Weighted live Research score: ${researchSummary.weightedScore?.toFixed(0) ?? "—"}; evidence confidence: ${researchSummary.weightedEvidenceConfidence?.toFixed(0) ?? "—"}.`
-                : "The live Research contract could not be reached. Money will not substitute synthetic Research values."}
-            </p>
-          </div>
-          <Link className="research-button" href="/research">Open Research feed <ArrowRight size={16} /></Link>
-        </section>
       </div>
 
       <section className="card homepage-attention">
         <div className="section-title-row">
           <div><span className="card-kicker">WHAT DESERVES ATTENTION</span><h2>Household attention feed</h2></div>
-          <Link className="text-button" href="/insights">Explain everything <ArrowRight size={15} /></Link>
         </div>
         <AttentionFeed items={attention} limit={4} />
       </section>
 
-      <section className="askbar">
-        <span className="ask-icon"><Sparkles size={19} /></span>
-        <div className="ask-copy">
-          <strong>Ask Solpient about your finances...</strong>
-          <span>Deterministic household calculations first; optional local AI for broader explanations.</span>
-        </div>
-        <div className="ask-prompts">
-          <Link href="/copilot">Can I retire at 50?</Link>
-          <Link href="/copilot">What deserves attention?</Link>
-          <Link href="/copilot">How concentrated is my portfolio?</Link>
-        </div>
-        <Link className="ask-send" aria-label="Open Money Copilot" href="/copilot"><ArrowRight size={18} /></Link>
-      </section>
-
       <div className="bottom-note">
         <Gauge size={15} />
-        <span>{persistent ? "Household data is persistent in PostgreSQL on this Mac." : "Money is in demo mode until local PostgreSQL is initialized."} Solpient Research remains a separate read-only source.</span>
+        <span>{persistent ? "Household data is persistent in PostgreSQL on this Mac." : "Money is in demo mode until local PostgreSQL is initialized."}</span>
       </div>
     </div>
   );

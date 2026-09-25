@@ -40,13 +40,10 @@ jobs:
         env:
           DATABASE_URL: postgresql://solpient:solpient_ci@127.0.0.1:5432/solpient
       - run: npm run lint
-      - run: npm run test:research
       - run: npm run test:money
       - run: npm run test:local
       - run: npm run test:v04
       - run: npm run test:v05
-      - run: npm run test:v06
-      - run: npm run test:v061
       - run: npm run test:connect
       - run: npm run test:connect-v11
       - run: npm run test:connect-v12
@@ -54,25 +51,17 @@ jobs:
       - run: npm run test:connect-v131
       - run: npm run test:connect-v132
       - run: npm run test:connect-v133
-      - run: npm run test:connect-v14
       - run: npm run test:v09
       - run: npm run test:v091
       - run: npm run test:v092
-      - run: npm run test:v093
-      - run: npm run test:v094
-      - run: npm run test:v10
       - run: npm run test:v11
       - run: npm run test:v12
       - run: npm run test:v121
       - run: npm run test:v122
       - run: npm run test:v123
-      - run: npm run test:v13
-      - run: npm run test:v14
       - run: npm run test:v15
-      - run: npm run test:v16
       - run: npm run test:v17
       - run: npm run test:v171
-      - run: npm run test:v172
       - run: npm run test:v173
       - run: npm run test:v174
       - run: npm run test:v175

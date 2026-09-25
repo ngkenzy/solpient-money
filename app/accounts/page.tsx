@@ -19,7 +19,7 @@ export default async function AccountsPage() {
   const context = await requireMoneyDataset();
   const data = context.dataset;
   const summary = getFinancialSummary(data);
-  const health = getFinancialHealth({}, data);
+  const health = getFinancialHealth(data);
   const m = health.metrics;
 
   return (
@@ -56,7 +56,7 @@ export default async function AccountsPage() {
             <div><span>Above target</span><strong>{money(m.excessBankCash)}</strong></div>
           </div>
           <p>Cash above the reserve target is not automatically investable. It may belong to near-term spending, goals, debt, or investing.</p>
-          <Link className="research-button" href="/scenario-lab">Test cash scenarios <ArrowRight size={15} /></Link>
+          <Link className="research-button" href="/plan">Review the financial plan <ArrowRight size={15} /></Link>
         </section>
       </div>
 

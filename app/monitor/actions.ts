@@ -6,8 +6,6 @@ import { saveCurrentMonthBaseline } from "@/lib/plan-monitor-engine";
 function refreshPaths() {
   revalidatePath("/monitor");
   revalidatePath("/plan");
-  revalidatePath("/copilot");
-  revalidatePath("/health");
   revalidatePath("/", "layout");
 }
 

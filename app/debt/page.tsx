@@ -1,9 +1,7 @@
 import Link from "next/link";
 import { ArrowRight, CircleDollarSign } from "lucide-react";
 import PageHeader from "@/components/PageHeader";
-import { getCashFlowIntelligence } from "@/lib/cash-flow-intelligence";
-import { buildFinancialHealthEngine } from "@/lib/financial-health-engine";
-import { getDebtPriority } from "@/lib/intelligence";
+import { getDebtPriority, getFinancialHealth } from "@/lib/intelligence";
 import { money } from "@/lib/finance";
 import { requireMoneyDataset } from "@/lib/money-data";
 
@@ -13,8 +11,7 @@ export default async function DebtPage() {
   const context = await requireMoneyDataset();
   const data = context.dataset;
   const debts = getDebtPriority(data);
-  const cashFlow = await getCashFlowIntelligence();
-  const health = buildFinancialHealthEngine(data, cashFlow);
+  const health = getFinancialHealth(data);
   const total = debts.reduce((sum, debt) => sum + debt.balance, 0);
   const annualizedInterest = debts.reduce((sum, debt) => sum + debt.annualizedInterest, 0);
 
@@ -47,7 +44,7 @@ export default async function DebtPage() {
             </div>
           ))}
         </div>
-        <div className="formula-note"><strong>Why this order?</strong><span>Balances are sorted by APR descending. The Scenario Lab applies required payments first, then sends extra payment to the highest APR remaining balance.</span></div>
+        <div className="formula-note"><strong>Why this order?</strong><span>Balances are sorted by APR descending. The Financial Plan applies required payments first, then sends extra payment to the highest APR remaining balance.</span></div>
       </section>
 
       <section className="card page-card">

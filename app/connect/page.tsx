@@ -484,7 +484,7 @@ export default async function ConnectPage() {
             Solpient owns the normalized financial model.
           </strong>
           <span>
-            File imports, Plaid, and future FDX/direct connectors feed
+            File imports and Direct OFX connections feed
             the same account, transaction, holding, and liability model.
             Provider-specific schemas remain at the edge.
           </span>

@@ -1893,8 +1893,8 @@ a {
 }
 
 .holdings-table.v03 .table-row {
-  grid-template-columns: minmax(190px, 1.45fr) 100px 70px 70px 70px 92px 110px;
-  min-width: 850px;
+  grid-template-columns: minmax(190px, 1.45fr) 100px 70px 70px;
+  min-width: 560px;
 }
 
 .research-metric-grid {
@@ -3510,7 +3510,7 @@ a {
 
 
 /* V0.6 Plaid Sandbox */
-.plaid-config-card {
+.ofx-config-card {
   display: grid;
   grid-template-columns: 36px minmax(0, 1fr);
   gap: 12px;
@@ -3518,24 +3518,24 @@ a {
   background: #fffdf8;
 }
 
-.plaid-config-card > svg {
+.ofx-config-card > svg {
   color: #9b6a22;
   margin-top: 2px;
 }
 
-.plaid-config-card h2 {
+.ofx-config-card h2 {
   margin: 5px 0 6px;
   font-size: 17px;
 }
 
-.plaid-config-card p,
-.plaid-config-card small {
+.ofx-config-card p,
+.ofx-config-card small {
   color: #697c92;
   font-size: 9px;
   line-height: 1.55;
 }
 
-.plaid-config-card pre {
+.ofx-config-card pre {
   max-width: 680px;
   margin: 12px 0 8px;
   padding: 12px;
@@ -3548,7 +3548,7 @@ a {
   line-height: 1.6;
 }
 
-.plaid-config-card code {
+.ofx-config-card code {
   padding: 2px 4px;
   border-radius: 4px;
   background: #f0f3f7;
@@ -3776,13 +3776,13 @@ a {
   font-size: 8px;
 }
 
-.plaid-security-grid {
+.ofx-security-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 14px;
 }
 
-.plaid-security-grid .page-card {
+.ofx-security-grid .page-card {
   margin: 0;
   display: grid;
   grid-template-columns: 30px 1fr;
@@ -3790,21 +3790,21 @@ a {
   align-items: start;
 }
 
-.plaid-security-grid svg {
+.ofx-security-grid svg {
   color: #237456;
 }
 
-.plaid-security-grid > section > div {
+.ofx-security-grid > section > div {
   display: flex;
   flex-direction: column;
   gap: 4px;
 }
 
-.plaid-security-grid strong {
+.ofx-security-grid strong {
   font-size: 10px;
 }
 
-.plaid-security-grid span {
+.ofx-security-grid span {
   color: #6a7d92;
   font-size: 8px;
   line-height: 1.5;
@@ -3820,7 +3820,7 @@ a {
 
 @media (max-width: 880px) {
   .plaid-connect-grid,
-  .plaid-security-grid {
+  .ofx-security-grid {
     grid-template-columns: 1fr;
   }
 

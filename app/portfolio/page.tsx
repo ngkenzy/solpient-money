@@ -5,7 +5,6 @@ import InteractiveLineChart from "@/components/InteractiveLineChart";
 import PageHeader from "@/components/PageHeader";
 import { getPortfolioMetrics, money } from "@/lib/finance";
 import { requireMoneyDataset } from "@/lib/money-data";
-import { loadResearchSnapshots, summarizeResearchCoverage } from "@/lib/research";
 import { buildPortfolioIntelligence } from "@/lib/portfolio-intelligence";
 
 export const dynamic = "force-dynamic";
@@ -14,25 +13,21 @@ export default async function PortfolioPage() {
   const context = await requireMoneyDataset();
   const data = context.dataset;
   const metrics = getPortfolioMetrics(data);
-  const directTickers = data.holdings.filter((holding) => holding.kind === "stock").map((holding) => holding.ticker);
-  const research = await loadResearchSnapshots(directTickers);
-  const researchSummary = summarizeResearchCoverage(data.holdings, research.snapshots);
-  const portfolioIntelligence = buildPortfolioIntelligence(data, research);
+  const portfolioIntelligence = buildPortfolioIntelligence(data);
 
   return (
     <div className="page">
       <PageHeader
         eyebrow="PORTFOLIO"
-        title="Your investments, connected to live Research."
-        description={context.source === "database" ? "Persisted household holdings are matched to live published Solpient Research." : "Demo holdings are matched to live published Solpient Research until Money persistence is connected."}
-        action={<span className={"live-pill " + (research.connected ? "connected" : "disconnected")}>{research.connected ? "RESEARCH LIVE" : "RESEARCH UNAVAILABLE"}</span>}
+        title="Your investments."
+        description={context.source === "database" ? "Persisted household holdings with deterministic exposure review." : "Demo holdings with deterministic exposure review until Money persistence is connected."}
       />
 
       <div className="metric-grid four">
         <div className="metric-card"><span>Portfolio value</span><strong>{money(metrics.total)}</strong><small>{data.holdings.length} holdings</small></div>
-        <div className="metric-card"><span>Research coverage</span><strong>{researchSummary.coveragePct.toFixed(0)}%</strong><small>Of direct-stock value</small></div>
-        <div className="metric-card"><span>Weighted Research score</span><strong>{researchSummary.weightedScore?.toFixed(0) ?? "—"}</strong><small>Latest published runs</small></div>
-        <div className="metric-card"><span>Evidence confidence</span><strong>{researchSummary.weightedEvidenceConfidence?.toFixed(0) ?? "—"}</strong><small>Current Research ranking layer</small></div>
+        <div className="metric-card"><span>Largest position</span><strong>{portfolioIntelligence.largestStockWeightPct.toFixed(1)}%</strong><small>Of invested assets</small></div>
+        <div className="metric-card"><span>Top-three weight</span><strong>{portfolioIntelligence.topThreeStockWeightPct.toFixed(1)}%</strong><small>Review line {data.householdPlan.topThreeStockReviewPct}%</small></div>
+        <div className="metric-card"><span>Positions flagged</span><strong>{portfolioIntelligence.watchCount + portfolioIntelligence.criticalCount}</strong><small>Concentration review</small></div>
       </div>
 
       <div className="portfolio-layout">
@@ -69,31 +64,27 @@ export default async function PortfolioPage() {
 
       <section className="card page-card">
         <div className="section-title-row">
-          <div><span className="card-kicker">HOLDINGS</span><h2>Positions + live Research</h2></div>
-          <span className="small-muted">Click a holding for position and Research detail</span>
+          <div><span className="card-kicker">HOLDINGS</span><h2>Positions</h2></div>
+          <span className="small-muted">Click a holding for position detail</span>
         </div>
         <div className="data-table holdings-table v03">
           <div className="table-row table-head-row">
-            <span>Holding</span><span>Value</span><span>Weight</span><span>YTD</span><span>Research</span><span>Fair value</span><span>Thesis</span>
+            <span>Holding</span><span>Value</span><span>Weight</span><span>YTD</span>
           </div>
           {data.holdings.map((holding) => {
             const weight = metrics.total ? (holding.value / metrics.total) * 100 : 0;
-            const snapshot = research.snapshots[holding.ticker];
             return (
               <Link className="table-row table-link" href={`/portfolio/${holding.ticker.toLowerCase()}`} key={holding.ticker}>
                 <span className="holding-name">
                   <strong>{holding.ticker}</strong>
                   <small>
                     {holding.name}
-                    {holding.source === "plaid" ? <em className="source-badge plaid-test">PLAID TEST</em> : holding.source === "file" ? <em className="source-badge file-import">FILE IMPORT</em> : holding.source === "ofx_direct" ? <em className="source-badge direct-ofx">DIRECT OFX</em> : holding.source === "fdx" ? <em className="source-badge fdx-source">OAUTH / FDX</em> : null}
+                    {holding.source === "file" ? <em className="source-badge file-import">FILE IMPORT</em> : holding.source === "ofx_direct" ? <em className="source-badge direct-ofx">DIRECT OFX</em> : null}
                   </small>
                 </span>
                 <strong>{money(holding.value)}</strong>
                 <span>{weight.toFixed(1)}%</span>
                 <span className={holding.ytdReturn >= 0 ? "positive-text" : "negative-text"}>{holding.ytdReturn >= 0 ? "+" : ""}{holding.ytdReturn.toFixed(1)}%</span>
-                <span>{snapshot?.overall_score ?? "—"}</span>
-                <span>{snapshot?.base_value != null ? money(snapshot.base_value, true) : "—"}</span>
-                <span><span className={"thesis-pill " + (snapshot?.thesis_health ?? "none")}>{snapshot?.thesis_health?.replace("_", " ") ?? "No coverage"}</span></span>
               </Link>
             );
           })}
@@ -102,7 +93,7 @@ export default async function PortfolioPage() {
 
       <section className="card page-card">
         <div className="section-title-row">
-          <div><span className="card-kicker">V1.5 PORTFOLIO INTELLIGENCE</span><h2>Exposure + Research conflicts</h2></div>
+          <div><span className="card-kicker">PORTFOLIO INTELLIGENCE</span><h2>Exposure review</h2></div>
           <Link className="text-button" href="/portfolio-intelligence">Open intelligence <ArrowRight size={15} /></Link>
         </div>
         <div className="insight-grid">

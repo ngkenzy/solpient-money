@@ -33,7 +33,7 @@ function lineHref(kind: PlanLineKind) {
   if (kind === "reserve") return "/accounts";
   if (kind === "high_interest_debt") return "/debt";
   if (kind === "goal") return "/goals";
-  if (kind === "retirement") return "/retirement";
+  if (kind === "retirement") return "/plan";
   return "/cash-flow";
 }
 
@@ -82,9 +82,6 @@ export default async function PlanPage() {
           <div className="plan-header-actions">
             <Link className="research-button" href="/monitor">
               Monitor plan <ArrowRight size={14} />
-            </Link>
-            <Link className="research-button" href="/copilot">
-              Ask why <ArrowRight size={14} />
             </Link>
           </div>
         }

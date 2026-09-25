@@ -1,9 +1,7 @@
 import Link from "next/link";
 import {
   Cable,
-  DatabaseZap,
   FileSpreadsheet,
-  Landmark,
 } from "lucide-react";
 import ConnectorSyncButton from "@/components/ConnectorSyncButton";
 import type {
@@ -13,8 +11,6 @@ import type {
 
 function iconFor(id: ConnectorId) {
   if (id === "files") return FileSpreadsheet;
-  if (id === "plaid") return DatabaseZap;
-  if (id === "fdx") return Landmark;
   return Cable;
 }
 
@@ -212,7 +208,7 @@ export default function ConnectorRegistryPanel({
               <Cable size={25} />
               <strong>No connector instances yet</strong>
               <span>
-                Import a file or add a Plaid Sandbox Item to
+                Import a file or connect a Direct OFX institution to
                 create the first one.
               </span>
             </div>

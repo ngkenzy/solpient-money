@@ -1,5 +1,4 @@
 import { demoMoneyDataset, type MoneyDataset } from "@/lib/demo-data";
-import type { ResearchSnapshot } from "@/lib/research";
 
 export type HealthComponent = {
   key: string;
@@ -25,17 +24,6 @@ export type AttentionItem = {
   ticker?: string;
 };
 
-export type ResearchAlert = {
-  id: string;
-  ticker: string;
-  direction: string;
-  materiality: string;
-  title: string;
-  summary: string;
-  createdAt: string | null;
-  href: string;
-};
-
 function average(values: number[]) {
   return values.length ? values.reduce((sum, value) => sum + value, 0) / values.length : 0;
 }
@@ -45,7 +33,6 @@ function clamp(value: number, min = 0, max = 100) {
 }
 
 export function getHouseholdMetrics(
-  snapshots: Record<string, ResearchSnapshot> = {},
   dataset: MoneyDataset = demoMoneyDataset
 ) {
   const { accounts, holdings, householdGoals, householdPlan, monthlyCashFlow } = dataset;
@@ -82,23 +69,6 @@ export function getHouseholdMetrics(
   const topThreeStockPct = stockWeights.slice(0, 3).reduce((sum, item) => sum + item.weight, 0);
   const portfolioCashPct = totalPortfolio ? (portfolioCash / totalPortfolio) * 100 : 0;
 
-  const coveredStocks = directStocks.filter((holding) => snapshots[holding.ticker]);
-  const directStockValue = directStocks.reduce((sum, holding) => sum + holding.value, 0);
-  const coveredValue = coveredStocks.reduce((sum, holding) => sum + holding.value, 0);
-  const researchCoveragePct = directStockValue ? (coveredValue / directStockValue) * 100 : 0;
-  const confidenceCovered = coveredStocks.filter(
-    (holding) => snapshots[holding.ticker]?.evidence_confidence_score != null
-  );
-  const confidenceValue = confidenceCovered.reduce((sum, holding) => sum + holding.value, 0);
-  const weightedEvidenceConfidence =
-    confidenceValue > 0
-      ? confidenceCovered.reduce(
-          (sum, holding) =>
-            sum + (snapshots[holding.ticker]?.evidence_confidence_score ?? 0) * holding.value,
-          0
-        ) / confidenceValue
-      : 0;
-
   const goalFundingPct =
     average(
       householdGoals.map((goal) => Math.min(1, goal.current / goal.target))
@@ -125,18 +95,15 @@ export function getHouseholdMetrics(
     largestStock,
     topThreeStockPct,
     portfolioCashPct,
-    researchCoveragePct,
-    weightedEvidenceConfidence,
     goalFundingPct,
   };
 }
 
 export function getFinancialHealth(
-  snapshots: Record<string, ResearchSnapshot> = {},
   dataset: MoneyDataset = demoMoneyDataset
 ) {
   const { householdPlan, householdGoals } = dataset;
-  const m = getHouseholdMetrics(snapshots, dataset);
+  const m = getHouseholdMetrics(dataset);
 
   const liquidityScore =
     m.emergencyFundMonths >= householdPlan.emergencyFundTargetMonths
@@ -161,12 +128,6 @@ export function getFinancialHealth(
   if (m.topThreeStockPct > householdPlan.topThreeStockReviewPct) portfolioScore -= 3;
   if (m.portfolioCashPct > householdPlan.portfolioCashReviewPct) portfolioScore -= 2;
   portfolioScore = clamp(portfolioScore, 0, 20);
-
-  const researchScore = clamp(
-    15 * (0.6 * (m.researchCoveragePct / 100) + 0.4 * (m.weightedEvidenceConfidence / 100)),
-    0,
-    15
-  );
 
   const planningScore = clamp((m.goalFundingPct / 100) * 10, 0, 10);
 
@@ -229,19 +190,6 @@ export function getFinancialHealth(
       calculation: "Start at 20; subtract deterministic concentration/cash review penalties",
     },
     {
-      key: "research",
-      label: "Research confidence",
-      score: researchScore,
-      maxScore: 15,
-      status: m.researchCoveragePct >= 80 && m.weightedEvidenceConfidence >= 70 ? "healthy" : "review",
-      detail: `${m.researchCoveragePct.toFixed(0)}% direct-stock coverage with ${m.weightedEvidenceConfidence.toFixed(0)} weighted evidence confidence.`,
-      inputs: [
-        `Research coverage: ${m.researchCoveragePct.toFixed(1)}%`,
-        `Evidence confidence: ${m.weightedEvidenceConfidence.toFixed(1)}`,
-      ],
-      calculation: "15 × (60% coverage + 40% evidence confidence)",
-    },
-    {
       key: "planning",
       label: "Goals",
       score: planningScore,
@@ -259,62 +207,11 @@ export function getFinancialHealth(
   return { score: totalScore, components, metrics: m };
 }
 
-export function getResearchAlerts(
-  snapshots: Record<string, ResearchSnapshot>,
-  dataset: MoneyDataset = demoMoneyDataset
-): ResearchAlert[] {
-  const { holdings } = dataset;
-  const alerts: ResearchAlert[] = [];
-
-  for (const holding of holdings.filter((item) => item.kind === "stock")) {
-    const snapshot = snapshots[holding.ticker];
-    if (!snapshot) continue;
-
-    for (const [index, change] of snapshot.what_changed.slice(0, 4).entries()) {
-      alerts.push({
-        id: `${holding.ticker}-change-${index}`,
-        ticker: holding.ticker,
-        direction: change.direction ?? "unchanged",
-        materiality: change.materiality ?? "unspecified",
-        title: change.label ?? change.category ?? "Published Research changed",
-        summary: change.summary ?? change.new_text ?? "A published Research field changed.",
-        createdAt: change.created_at,
-        href: `/portfolio/${holding.ticker.toLowerCase()}`,
-      });
-    }
-
-    if (!snapshot.what_changed.length && ["watch", "monitor"].includes(snapshot.thesis_health)) {
-      alerts.push({
-        id: `${holding.ticker}-thesis-status`,
-        ticker: holding.ticker,
-        direction: "monitor",
-        materiality: "current",
-        title: `Thesis status: ${snapshot.thesis_health}`,
-        summary: `The latest published Research package classifies ${holding.ticker} thesis health as ${snapshot.thesis_health}.`,
-        createdAt: snapshot.published_at ?? snapshot.researched_at,
-        href: `/portfolio/${holding.ticker.toLowerCase()}`,
-      });
-    }
-  }
-
-  const weight = (alert: ResearchAlert) => {
-    const direction = alert.direction.toLowerCase();
-    const materiality = alert.materiality.toLowerCase();
-    return (
-      (direction === "weakened" ? 50 : direction === "strengthened" ? 20 : 10) +
-      (materiality === "high" ? 30 : materiality === "medium" ? 20 : materiality === "low" ? 10 : 0)
-    );
-  };
-
-  return alerts.sort((a, b) => weight(b) - weight(a)).slice(0, 8);
-}
-
 export function getAttentionFeed(
-  snapshots: Record<string, ResearchSnapshot> = {},
   dataset: MoneyDataset = demoMoneyDataset
 ): AttentionItem[] {
   const { accounts, holdings, householdPlan } = dataset;
-  const health = getFinancialHealth(snapshots, dataset);
+  const health = getFinancialHealth(dataset);
   const m = health.metrics;
   const items: AttentionItem[] = [];
 
@@ -336,54 +233,6 @@ export function getAttentionFeed(
       ],
       calculation: `Balances with APR ≥ ${householdPlan.highInterestDebtAprPct}%`,
       href: "/debt",
-    });
-  }
-
-  const alerts = getResearchAlerts(snapshots, dataset);
-  for (const alert of alerts.slice(0, 3)) {
-    items.push({
-      id: alert.id,
-      priority: alert.direction === "weakened" ? 92 : 72,
-      category: "review",
-      title: `${alert.ticker}: ${alert.title}`,
-      detail: alert.summary,
-      why: "This holding is in the demo portfolio and its published Solpient Research package changed.",
-      inputs: [`Direction: ${alert.direction}`, `Materiality: ${alert.materiality}`],
-      calculation: "Latest published Research change matched to a portfolio ticker",
-      href: alert.href,
-      ticker: alert.ticker,
-    });
-  }
-
-  const weakEvidence = holdings
-    .filter((holding) => holding.kind === "stock")
-    .map((holding) => ({ holding, snapshot: snapshots[holding.ticker] }))
-    .filter(
-      ({ snapshot }) =>
-        snapshot?.evidence_confidence_score != null &&
-        snapshot.evidence_confidence_score < 60
-    )
-    .sort(
-      (a, b) =>
-        (a.snapshot?.evidence_confidence_score ?? 0) -
-        (b.snapshot?.evidence_confidence_score ?? 0)
-    )[0];
-
-  if (weakEvidence?.snapshot) {
-    items.push({
-      id: "evidence-confidence",
-      priority: 68,
-      category: "review",
-      title: `${weakEvidence.holding.ticker}: evidence confidence is limited`,
-      detail: `Current evidence confidence is ${weakEvidence.snapshot.evidence_confidence_score?.toFixed(1)} even though the published Research score is ${weakEvidence.snapshot.overall_score?.toFixed(0) ?? "—"}.`,
-      why: "Score and evidence confidence are intentionally separate so incomplete evidence is visible.",
-      inputs: [
-        `Research score: ${weakEvidence.snapshot.overall_score?.toFixed(0) ?? "—"}`,
-        `Evidence confidence: ${weakEvidence.snapshot.evidence_confidence_score?.toFixed(1) ?? "—"}`,
-      ],
-      calculation: "Flag covered holdings when evidence confidence < 60",
-      href: `/portfolio/${weakEvidence.holding.ticker.toLowerCase()}`,
-      ticker: weakEvidence.holding.ticker,
     });
   }
 
@@ -417,7 +266,7 @@ export function getAttentionFeed(
         `Reserve target: $${m.reserveTarget.toLocaleString("en-US", { maximumFractionDigits: 0 })}`,
       ],
       calculation: "Bank cash − six-month average spending reserve",
-      href: "/scenario-lab",
+      href: "/plan",
     });
   }
 

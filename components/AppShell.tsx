@@ -1,36 +1,25 @@
 "use client";
 
 import Link from "next/link";
-import AutopilotDailyRunner from "@/components/AutopilotDailyRunner";
-import ActionCenterNavBadge from "@/components/ActionCenterNavBadge";
 import { usePathname } from "next/navigation";
 import {
   Activity,
   BarChart3,
-  Bell,
-  BellRing,
-  BookOpenCheck,
-  Bot,
   BrainCircuit,
   BriefcaseBusiness,
-  Building2,
   ChevronDown,
   CircleDollarSign,
   CreditCard,
   Goal,
-  Gauge,
-  ListChecks,
   Home,
   LineChart,
   Landmark,
+  ListChecks,
   PlugZap,
   List,
-  PiggyBank,
-  Radar,
   Search,
   Settings,
   ShieldCheck,
-  SlidersHorizontal,
   WalletCards,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
@@ -39,7 +28,6 @@ type NavItem = {
   href: string;
   label: string;
   icon: LucideIcon;
-  badge?: string;
 };
 
 const sections: Array<{ label?: string; items: NavItem[] }> = [
@@ -57,7 +45,6 @@ const sections: Array<{ label?: string; items: NavItem[] }> = [
     items: [
       { href: "/portfolio", label: "Portfolio", icon: BriefcaseBusiness },
       { href: "/portfolio-intelligence", label: "Portfolio Intelligence", icon: BrainCircuit },
-      { href: "/decision-journal", label: "Decision Journal", icon: BookOpenCheck },
       { href: "/performance", label: "Performance", icon: LineChart },
       { href: "/allocation", label: "Allocation", icon: BarChart3 },
       { href: "/tsp", label: "Thrift Saving Plan", icon: Landmark },
@@ -68,21 +55,13 @@ const sections: Array<{ label?: string; items: NavItem[] }> = [
     items: [
       { href: "/plan", label: "Financial Plan", icon: ListChecks },
       { href: "/monitor", label: "Plan Monitor", icon: Activity },
-      { href: "/retirement", label: "Retirement", icon: PiggyBank },
       { href: "/goals", label: "Goals", icon: Goal },
       { href: "/debt", label: "Debt", icon: CreditCard },
-      { href: "/scenario-lab", label: "Scenario Lab", icon: SlidersHorizontal },
     ],
   },
   {
-    label: "INTELLIGENCE",
+    label: "DATA",
     items: [
-      { href: "/action-center", label: "Action Center", icon: BellRing },
-      { href: "/autopilot", label: "Autopilot", icon: Radar },
-      { href: "/copilot", label: "Money Copilot", icon: Bot },
-      { href: "/health", label: "Financial Health", icon: Gauge },
-      { href: "/insights", label: "Insights", icon: BrainCircuit, badge: "3" },
-      { href: "/research", label: "Research", icon: Building2 },
       { href: "/data-health", label: "Data Health", icon: ShieldCheck },
       { href: "/data", label: "Data", icon: Settings },
     ],
@@ -125,7 +104,6 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
                   >
                     <Icon size={18} strokeWidth={1.8} />
                     <span>{item.label}</span>
-                    {item.href === "/action-center" ? <ActionCenterNavBadge /> : item.badge ? <span className="side-badge">{item.badge}</span> : null}
                   </Link>
                 );
               })}
@@ -140,12 +118,10 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
       </aside>
 
       <section className="workspace">
-        <AutopilotDailyRunner />
         <header className="topbar">
           <div className="topbar-product-group">
             <div className="product-switch">
-              <Link href="/research">Research</Link>
-              <Link className={pathname === "/research" ? "" : "selected"} href="/">Money</Link>
+              <Link className="selected" href="/">Money</Link>
             </div>
           </div>
 
@@ -154,13 +130,6 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
               <Search size={16} />
               <span>Search...</span>
             </div>
-            <Link
-              className="icon-button"
-              aria-label="Open Action Center"
-              href="/action-center"
-            >
-              <Bell size={18} />
-            </Link>
             <div className="profile">
               <span className="avatar">SM</span>
               <span>Money Household</span>

@@ -3,11 +3,7 @@ import { readFile } from "node:fs/promises";
 const files = {
   packageJson: await readFile("package.json", "utf8"),
   localDate: await readFile("lib/local-calendar-date.ts", "utf8"),
-  autopilot: await readFile("lib/money-autopilot.ts", "utf8"),
   prices: await readFile("lib/tsp-prices.ts", "utf8"),
-  runner: await readFile("components/AutopilotDailyRunner.tsx", "utf8"),
-  page: await readFile("app/tsp/page.tsx", "utf8"),
-  scheduled: await readFile("scripts/run-scheduled-autopilot.mjs", "utf8"),
   page: await readFile("app/tsp/page.tsx", "utf8"),
   shell: await readFile("components/AppShell.tsx", "utf8"),
 };
@@ -36,11 +32,6 @@ const checks = [
       !files.localDate.includes("toISOString"),
   ],
   [
-    "Autopilot run date uses local calendar day",
-    files.autopilot.includes('import { localCalendarDateKey } from "@/lib/local-calendar-date"') &&
-      files.autopilot.includes("return localCalendarDateKey(date)"),
-  ],
-  [
     "TSP fetch window uses local calendar day",
     files.prices.includes('import { localCalendarDateKey } from "@/lib/local-calendar-date"') &&
       files.prices.includes("const today = localCalendarDateKey(now)"),
@@ -62,27 +53,6 @@ const checks = [
       files.prices.includes('.select("price_date")') &&
       files.prices.includes("cachedLatest") &&
       files.prices.includes("cachedLatest?.price_date"),
-  ],
-  [
-    "automatic TSP sync result is retained",
-    files.autopilot.includes("tspPriceSync: TspPriceSyncResult | null") &&
-      files.autopilot.includes("tspPriceSync = await syncTspSharePrices(now)"),
-  ],
-  [
-    "automatic TSP fetch failure becomes explicit status",
-    files.autopilot.includes("ok: false") &&
-      files.autopilot.includes("Automatic TSP share-price refresh failed."),
-  ],
-  [
-    "browser does not mark failed TSP sync as successful",
-    files.runner.includes("const tspSyncFailed") &&
-      files.runner.includes("if (!tspSyncFailed)") &&
-      files.runner.includes("window.localStorage.setItem"),
-  ],
-  [
-    "launchd runner retries failed TSP sync",
-    files.scheduled.includes("tspPriceSync?.ok === false") &&
-      files.scheduled.includes("throw new Error"),
   ],
   [
     "release-label removal does not remove the TSP workspace",

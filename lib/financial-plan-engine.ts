@@ -2,7 +2,7 @@ import "server-only";
 
 import type { CashFlowIntelligence } from "@/lib/cash-flow-intelligence";
 import type { MoneyDataset } from "@/lib/demo-data";
-import { buildFinancialHealthEngine } from "@/lib/financial-health-engine";
+import { getFinancialHealth } from "@/lib/intelligence";
 
 export type PlanLineKind =
   | "reserve"
@@ -163,6 +163,28 @@ function requiredContributionForTarget({
   return Math.max(0, (target - futurePrincipal) / annuityFactor);
 }
 
+function futureValueOfContributions({
+  principal,
+  monthlyContribution,
+  annualReturnPct,
+  months,
+}: {
+  principal: number;
+  monthlyContribution: number;
+  annualReturnPct: number;
+  months: number;
+}) {
+  if (months <= 0) return principal;
+  const rate = annualReturnPct / 100 / 12;
+  const growth = Math.pow(1 + rate, months);
+  const futurePrincipal = principal * growth;
+  if (Math.abs(rate) < 0.0000001) {
+    return futurePrincipal + monthlyContribution * months;
+  }
+  const annuityFactor = (growth - 1) / rate;
+  return futurePrincipal + monthlyContribution * annuityFactor;
+}
+
 function simulateDebtPlan(
   inputDebts: Debt[],
   extraMonthly: number,
@@ -259,7 +281,7 @@ export function buildHouseholdFinancialPlan(
     )
   );
 
-  const health = buildFinancialHealthEngine(dataset, cashFlow);
+  const health = getFinancialHealth(dataset);
   const plan = dataset.householdPlan;
   const monthlyIncome = average(
     cashFlow.monthly.map((month) => month.income)
@@ -273,7 +295,10 @@ export function buildHouseholdFinancialPlan(
 
   let remaining = monthlySurplus;
 
-  const reserveGap = Math.max(0, health.metrics.reserveGap);
+  const reserveGap = Math.max(
+    0,
+    health.metrics.reserveTarget - health.metrics.bankCash
+  );
   const reserveRequiredMonthly =
     reserveGap > 0 ? reserveGap / 12 : 0;
   const reserveAllocation = roundDollar(
@@ -401,6 +426,13 @@ export function buildHouseholdFinancialPlan(
   remaining -= retirementAllocation;
 
   const flexibleMonthly = roundDollar(Math.max(0, remaining));
+
+  const retirementProjectedAssets = futureValueOfContributions({
+    principal: health.metrics.investments,
+    monthlyContribution: retirementAllocation,
+    annualReturnPct: plan.expectedAnnualReturnPct,
+    months: retirementMonths,
+  });
 
   const debtScenario = simulateDebtPlan(
     debts,
@@ -534,8 +566,7 @@ export function buildHouseholdFinancialPlan(
     target: plan.targetRetirementAssets,
     gap: Math.max(
       0,
-      plan.targetRetirementAssets -
-        health.metrics.retirementProjectedAssets
+      plan.targetRetirementAssets - retirementProjectedAssets
     ),
     targetDate: null,
     estimatedCompletionMonths: retirementMonths || null,
