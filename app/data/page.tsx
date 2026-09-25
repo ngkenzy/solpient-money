@@ -1,5 +1,7 @@
 import Link from "next/link";
-import { Database, LogOut, PlusCircle } from "lucide-react";
+import { readdir, stat } from "node:fs/promises";
+import path from "node:path";
+import { Database, LogOut, PlusCircle, ShieldAlert, ShieldCheck } from "lucide-react";
 import PageHeader from "@/components/PageHeader";
 import { requireMoneyDataset } from "@/lib/money-data";
 import { money } from "@/lib/finance";
@@ -11,12 +13,47 @@ import {
   updatePlanning,
 } from "./actions";
 
+type BackupHealth =
+  | { state: "healthy"; date: Date }
+  | { state: "stale"; date: Date }
+  | { state: "never" }
+  | { state: "unknown" };
+
+async function getBackupHealth(): Promise<BackupHealth> {
+  try {
+    const dir = path.join(process.cwd(), "backups");
+    const files = (await readdir(dir)).filter(
+      (name) => name.startsWith("solpient-money-") && name.endsWith(".sql.gz.enc")
+    );
+    if (!files.length) return { state: "never" };
+    const withMtime = await Promise.all(
+      files.map(async (name) => ({
+        name,
+        mtime: (await stat(path.join(dir, name))).mtimeMs,
+      }))
+    );
+    withMtime.sort((a, b) => b.mtime - a.mtime);
+    const latest = withMtime[0];
+    const ageDays = (Date.now() - latest.mtime) / 86_400_000;
+    return ageDays > 30
+      ? { state: "stale", date: new Date(latest.mtime) }
+      : { state: "healthy", date: new Date(latest.mtime) };
+  } catch {
+    return { state: "unknown" };
+  }
+}
+
+function formatBackupDate(date: Date): string {
+  return date.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+}
+
 export const dynamic = "force-dynamic";
 
 export default async function DataPage() {
   const context = await requireMoneyDataset();
   const data = context.dataset;
   const persistent = context.source === "database";
+  const backup = persistent ? await getBackupHealth() : null;
 
   return (
     <div className="page">
@@ -25,8 +62,8 @@ export default async function DataPage() {
         title={persistent ? context.household?.name ?? "Household data" : "Demo data mode"}
         description={
           persistent
-            ? "Authenticated household data is being read from the dedicated Solpient Money database. Manual entry is always available."
-            : "The dedicated Money Supabase project is not connected yet. The application is running against deterministic demo data and persistence controls are disabled."
+            ? "Household data is read from your private PostgreSQL database on this Mac. Manual entry is always available."
+            : "The local Money database is not configured yet. Run npm run local:setup, then this app reads your private PostgreSQL on this Mac — demo controls are shown until then."
         }
         action={
           persistent ? (
@@ -40,14 +77,37 @@ export default async function DataPage() {
       <section className="card page-card data-status-card">
         <Database size={22} />
         <div>
-          <strong>{persistent ? "Private household database active" : "Persistence pending Supabase project slot"}</strong>
+          <strong>{persistent ? "Private household database active" : "Local database not configured"}</strong>
           <span>
             {persistent
               ? `${data.accounts.length} accounts · ${data.transactions.length} transactions · ${data.holdings.length} holdings · ${data.householdGoals.length} goals`
-              : "No personal financial data has been stored in Solpient Research or another database."}
+              : "No personal financial data leaves this Mac."}
           </span>
         </div>
       </section>
+
+      {backup ? (
+        <section className="card page-card data-status-card">
+          {backup.state === "healthy" ? <ShieldCheck size={22} /> : <ShieldAlert size={22} />}
+          <div>
+            <strong>
+              {backup.state === "healthy" && `Last backup ${formatBackupDate(backup.date)}`}
+              {backup.state === "stale" && `Last backup ${formatBackupDate(backup.date)} — stale`}
+              {backup.state === "never" && "No backups yet"}
+              {backup.state === "unknown" && "Backup status unknown"}
+            </strong>
+            <span>
+              {backup.state === "healthy" && "Your encrypted backup is current. Local-first means you own the backup — keep a copy off this Mac."}
+              {backup.state === "stale" && "Over 30 days since your last backup. Run npm run local:backup in the app folder today."}
+              {backup.state === "never" && "This Mac holds the only copy of your data. Run npm run local:backup in the app folder to create your first encrypted backup."}
+              {backup.state === "unknown" && "Could not read the backups directory."}
+            </span>
+          </div>
+          {backup.state === "stale" || backup.state === "never" ? (
+            <span className="live-pill disconnected">BACKUP NEEDED</span>
+          ) : null}
+        </section>
+      ) : null}
 
       {persistent ? (
         <>
@@ -163,9 +223,9 @@ export default async function DataPage() {
         </>
       ) : (
         <section className="card page-card">
-          <span className="card-kicker">NEXT ACCOUNT STEP</span>
-          <h2>Free one Supabase project slot or upgrade Nexus.</h2>
-          <p className="empty-copy">Once a project slot is available, create the dedicated Solpient Money project, apply the committed migration, set the two Money environment variables, and the login/onboarding flow becomes active.</p>
+          <span className="card-kicker">NEXT STEP</span>
+          <h2>Run the local database setup.</h2>
+          <p className="empty-copy">From the app folder, run <strong>npm run local:setup</strong> to start PostgreSQL in Docker, apply the schema, and keep all Money data on this Mac. Then the login and onboarding flow becomes active.</p>
         </section>
       )}
     </div>

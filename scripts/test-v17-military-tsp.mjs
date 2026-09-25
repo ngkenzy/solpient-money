@@ -121,7 +121,7 @@ const checks = [
       files.shell.indexOf('label: "INVEST"') <
         files.shell.indexOf('href: "/tsp"') &&
       files.shell.indexOf('href: "/tsp"') <
-        files.shell.indexOf('label: "PLAN"'),
+        files.shell.indexOf('label: "BUDGETING"'),
   ],
   [
     "Local Doctor verifies V1.7 TSP schema",

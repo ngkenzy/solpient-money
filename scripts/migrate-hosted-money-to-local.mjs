@@ -334,7 +334,7 @@ try {
     "Encrypted connector token/credential vaults were intentionally NOT copied."
   );
   console.log(
-    "Plaid / Direct OFX / OAuth-FDX connections were marked needs_update and should be reconnected locally."
+    "Direct OFX connections were marked needs_update and should be reconnected locally via /connect/ofx."
   );
   console.log(
     "After verification, remove SOLPIENT_SOURCE_DATABASE_URL from your shell/history and retire the hosted Money database when you are ready."

@@ -1,7 +1,7 @@
 import { Database, ShieldCheck } from "lucide-react";
 import { redirect } from "next/navigation";
 import { getMoneyContext } from "@/lib/money-data";
-import { createHouseholdWithDemoData } from "./actions";
+import { createHouseholdEmpty, createHouseholdWithDemoData } from "./actions";
 
 export const dynamic = "force-dynamic";
 
@@ -33,7 +33,7 @@ export default async function SetupPage() {
           <span className="setup-shield"><ShieldCheck size={24} /></span>
           <div className="eyebrow">PRIVATE HOUSEHOLD SETUP</div>
           <h1>Create your Money household.</h1>
-          <p>This creates the local household and loads the synthetic demo model into PostgreSQL on this Mac. You can replace demo rows with file imports or connector data.</p>
+          <p>Two ways to start. Explore first with realistic demo data you can delete anytime — or skip straight to importing your own bank and brokerage files.</p>
         </div>
 
         <form className="card setup-form" action={createHouseholdWithDemoData}>
@@ -47,7 +47,10 @@ export default async function SetupPage() {
             <span>✓ Demo holdings and goals</span>
             <span>✓ Planning assumptions and history</span>
           </div>
-          <button className="primary-auth-button" type="submit">Create household & load demo data</button>
+          <button className="primary-auth-button" type="submit">Create household & explore demo data</button>
+          <button className="text-button" type="submit" formAction={createHouseholdEmpty}>
+            Skip demo — create empty household & import my files
+          </button>
         </form>
       </section>
     </div>

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { ArrowRight, ArrowUpRight, Landmark, WalletCards } from "lucide-react";
+import EmptyState from "@/components/EmptyState";
 import PageHeader from "@/components/PageHeader";
 import { getFinancialSummary, money } from "@/lib/finance";
 import { getFinancialHealth } from "@/lib/intelligence";
@@ -21,6 +22,25 @@ export default async function AccountsPage() {
   const summary = getFinancialSummary(data);
   const health = getFinancialHealth(data);
   const m = health.metrics;
+
+  if (!data.accounts.length) {
+    return (
+      <div className="page">
+        <PageHeader
+          eyebrow="ACCOUNTS"
+          title="The household balance sheet."
+          description="Track every account in one place — cash, brokerage, retirement, property, and debt."
+        />
+        <EmptyState
+          icon={WalletCards}
+          title="No accounts yet"
+          copy="Add your first account manually on the Data page, or import a bank file and accounts are created for you."
+          actionHref="/data"
+          actionLabel="Add your first account"
+        />
+      </div>
+    );
+  }
 
   return (
     <div className="page">

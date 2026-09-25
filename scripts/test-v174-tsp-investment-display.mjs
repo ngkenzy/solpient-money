@@ -13,7 +13,7 @@ const pkg = JSON.parse(files.packageJson);
 const tspNav = '{ href: "/tsp", label: "Thrift Saving Plan", icon: Landmark }';
 const tspNavIndex = files.shell.indexOf(tspNav);
 const investIndex = files.shell.indexOf('label: "INVEST"');
-const planIndex = files.shell.indexOf('label: "PLAN"');
+const planIndex = files.shell.indexOf('label: "BUDGETING"');
 
 function atLeast174(version) {
   const [major = 0, minor = 0, patch = 0] = String(version)

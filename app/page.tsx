@@ -8,8 +8,10 @@ import {
   ShieldCheck,
   TrendingUp,
   TriangleAlert,
+  Upload,
 } from "lucide-react";
 import AllocationDonut from "@/components/AllocationDonut";
+import EmptyState from "@/components/EmptyState";
 import InteractiveLineChart from "@/components/InteractiveLineChart";
 import { getCashFlowIntelligence } from "@/lib/cash-flow-intelligence";
 import { dataAsOf, demoRefresh } from "@/lib/demo-data";
@@ -59,9 +61,19 @@ export default async function HomePage() {
         </div>
         <div className="asof">
           <strong>{persistent ? "Authenticated household" : dataAsOf}</strong>
-          <span>{persistent ? "Supabase-backed Money data" : `Money refresh · ${demoRefresh}`}</span>
+          <span>{persistent ? "Private local database" : `Money refresh · ${demoRefresh}`}</span>
         </div>
       </div>
+
+      {!data.accounts.length && !data.holdings.length && !data.transactions.length ? (
+        <EmptyState
+          icon={Upload}
+          title="Welcome to Solpient Money"
+          copy="Import your first bank or brokerage file and this dashboard comes alive — net worth, cash flow, budgets, and investments."
+          actionHref="/connect"
+          actionLabel="Import your first file"
+        />
+      ) : null}
 
       <div className="dashboard-grid">
         <section className="card networth-card">

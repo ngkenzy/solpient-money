@@ -1,9 +1,34 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Search } from "lucide-react";
+import { Download, Search } from "lucide-react";
 import type { Transaction } from "@/lib/demo-data";
 import { money } from "@/lib/finance";
+
+function csvCell(value: string | number): string {
+  const text = String(value ?? "");
+  return /[",\n]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
+}
+
+function downloadCsv(filename: string, rows: Transaction[]) {
+  const header = ["Date", "Description", "Category", "Account", "Type", "Amount"];
+  const lines = rows.map((t) =>
+    [t.date, t.merchant, t.category, t.account, t.type, Number(t.amount).toFixed(2)]
+      .map(csvCell)
+      .join(",")
+  );
+  const blob = new Blob([[header.join(","), ...lines].join("\n")], {
+    type: "text/csv;charset=utf-8",
+  });
+  const url = URL.createObjectURL(blob);
+  const anchor = document.createElement("a");
+  anchor.href = url;
+  anchor.download = filename;
+  document.body.appendChild(anchor);
+  anchor.click();
+  anchor.remove();
+  URL.revokeObjectURL(url);
+}
 
 export default function TransactionsExplorer({ transactions }: { transactions: Transaction[] }) {
   const [query, setQuery] = useState("");
@@ -56,6 +81,19 @@ export default function TransactionsExplorer({ transactions }: { transactions: T
       <div className="table-summary">
         <span>{filtered.length} transactions</span>
         <span>Net selected activity <strong className={total >= 0 ? "positive-text" : "negative-text"}>{money(total, true)}</strong></span>
+        <button
+          type="button"
+          className="text-button"
+          onClick={() =>
+            downloadCsv(
+              `solpient-transactions-${new Date().toISOString().slice(0, 10)}.csv`,
+              filtered
+            )
+          }
+          title="Download the currently filtered transactions as CSV"
+        >
+          <Download size={14} /> Export CSV
+        </button>
       </div>
 
       <div className="data-table transaction-table">
