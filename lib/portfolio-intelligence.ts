@@ -54,6 +54,42 @@ export type PortfolioIntelligenceReport = {
   watchCount: number;
 };
 
+
+/**
+ * Combine per-account holdings into one row per ticker so lists keyed by
+ * ticker never render duplicates. Values, cost basis, and share counts are
+ * summed; returns are value-weighted; descriptive fields come from the first
+ * occurrence.
+ */
+export function aggregateHoldingsByTicker(holdings: Holding[]): Holding[] {
+  const grouped = new Map<
+    string,
+    { base: Holding; ytdWeighted: number; dayWeighted: number }
+  >();
+  for (const holding of holdings) {
+    const key = holding.ticker.toUpperCase();
+    const existing = grouped.get(key);
+    if (!existing) {
+      grouped.set(key, {
+        base: { ...holding },
+        ytdWeighted: holding.ytdReturn * holding.value,
+        dayWeighted: holding.dayChange * holding.value,
+      });
+    } else {
+      existing.base.value += holding.value;
+      existing.base.costBasis += holding.costBasis;
+      existing.base.shares += holding.shares;
+      existing.ytdWeighted += holding.ytdReturn * holding.value;
+      existing.dayWeighted += holding.dayChange * holding.value;
+    }
+  }
+  return [...grouped.values()].map(({ base, ytdWeighted, dayWeighted }) => ({
+    ...base,
+    ytdReturn: base.value > 0 ? ytdWeighted / base.value : base.ytdReturn,
+    dayChange: base.value > 0 ? dayWeighted / base.value : base.dayChange,
+  }));
+}
+
 function positionIntelligence(
   holding: Holding,
   totalPortfolioValue: number,
@@ -120,7 +156,9 @@ export function buildPortfolioIntelligence(
       0
     );
 
-  const positions = directStocks
+  const aggregatedStocks = aggregateHoldingsByTicker(directStocks);
+
+  const positions = aggregatedStocks
     .map((holding) =>
       positionIntelligence(
         holding,

@@ -6,7 +6,10 @@ import InteractiveLineChart from "@/components/InteractiveLineChart";
 import PageHeader from "@/components/PageHeader";
 import { getPortfolioMetrics, money } from "@/lib/finance";
 import { requireMoneyDataset } from "@/lib/money-data";
-import { buildPortfolioIntelligence } from "@/lib/portfolio-intelligence";
+import {
+  aggregateHoldingsByTicker,
+  buildPortfolioIntelligence,
+} from "@/lib/portfolio-intelligence";
 
 export const dynamic = "force-dynamic";
 
@@ -15,6 +18,7 @@ export default async function PortfolioPage() {
   const data = context.dataset;
   const metrics = getPortfolioMetrics(data);
   const portfolioIntelligence = buildPortfolioIntelligence(data);
+  const holdings = aggregateHoldingsByTicker(data.holdings);
 
   if (!data.holdings.length) {
     return (
@@ -91,7 +95,7 @@ export default async function PortfolioPage() {
           <div className="table-row table-head-row">
             <span>Holding</span><span>Value</span><span>Weight</span><span>YTD</span>
           </div>
-          {data.holdings.map((holding) => {
+          {holdings.map((holding) => {
             const weight = metrics.total ? (holding.value / metrics.total) * 100 : 0;
             return (
               <Link className="table-row table-link" href={`/portfolio/${holding.ticker.toLowerCase()}`} key={holding.ticker}>
