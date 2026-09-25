@@ -25,7 +25,7 @@ export default async function GoalsPage() {
   return (
     <div className="page">
       <PageHeader
-        eyebrow="V1.1 · GOALS"
+        eyebrow="GOALS"
         title="Give every goal an amount and a date."
         description="Target dates let the Financial Plan Engine calculate the monthly contribution required to stay on pace. Undated goals remain visible but Solpient will not invent a deadline for them."
       />
@@ -137,8 +137,8 @@ export default async function GoalsPage() {
             <span className="card-kicker">NEW GOAL</span>
             <h2>Add another household objective</h2>
             <p className="empty-copy">
-              Priority uses smaller numbers first. A target date is optional, but dated goals can be
-              converted into a required monthly contribution by V1.1.
+              Priority uses smaller numbers first. A target date is optional, but dated goals are
+              converted into a required monthly contribution by the Financial Plan.
             </p>
           </div>
         </div>
@@ -173,8 +173,8 @@ export default async function GoalsPage() {
         <div className="plan-note">
           <CalendarClock size={15} />
           <span>
-            Goal edits automatically recalculate Financial Health and the V1.1 Plan
-            context on the next page load.
+            Goal edits automatically recalculate Financial Health and the
+            Financial Plan context on the next page load.
           </span>
         </div>
       </section>

@@ -581,3 +581,41 @@ export async function getCashFlowIntelligence(): Promise<CashFlowIntelligence> {
     transactionCount: transactions.length,
   };
 }
+
+export type MonthlyCategoryActuals = {
+  /** Ascending "YYYY-MM" month keys with observed expense transactions. */
+  months: string[];
+  /** month -> category -> expense dollars (truth-engine categories, transfers and duplicates excluded). */
+  totals: Record<string, Record<string, number>>;
+};
+
+export async function getMonthlyCategoryActuals(): Promise<MonthlyCategoryActuals> {
+  const { supabase, householdId } = await requireActiveHousehold();
+
+  const { data, error } = await supabase
+    .from("transactions")
+    .select(
+      "id,posted_at,merchant,normalized_merchant,category,truth_category,amount_cents,transaction_type,source,duplicate_of_transaction_id,detected_transfer"
+    )
+    .eq("household_id", householdId)
+    .order("posted_at", { ascending: true })
+    .limit(5000);
+
+  if (error) {
+    throw new Error(`Budget actuals query failed: ${error.message}`);
+  }
+
+  const totals: Record<string, Record<string, number>> = {};
+
+  for (const transaction of cleanRows((data ?? []) as CashFlowRow[])) {
+    if (transaction.type !== "expense") continue;
+    const monthTotals = (totals[transaction.month] ??= {});
+    monthTotals[transaction.category] =
+      (monthTotals[transaction.category] ?? 0) + transaction.amount;
+  }
+
+  return {
+    months: Object.keys(totals).sort(),
+    totals,
+  };
+}
