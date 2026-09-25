@@ -5,15 +5,16 @@ import {
   CreditCard,
   Gauge,
   Landmark,
+  ShieldCheck,
   TrendingUp,
   TriangleAlert,
 } from "lucide-react";
 import AllocationDonut from "@/components/AllocationDonut";
-import AttentionFeed from "@/components/AttentionFeed";
 import InteractiveLineChart from "@/components/InteractiveLineChart";
+import { getCashFlowIntelligence } from "@/lib/cash-flow-intelligence";
 import { dataAsOf, demoRefresh } from "@/lib/demo-data";
 import { getFinancialSummary, getPortfolioMetrics, money } from "@/lib/finance";
-import { getAttentionFeed, getFinancialHealth } from "@/lib/intelligence";
+import { getFinancialHealth } from "@/lib/intelligence";
 import { requireMoneyDataset } from "@/lib/money-data";
 
 export const dynamic = "force-dynamic";
@@ -24,7 +25,8 @@ export default async function HomePage() {
   const summary = getFinancialSummary(data);
   const portfolio = getPortfolioMetrics(data);
   const health = getFinancialHealth(data);
-  const attention = getAttentionFeed(data);
+  const cashIntel = await getCashFlowIntelligence();
+  const spendingAlerts = cashIntel.alerts.slice(0, 4);
   const recent = data.transactions.slice(0, 5);
   const latestCashFlow = data.monthlyCashFlow.at(-1) ?? { label: "Current", income: 0, spending: 0 };
   const latestSaved = latestCashFlow.income - latestCashFlow.spending;
@@ -189,9 +191,36 @@ export default async function HomePage() {
 
       <section className="card homepage-attention">
         <div className="section-title-row">
-          <div><span className="card-kicker">WHAT DESERVES ATTENTION</span><h2>Household attention feed</h2></div>
+          <div><span className="card-kicker">WORTH A LOOK</span><h2>Spending alerts</h2></div>
+          <Link className="text-button" href="/cash-flow">Details <ArrowRight size={15} /></Link>
         </div>
-        <AttentionFeed items={attention} limit={4} />
+        {spendingAlerts.length ? (
+          <div className="cash-alert-list">
+            {spendingAlerts.map((alert) => (
+              <div className={`cash-alert-row ${alert.level}`} key={alert.id}>
+                <span className="cash-alert-icon">
+                  <TriangleAlert size={15} />
+                </span>
+                <div>
+                  <strong>{alert.title}</strong>
+                  <span>
+                    {alert.detail}
+                    {alert.date ? ` · ${alert.date}` : ""}
+                  </span>
+                </div>
+                <strong>{money(alert.amount)} above baseline</strong>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="cash-empty roomy">
+            <ShieldCheck size={29} />
+            <strong>No unusual spending signals</strong>
+            <span>
+              Solpient compared recent category and merchant spending with your own history.
+            </span>
+          </div>
+        )}
       </section>
 
       <div className="bottom-note">
