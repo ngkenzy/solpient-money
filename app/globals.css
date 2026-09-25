@@ -3508,8 +3508,6 @@ a {
   }
 }
 
-
-/* V0.6 Plaid Sandbox */
 .ofx-config-card {
   display: grid;
   grid-template-columns: 36px minmax(0, 1fr);
@@ -3555,148 +3553,6 @@ a {
   font-size: 8px;
 }
 
-.plaid-connect-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 14px;
-  margin-bottom: 14px;
-}
-
-.plaid-connect-grid .page-card {
-  margin: 0;
-}
-
-.plaid-connect-block {
-  min-height: 160px;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-}
-
-.plaid-connect-title {
-  display: grid;
-  grid-template-columns: 38px 1fr;
-  gap: 10px;
-  align-items: start;
-}
-
-.plaid-connect-title > span {
-  width: 36px;
-  height: 36px;
-  border-radius: 10px;
-  display: grid;
-  place-items: center;
-  color: #2f6aa4;
-  background: #eaf2fb;
-}
-
-.plaid-connect-title > div {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-}
-
-.plaid-connect-title strong {
-  font-size: 12px;
-}
-
-.plaid-connect-title small {
-  color: #6e8095;
-  font-size: 8px;
-  line-height: 1.5;
-}
-
-.plaid-connect-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-top: 22px;
-}
-
-.plaid-primary,
-.plaid-secondary,
-.plaid-row-actions button {
-  min-height: 34px;
-  border-radius: 7px;
-  padding: 0 11px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  font: inherit;
-  font-size: 8px;
-  font-weight: 800;
-  cursor: pointer;
-}
-
-.plaid-primary {
-  border: 0;
-  color: white;
-  background: #155fae;
-}
-
-.plaid-secondary,
-.plaid-row-actions button {
-  border: 1px solid #d7e0ea;
-  color: #43607d;
-  background: white;
-}
-
-.plaid-primary:disabled,
-.plaid-secondary:disabled,
-.plaid-row-actions button:disabled {
-  cursor: not-allowed;
-  opacity: .48;
-}
-
-.plaid-action-message {
-  margin: 9px 0 0;
-  color: #61768d;
-  font-size: 8px;
-}
-
-.plaid-connection-list {
-  margin-top: 12px;
-}
-
-.plaid-connection-row {
-  position: relative;
-  display: grid;
-  grid-template-columns: 38px minmax(190px, 1fr) 150px auto;
-  gap: 12px;
-  align-items: center;
-  min-height: 72px;
-  padding: 12px 2px;
-  border-top: 1px solid #e7edf3;
-}
-
-.plaid-institution-icon {
-  width: 34px;
-  height: 34px;
-  border-radius: 9px;
-  display: grid;
-  place-items: center;
-  color: #2f699f;
-  background: #edf4fb;
-}
-
-.plaid-connection-main,
-.plaid-connection-status {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.plaid-connection-main strong {
-  font-size: 10px;
-}
-
-.plaid-connection-main span,
-.plaid-connection-status small {
-  color: #72849a;
-  font-size: 8px;
-}
-
 .connection-status {
   width: fit-content;
   padding: 4px 7px;
@@ -3725,36 +3581,6 @@ a {
 .connection-status.disconnected {
   color: #697b91;
   background: #eef2f6;
-}
-
-.plaid-row-actions {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: flex-end;
-  gap: 6px;
-}
-
-.plaid-row-actions .danger {
-  color: #a24a50;
-  border-color: #edcfd2;
-  background: #fff8f8;
-}
-
-.plaid-row-actions small {
-  flex-basis: 100%;
-  max-width: 260px;
-  color: #a24a50;
-  font-size: 7px;
-  text-align: right;
-  line-height: 1.4;
-}
-
-.plaid-row-error {
-  grid-column: 2 / -1;
-  margin: -4px 0 3px;
-  color: #a14a50;
-  font-size: 8px;
-  line-height: 1.45;
 }
 
 .empty-connection-state {
@@ -3819,27 +3645,8 @@ a {
 }
 
 @media (max-width: 880px) {
-  .plaid-connect-grid,
   .ofx-security-grid {
     grid-template-columns: 1fr;
-  }
-
-  .plaid-connection-row {
-    grid-template-columns: 38px 1fr;
-  }
-
-  .plaid-connection-status,
-  .plaid-row-actions {
-    grid-column: 2;
-    justify-content: flex-start;
-  }
-
-  .plaid-row-actions small {
-    text-align: left;
-  }
-
-  .plaid-row-error {
-    grid-column: 2;
   }
 }
 
@@ -3912,68 +3719,6 @@ a {
   line-height: 1.45;
 }
 
-.plaid-auto-refresh {
-  display: grid;
-  grid-template-columns: 24px minmax(0, 1fr) auto;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 14px;
-  padding: 10px 12px;
-  border: 1px solid #dde6ef;
-  border-radius: 10px;
-  background: #f9fbfd;
-  color: #5e7389;
-}
-
-.plaid-auto-refresh > div {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.plaid-auto-refresh strong {
-  color: #425e79;
-  font-size: 8px;
-}
-
-.plaid-auto-refresh span {
-  font-size: 7px;
-}
-
-.plaid-auto-refresh.ok {
-  border-color: #cee7db;
-  background: #f5fbf8;
-}
-
-.plaid-auto-refresh.error {
-  border-color: #efcfd2;
-  background: #fff8f8;
-}
-
-.plaid-auto-refresh button {
-  min-height: 30px;
-  padding: 0 10px;
-  border: 1px solid #d7e0ea;
-  border-radius: 7px;
-  background: white;
-  color: #46617d;
-  font: inherit;
-  font-size: 7px;
-  font-weight: 800;
-  cursor: pointer;
-}
-
-.plaid-auto-refresh button:disabled {
-  cursor: not-allowed;
-  opacity: .5;
-}
-
-.plaid-row-actions .repair {
-  color: #8b5a16;
-  border-color: #efd18e;
-  background: #fffaf0;
-}
-
 @media (max-width: 780px) {
   .topbar-product-group {
     gap: 6px;
@@ -3982,15 +3727,6 @@ a {
   .global-sandbox-badge {
     padding: 4px 6px;
     font-size: 6px;
-  }
-
-  .plaid-auto-refresh {
-    grid-template-columns: 22px 1fr;
-  }
-
-  .plaid-auto-refresh button {
-    grid-column: 2;
-    justify-self: start;
   }
 
   .sandbox-warning {
@@ -5315,14 +5051,6 @@ a {
   flex: 0 0 auto;
 }
 
-.direct-ofx-action-error {
-  display: flex;
-  align-items: flex-start;
-  gap: 5px;
-  color: #9b4650;
-  font-size: 7px;
-  line-height: 1.4;
-}
 
 @media (max-width: 1050px) {
   .direct-ofx-row {

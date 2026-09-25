@@ -44,9 +44,7 @@ const checks = [
   [
     "Connect delete endpoint requires prior undo",
     files.connectDelete.includes('batch.status === "imported"') &&
-      files.connectDelete.includes(
-        "Undo this import before permanently deleting"
-      ),
+      files.connectDelete.includes("requiresUndo: true"),
   ],
   [
     "permanent Connect delete removes batch history",

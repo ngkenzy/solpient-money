@@ -14,10 +14,6 @@ const files = {
     "components/ImportHistoryActions.tsx",
     "utf8"
   ),
-  undoButton: await readFile(
-    "components/UndoImportButton.tsx",
-    "utf8"
-  ),
   tspDelete: await readFile(
     "components/DeleteTspImportButton.tsx",
     "utf8"
@@ -56,7 +52,6 @@ function atLeast204(version) {
 
 const actionComponents = [
   ["ImportHistoryActions", files.historyActions],
-  ["UndoImportButton", files.undoButton],
   ["DeleteTspImportButton", files.tspDelete],
   ["DirectOfxConnectionActions", files.ofxActions],
   ["ImportActionConfirm", files.confirm],
@@ -77,7 +72,6 @@ const twoClickPattern = actionComponents
 
 const alertUsage = [
   files.historyActions,
-  files.undoButton,
   files.tspDelete,
   files.ofxActions,
 ].every(
@@ -107,7 +101,6 @@ const checks = [
     "shared ImportActionConfirm panel used everywhere",
     [
       files.historyActions,
-      files.undoButton,
       files.tspDelete,
       files.ofxActions,
     ].every((source) =>

@@ -349,7 +349,7 @@ export default function DirectOfxSetupForm({
                     </>
                   ) : (
                     <span>
-                      Use Files now · OAuth/FDX later
+                      Use Files for this bank
                     </span>
                   )}
                 </div>
