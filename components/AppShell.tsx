@@ -16,7 +16,6 @@ import {
   ListChecks,
   PlugZap,
   List,
-  Search,
   Settings,
   ShieldCheck,
   Wallet,
@@ -126,10 +125,6 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
           </div>
 
           <div className="top-actions">
-            <div className="searchbox" aria-label="Global search placeholder">
-              <Search size={16} />
-              <span>Search...</span>
-            </div>
             <div className="profile">
               <span className="avatar">SM</span>
               <span>Money Household</span>
