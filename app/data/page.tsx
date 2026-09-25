@@ -3,6 +3,7 @@ import { readdir, stat } from "node:fs/promises";
 import path from "node:path";
 import { Database, LogOut, PlusCircle, ShieldAlert, ShieldCheck } from "lucide-react";
 import PageHeader from "@/components/PageHeader";
+import DataBackupActions from "@/components/DataBackupActions";
 import { requireMoneyDataset } from "@/lib/money-data";
 import { money } from "@/lib/finance";
 import {
@@ -87,7 +88,8 @@ export default async function DataPage() {
       </section>
 
       {backup ? (
-        <section className="card page-card data-status-card">
+        <section className="card page-card data-backup-card">
+          <div className="data-status-card">
           {backup.state === "healthy" ? <ShieldCheck size={22} /> : <ShieldAlert size={22} />}
           <div>
             <strong>
@@ -98,14 +100,16 @@ export default async function DataPage() {
             </strong>
             <span>
               {backup.state === "healthy" && "Your encrypted backup is current. Local-first means you own the backup — keep a copy off this Mac."}
-              {backup.state === "stale" && "Over 30 days since your last backup. Run npm run local:backup in the app folder today."}
-              {backup.state === "never" && "This Mac holds the only copy of your data. Run npm run local:backup in the app folder to create your first encrypted backup."}
+              {backup.state === "stale" && "Over 30 days since your last backup. Create a fresh encrypted backup below."}
+              {backup.state === "never" && "This Mac holds the only copy of your data. Create your first encrypted backup below."}
               {backup.state === "unknown" && "Could not read the backups directory."}
             </span>
           </div>
           {backup.state === "stale" || backup.state === "never" ? (
             <span className="live-pill disconnected">BACKUP NEEDED</span>
           ) : null}
+          </div>
+          <DataBackupActions />
         </section>
       ) : null}
 

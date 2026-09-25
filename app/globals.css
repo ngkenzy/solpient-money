@@ -3272,6 +3272,46 @@ a {
   font-size: 9px;
 }
 
+.data-backup-card {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.data-backup-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.data-backup-buttons {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.data-backup-buttons button {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.data-backup-notice {
+  margin: 0;
+  color: #1e7a4c;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
 .data-form-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
