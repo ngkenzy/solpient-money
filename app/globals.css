@@ -10780,3 +10780,279 @@ a {
   color: #1e6fb8;
   font-weight: 700;
 }
+
+/* ================= Cool pack: motion + command palette ================= */
+
+.negative-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 4px;
+  color: #c04a4e;
+  font-size: 12px;
+}
+
+.negative-row span {
+  color: #697b92;
+}
+
+.hero-value,
+.mini-head h3 {
+  font-variant-numeric: tabular-nums;
+}
+
+.card {
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 28px rgba(33, 57, 87, 0.09);
+}
+
+.side-item {
+  transition: background-color 0.15s ease, color 0.15s ease, transform 0.15s ease;
+}
+
+.side-item:hover {
+  transform: translateX(2px);
+}
+
+.side-item.active:hover {
+  transform: none;
+}
+
+.text-button,
+.icon-button,
+.periods button {
+  transition: background-color 0.15s ease, color 0.15s ease, transform 0.12s ease;
+}
+
+.text-button:active,
+.icon-button:active,
+.periods button:active {
+  transform: scale(0.96);
+}
+
+.workspace > * {
+  animation: page-in 0.32s ease both;
+}
+
+@keyframes page-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* ---- Command palette ---- */
+
+.cmdk-trigger {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: calc(100% - 32px);
+  margin: 2px 16px 12px;
+  padding: 9px 12px;
+  border-radius: 9px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.06);
+  color: #c9d6e5;
+  font-size: 13px;
+  cursor: pointer;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.cmdk-trigger:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.22);
+}
+
+.cmdk-trigger kbd {
+  margin-left: auto;
+  font-family: inherit;
+  font-size: 11px;
+  padding: 2px 7px;
+  border-radius: 5px;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+}
+
+.cmdk-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 12vh 16px 16px;
+  background: rgba(8, 25, 47, 0.45);
+  animation: cmdk-in 0.15s ease;
+}
+
+.cmdk-panel {
+  width: min(560px, 100%);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  box-shadow: 0 24px 70px rgba(8, 25, 47, 0.28);
+  overflow: hidden;
+}
+
+.cmdk-input-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--line);
+  color: var(--muted);
+}
+
+.cmdk-input {
+  flex: 1;
+  border: 0;
+  outline: 0;
+  font-size: 15px;
+  background: transparent;
+  color: var(--ink);
+}
+
+.cmdk-input-row kbd,
+.cmdk-footer kbd {
+  font-family: inherit;
+  font-size: 11px;
+  padding: 2px 7px;
+  border-radius: 5px;
+  background: #eef2f7;
+  border: 1px solid var(--line);
+  color: var(--muted);
+}
+
+.cmdk-list {
+  max-height: 340px;
+  overflow-y: auto;
+  padding: 8px;
+}
+
+.cmdk-section-label {
+  padding: 8px 12px 4px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.cmdk-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  text-align: left;
+  padding: 10px 12px;
+  border: 0;
+  border-radius: 9px;
+  background: transparent;
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.cmdk-item.active {
+  background: #e8f0fb;
+}
+
+.cmdk-item-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: #eef3f9;
+  color: #1e6fb8;
+  flex: none;
+}
+
+.cmdk-item-text {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+
+.cmdk-item-text strong {
+  font-size: 14px;
+  font-weight: 650;
+}
+
+.cmdk-item-text span {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.cmdk-go {
+  margin-left: auto;
+  color: var(--muted);
+  font-size: 13px;
+  opacity: 0;
+}
+
+.cmdk-item.active .cmdk-go {
+  opacity: 1;
+}
+
+.cmdk-empty {
+  padding: 26px 16px;
+  text-align: center;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.cmdk-footer {
+  display: flex;
+  gap: 16px;
+  padding: 10px 16px;
+  border-top: 1px solid var(--line);
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.cmdk-footer span {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+@keyframes cmdk-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .workspace > *,
+  .cmdk-backdrop {
+    animation: none !important;
+  }
+
+  .card,
+  .side-item,
+  .text-button,
+  .icon-button,
+  .periods button,
+  .cmdk-trigger {
+    transition: none !important;
+  }
+
+  .card:hover,
+  .side-item:hover {
+    transform: none;
+  }
+}

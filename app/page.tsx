@@ -6,11 +6,13 @@ import {
   Gauge,
   Landmark,
   ShieldCheck,
+  TrendingDown,
   TrendingUp,
   TriangleAlert,
   Upload,
 } from "lucide-react";
 import AllocationDonut from "@/components/AllocationDonut";
+import CountUp from "@/components/CountUp";
 import EmptyState from "@/components/EmptyState";
 import InteractiveLineChart from "@/components/InteractiveLineChart";
 import { getCashFlowIntelligence } from "@/lib/cash-flow-intelligence";
@@ -42,6 +44,19 @@ export default async function HomePage() {
   const healthScore = health.score;
   const healthMax = health.components.reduce((sum, item) => sum + item.maxScore, 0);
   const persistent = context.source === "database";
+
+  // Real net-worth trend from the daily snapshots (needs at least 2 days).
+  const netWorthTrend = (() => {
+    if (!persistent || data.netWorthSeries.length < 2) return null;
+    const first = data.netWorthSeries[0];
+    const last = data.netWorthSeries[data.netWorthSeries.length - 1];
+    const delta = last.value - first.value;
+    return {
+      delta,
+      pct: first.value !== 0 ? (delta / Math.abs(first.value)) * 100 : 0,
+      since: first.label,
+    };
+  })();
 
   if (persistent) {
     // Record today's net-worth snapshot so the history chart grows daily.
@@ -87,12 +102,20 @@ export default async function HomePage() {
           <div className="card-head">
             <div>
               <span className="card-kicker">NET WORTH</span>
-              <div className="hero-value">{money(summary.netWorth)}</div>
-              <div className="positive-row">
-                <TrendingUp size={18} />
-                <strong>{persistent ? "Persistent" : "+12.7%"}</strong>
-                <span>{persistent ? "household balance sheet" : "illustrative year to date"}</span>
-              </div>
+              <div className="hero-value"><CountUp value={summary.netWorth} /></div>
+              {netWorthTrend ? (
+                <div className={netWorthTrend.delta >= 0 ? "positive-row" : "negative-row"}>
+                  {netWorthTrend.delta >= 0 ? <TrendingUp size={18} /> : <TrendingDown size={18} />}
+                  <strong>{money(netWorthTrend.delta)} ({netWorthTrend.delta >= 0 ? "+" : ""}{netWorthTrend.pct.toFixed(1)}%)</strong>
+                  <span>since {netWorthTrend.since}</span>
+                </div>
+              ) : (
+                <div className="positive-row">
+                  <TrendingUp size={18} />
+                  <strong>{persistent ? "Persistent" : "+12.7%"}</strong>
+                  <span>{persistent ? "household balance sheet" : "illustrative year to date"}</span>
+                </div>
+              )}
             </div>
           </div>
           <InteractiveLineChart
@@ -127,7 +150,7 @@ export default async function HomePage() {
 
         <section className="card mini-card">
           <div className="mini-head">
-            <div><span className="card-kicker">ASSETS</span><h3>{money(summary.assets)}</h3></div>
+            <div><span className="card-kicker">ASSETS</span><h3><CountUp value={summary.assets} /></h3></div>
             <span className="mini-positive">{persistent ? "Persisted" : "Demo household"}</span>
           </div>
           <div className="stacked assets-stack">
@@ -142,7 +165,7 @@ export default async function HomePage() {
 
         <section className="card mini-card">
           <div className="mini-head">
-            <div><span className="card-kicker">LIABILITIES</span><h3>{money(summary.liabilities)}</h3></div>
+            <div><span className="card-kicker">LIABILITIES</span><h3><CountUp value={summary.liabilities} /></h3></div>
             <span className="mini-negative">{debtAccounts.length} debt account{debtAccounts.length === 1 ? "" : "s"}</span>
           </div>
           <div className="stacked liability-stack">
@@ -192,7 +215,7 @@ export default async function HomePage() {
 
         <section className="card investments-card">
           <div className="section-title-row">
-            <div><span className="card-kicker">INVESTMENTS</span><h2>{money(portfolio.total)}</h2></div>
+            <div><span className="card-kicker">INVESTMENTS</span><h2><CountUp value={portfolio.total} /></h2></div>
             <span className="mini-positive">{data.holdings.length} holdings</span>
           </div>
           <div className="investment-body">

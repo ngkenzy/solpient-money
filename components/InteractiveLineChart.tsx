@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useId, useMemo, useState } from "react";
 
 type Point = {
   label: string;
@@ -31,6 +31,34 @@ function formatValue(value: number, format: Series["format"]) {
   }
   if (format === "percent") return `${value >= 0 ? "+" : ""}${value.toFixed(1)}%`;
   return value.toLocaleString("en-US");
+}
+
+// Catmull-Rom spline rendered as cubic Bézier segments — smooths the
+// polyline without overshooting the way naive curve fitting can.
+export function buildSmoothPath(points: Array<[number, number]>): string {
+  if (points.length === 0) return "";
+  if (points.length === 1) return `M ${points[0][0]},${points[0][1]}`;
+  let d = `M ${points[0][0]},${points[0][1]}`;
+  for (let i = 0; i < points.length - 1; i += 1) {
+    const p0 = points[Math.max(0, i - 1)];
+    const p1 = points[i];
+    const p2 = points[i + 1];
+    const p3 = points[Math.min(points.length - 1, i + 2)];
+    const c1x = p1[0] + (p2[0] - p0[0]) / 6;
+    const c1y = p1[1] + (p2[1] - p0[1]) / 6;
+    const c2x = p2[0] - (p3[0] - p1[0]) / 6;
+    const c2y = p2[1] - (p3[1] - p1[1]) / 6;
+    d += ` C ${c1x.toFixed(2)},${c1y.toFixed(2)} ${c2x.toFixed(2)},${c2y.toFixed(2)} ${p2[0].toFixed(2)},${p2[1].toFixed(2)}`;
+  }
+  return d;
+}
+
+export function buildAreaPath(points: Array<[number, number]>, baseY: number): string {
+  if (points.length === 0) return "";
+  const line = buildSmoothPath(points);
+  const firstX = points[0][0].toFixed(2);
+  const lastX = points[points.length - 1][0].toFixed(2);
+  return `${line} L ${lastX},${baseY.toFixed(2)} L ${firstX},${baseY.toFixed(2)} Z`;
 }
 
 export default function InteractiveLineChart({
@@ -72,6 +100,8 @@ export default function InteractiveLineChart({
   const colors = ["#1769e0", "#8a99ad", "#2f8d68"];
   const activeIndex = hoverIndex ?? visible.length - 1;
   const activePoint = visible[activeIndex];
+  const gradientId = `nw-area-${useId().replace(/[^a-zA-Z0-9]/g, "")}`;
+  const baseY = height - padY;
 
   function onMouseMove(event: React.MouseEvent<SVGSVGElement>) {
     const rect = event.currentTarget.getBoundingClientRect();
@@ -117,6 +147,12 @@ export default function InteractiveLineChart({
         onMouseMove={onMouseMove}
         onMouseLeave={() => setHoverIndex(null)}
       >
+        <defs>
+          <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor={colors[0]} stopOpacity={0.25} />
+            <stop offset="100%" stopColor={colors[0]} stopOpacity={0} />
+          </linearGradient>
+        </defs>
         {[0.2, 0.5, 0.8].map((ratio) => (
           <line
             key={ratio}
@@ -128,19 +164,25 @@ export default function InteractiveLineChart({
           />
         ))}
         {series.map((item, seriesIndex) => {
-          const points = visible
-            .map((row, index) => `${xAt(index)},${yAt(Number(row[item.key] ?? 0))}`)
-            .join(" ");
+          const coords = visible.map(
+            (row, index) =>
+              [xAt(index), yAt(Number(row[item.key] ?? 0))] as [number, number]
+          );
+          const line = buildSmoothPath(coords);
           return (
-            <polyline
-              key={item.key}
-              points={points}
-              fill="none"
-              stroke={colors[seriesIndex % colors.length]}
-              strokeWidth={seriesIndex === 0 ? 3 : 2}
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
+            <g key={item.key}>
+              {seriesIndex === 0 ? (
+                <path d={buildAreaPath(coords, baseY)} fill={`url(#${gradientId})`} stroke="none" />
+              ) : null}
+              <path
+                d={line}
+                fill="none"
+                stroke={colors[seriesIndex % colors.length]}
+                strokeWidth={seriesIndex === 0 ? 3 : 2}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </g>
           );
         })}
         {activePoint ? (

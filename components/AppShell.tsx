@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import CommandPalette from "./CommandPalette";
 import {
   Activity,
   BarChart3,
@@ -108,6 +109,8 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
             </div>
           ))}
         </nav>
+
+        <CommandPalette />
 
         <div className="sidebar-footer">
           <div className="mountain-mark" />
