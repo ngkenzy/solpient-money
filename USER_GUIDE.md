@@ -20,7 +20,7 @@ Go to **Connect**. Drop in a CSV, QFX, or OFX from your bank, credit card, or br
 
 ## Investments
 
-**Portfolio** shows every holding with allocation and a heatmap. Click a position for detail — including a notes field for your own thinking (notes only; the app never trades).
+**Portfolio** shows every holding with allocation. Click a position for detail — including a notes field for your own thinking (notes only; the app never trades).
 
 **Budgeting → Financial Plan** runs the waterfall: emergency reserve first, then high-interest debt, then goals and investing, in priority order.
 

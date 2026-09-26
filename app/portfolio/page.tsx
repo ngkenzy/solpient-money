@@ -5,7 +5,6 @@ import EmptyState from "@/components/EmptyState";
 import PageHeader from "@/components/PageHeader";
 import RefreshPricesButton from "./RefreshPricesButton";
 import { getPortfolioMetrics, money } from "@/lib/finance";
-import HoldingsHeatmap from "@/components/HoldingsHeatmap";
 import { requireMoneyDataset } from "@/lib/money-data";
 import {
   aggregateHoldingsByTicker,
@@ -84,14 +83,6 @@ export default async function PortfolioPage() {
             </div>
           </div>
         </section>
-
-      <section className="card page-card" id="heatmap">
-        <div className="section-title-row">
-          <div><span className="card-kicker">HEATMAP</span><h2>Where your money sits</h2></div>
-          <span className="small-muted">Box size = position value · shade = today&apos;s change</span>
-        </div>
-        <HoldingsHeatmap holdings={holdings} />
-      </section>
 
       <section className="card page-card">
         <div className="section-title-row">
