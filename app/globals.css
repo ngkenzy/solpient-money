@@ -13,6 +13,10 @@
   --sky: #74ace8;
   --green: #42ad7a;
   --slate: #99a5b3;
+  --teal: #2a9d8f;
+  --purple: #7c5cd6;
+  --amber: #d9932c;
+  --stone: #c9d2dc;
   --red: #d9585c;
   --rose: #ee8d92;
   --orange: #ec941c;
@@ -498,6 +502,10 @@ button {
 .dot.sky { background: var(--sky); }
 .dot.green { background: var(--green); }
 .dot.slate { background: var(--slate); }
+.dot.teal { background: var(--teal); }
+.dot.purple { background: var(--purple); }
+.dot.amber { background: var(--amber); }
+.dot.stone { background: var(--stone); }
 .dot.red { background: var(--red); }
 .dot.rose { background: var(--rose); }
 

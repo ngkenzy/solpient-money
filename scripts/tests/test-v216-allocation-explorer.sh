@@ -59,14 +59,15 @@ echo "---- runtime: bucket classification ----"
 RUNTIME_OUT="$(node --experimental-strip-types --no-warnings -e "
 import('./lib/allocation-buckets.ts').then((m) => {
   const cases = [
-    [{ kind: 'stock', sector: 'Technology' }, 'U.S. equities'],
-    [{ kind: 'etf', sector: 'Real Estate' }, 'U.S. equities'],
-    [{ kind: 'stock', sector: 'International' }, 'International'],
-    [{ kind: 'etf', sector: 'International' }, 'International'],
-    [{ kind: 'bond', sector: 'Fixed Income' }, 'Bonds'],
-    [{ kind: 'cash', sector: 'Cash' }, 'Cash'],
-    [{ kind: 'stock', sector: 'Lifecycle' }, 'Other'],
-    [{ kind: 'etf', sector: 'Lifecycle' }, 'Other'],
+    [{ ticker: 'VFIAX', name: 'Vanguard 500 Index Fund', kind: 'etf', sector: 'Broad Market' }, 'U.S. Large Cap'],
+    [{ ticker: 'VIMAX', name: 'Vanguard Mid-Cap Index Fund', kind: 'etf', sector: 'Mid Cap' }, 'U.S. Mid Cap'],
+    [{ ticker: 'VSMAX', name: 'Vanguard Small-Cap Index Fund', kind: 'etf', sector: 'Small Cap' }, 'U.S. Small Cap'],
+    [{ ticker: 'VTSAX', name: 'Vanguard Total Stock Market Index', kind: 'etf', sector: 'Broad Market' }, 'U.S. Total Market'],
+    [{ ticker: 'VXUS', name: 'Vanguard Total International Stock ETF', kind: 'etf', sector: 'International' }, 'International'],
+    [{ ticker: 'BND', name: 'Vanguard Total Bond Market ETF', kind: 'etf', sector: 'Fixed Income' }, 'Bonds'],
+    [{ ticker: 'VMFXX', name: 'Vanguard Federal Money Market Fund', kind: 'cash', sector: 'Cash' }, 'Money Market'],
+    [{ ticker: 'CASH', name: 'Bank sweep', kind: 'cash', sector: 'Cash' }, 'Cash'],
+    [{ ticker: 'VFIFX', name: 'Vanguard Target Retirement 2050', kind: 'etf', sector: 'Lifecycle' }, 'Other'],
   ];
   let pass = 0, fail = 0;
   for (const [holding, expected] of cases) {
@@ -74,14 +75,15 @@ import('./lib/allocation-buckets.ts').then((m) => {
     else { fail++; console.log('MISMATCH', JSON.stringify(holding), '->', m.allocationBucketFor(holding)); }
   }
   const labels = m.ALLOCATION_BUCKETS.map((b) => b.label).join('|');
-  if (labels === 'U.S. equities|International|Bonds|Cash') pass++; else { fail++; console.log('ORDER', labels); }
+  const want = 'U.S. Large Cap|U.S. Mid Cap|U.S. Small Cap|U.S. Total Market|International|Bonds|Money Market|Cash';
+  if (labels === want) pass++; else { fail++; console.log('ORDER', labels); }
   console.log('runtime: ' + pass + ' passed, ' + fail + ' failed');
   process.exit(fail ? 1 : 0);
 });
 " 2>&1)"
 echo "$RUNTIME_OUT"
 if echo "$RUNTIME_OUT" | grep -q "0 failed"; then
-  PASS=$((PASS + 9)); ok "runtime checks counted (9)"
+  PASS=$((PASS + 10)); ok "runtime checks counted (10)"
 else
   FAIL=$((FAIL + 1)); bad "runtime bucket classification"
 fi
