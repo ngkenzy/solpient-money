@@ -11,6 +11,7 @@ import {
   addGoal,
   addHolding,
   addTransaction,
+  saveHousing,
   updateAccount,
   updatePlanning,
 } from "./actions";
@@ -56,6 +57,16 @@ export default async function DataPage() {
   const data = context.dataset;
   const persistent = context.source === "database";
   const backup = persistent ? await getBackupHealth() : null;
+
+  const propertyAccounts = data.accounts.filter((a) => a.type === "property");
+  const debtAccounts = data.accounts.filter((a) => a.type === "debt");
+  const homeAccount = propertyAccounts[0] ?? null;
+  const mortgageAccount =
+    debtAccounts.find((a) => /mortgage|home\s*loan/i.test(a.name)) ?? null;
+  const homeEquity =
+    homeAccount != null
+      ? homeAccount.balance - Math.abs(mortgageAccount?.balance ?? 0)
+      : null;
 
   return (
     <div className="page">
@@ -128,15 +139,11 @@ export default async function DataPage() {
                 <option value="property">Property</option>
                 <option value="debt">Debt</option>
               </select>
-              <input name="balance" type="number" step="0.01" placeholder="Balance (debt may be negative)" required />
+              <input name="balance" type="number" step="0.01" placeholder="Balance" required />
               <select name="owner_scope" defaultValue="Household">
                 <option>Household</option><option>Primary</option><option>Joint</option>
               </select>
               <input name="last_four" maxLength={8} placeholder="Last four / label" />
-              <div className="split-inputs">
-                <input name="apr" type="number" step="0.01" placeholder="APR % if debt" />
-                <input name="minimum_payment" type="number" step="0.01" placeholder="Minimum payment" />
-              </div>
               <button className="data-submit">Add account</button>
             </form>
 
@@ -197,30 +204,77 @@ export default async function DataPage() {
             </form>
           </div>
 
+          <section className="card page-card">
+            <div className="section-title-row">
+              <div><span className="card-kicker">HOUSING</span><h2>Home value & mortgage</h2></div>
+            </div>
+            <p className="small-muted">Both sides of your house in one place: what it&rsquo;s worth and what you still owe. Saving updates the matching property and debt accounts below — and your net worth everywhere.</p>
+            <form className="housing-form" action={saveHousing}>
+              <label><span>Home account</span>
+                <select name="home_account_id" defaultValue={homeAccount?.id ?? "new"}>
+                  {propertyAccounts.map((a) => (
+                    <option key={a.id} value={a.id}>{a.name} — {money(a.balance)}</option>
+                  ))}
+                  <option value="new">New home account</option>
+                </select>
+              </label>
+              <label><span>Mortgage account</span>
+                <select name="mortgage_account_id" defaultValue={mortgageAccount?.id ?? "new"}>
+                  <option value="none">No mortgage</option>
+                  {debtAccounts.map((a) => (
+                    <option key={a.id} value={a.id}>{a.name} — {money(a.balance)}</option>
+                  ))}
+                  <option value="new">New mortgage account</option>
+                </select>
+              </label>
+              <label><span>Home value</span>
+                <input name="home_value" type="number" min="0" step="0.01" defaultValue={homeAccount?.balance ?? ""} placeholder="What it's worth" required />
+              </label>
+              <label><span>Mortgage owed</span>
+                <input name="mortgage_balance" type="number" min="0" step="0.01" defaultValue={mortgageAccount ? Math.abs(mortgageAccount.balance) : ""} placeholder="Amount still owed" />
+              </label>
+              <label><span>Lender</span>
+                <input name="lender" defaultValue={mortgageAccount?.institution ?? homeAccount?.institution ?? ""} placeholder="Bank / servicer" />
+              </label>
+              <label><span>Mortgage APR %</span>
+                <input name="mortgage_apr" type="number" min="0" step="0.01" defaultValue={mortgageAccount?.apr ?? ""} placeholder="Rate" />
+              </label>
+              <label><span>Monthly payment</span>
+                <input name="mortgage_payment" type="number" min="0" step="0.01" defaultValue={mortgageAccount?.minimumPayment ?? ""} placeholder="PITI or P&I" />
+              </label>
+              <button className="data-submit">Save housing</button>
+            </form>
+            {homeEquity !== null ? (
+              <p className="housing-equity">Home equity <strong>{money(homeEquity)}</strong> <span className="small-muted">— value minus owed, counted in your net worth.</span></p>
+            ) : null}
+          </section>
+
           {data.accounts.length ? (
             <section className="card page-card">
               <div className="section-title-row">
-                <div><span className="card-kicker">ACCOUNTS</span><h2>Edit accounts</h2></div>
+                <div><span className="card-kicker">ACCOUNTS</span><h2>All accounts</h2></div>
               </div>
-              <p className="small-muted">Update a name or balance any time — for example, your home value or what you still owe on the mortgage. Debt balances are stored negative.</p>
-              <div className="data-form-grid">
+              <p className="small-muted">Tweak any account inline and save its row. Debt balances are stored negative.</p>
+              <div className="accounts-editor">
+                <div className="accounts-editor-head" aria-hidden="true">
+                  <span>Account</span><span>Type</span><span>Balance</span><span>Institution</span><span>Debt details</span><span></span>
+                </div>
                 {data.accounts.map((account) => (
-                  <form className="card data-form" action={updateAccount} key={account.id}>
+                  <form className="accounts-editor-row" action={updateAccount} key={account.id}>
                     <input type="hidden" name="id" value={account.id} />
-                    <div className="data-form-title"><strong>{account.name}</strong><span className="small-muted">{account.type}</span></div>
-                    <input name="name" defaultValue={account.name} placeholder="Account name" required />
-                    <input name="balance" type="number" step="0.01" defaultValue={account.balance} placeholder="Balance (debt stays negative)" required />
-                    <div className="split-inputs">
-                      <input name="institution" defaultValue={account.institution} placeholder="Institution" />
-                      <input name="last_four" defaultValue={account.lastFour} maxLength={8} placeholder="Last four / label" />
-                    </div>
+                    <input name="name" defaultValue={account.name} required aria-label={`${account.name} name`} />
+                    <span className="account-type-badge">{account.type}</span>
+                    <input name="balance" type="number" step="0.01" defaultValue={account.balance} required aria-label={`${account.name} balance`} />
+                    <input name="institution" defaultValue={account.institution} placeholder="Institution" aria-label={`${account.name} institution`} />
                     {account.type === "debt" ? (
-                      <div className="split-inputs">
-                        <input name="apr" type="number" step="0.01" defaultValue={account.apr ?? ""} placeholder="APR %" />
-                        <input name="minimum_payment" type="number" step="0.01" defaultValue={account.minimumPayment ?? ""} placeholder="Minimum payment" />
-                      </div>
-                    ) : null}
-                    <button className="data-submit">Save changes</button>
+                      <span className="split-inputs">
+                        <input name="apr" type="number" step="0.01" defaultValue={account.apr ?? ""} placeholder="APR %" aria-label={`${account.name} APR`} />
+                        <input name="minimum_payment" type="number" step="0.01" defaultValue={account.minimumPayment ?? ""} placeholder="Min payment" aria-label={`${account.name} minimum payment`} />
+                      </span>
+                    ) : (
+                      <span className="accounts-editor-na">—</span>
+                    )}
+                    <button className="data-submit">Save</button>
                   </form>
                 ))}
               </div>

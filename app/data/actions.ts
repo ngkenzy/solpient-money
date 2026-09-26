@@ -66,8 +66,14 @@ export async function updateAccount(formData: FormData) {
       name: text(formData, "name"),
       institution: text(formData, "institution") || "Manual",
       balance_cents: cents(normalizedBalance),
-      owner_scope: text(formData, "owner_scope") || "Household",
-      last_four: text(formData, "last_four") || null,
+      // Only touch owner_scope / last_four when the submitting form carries them,
+      // so compact editors that omit those fields don't wipe existing values.
+      ...(formData.has("owner_scope")
+        ? { owner_scope: text(formData, "owner_scope") || "Household" }
+        : {}),
+      ...(formData.has("last_four")
+        ? { last_four: text(formData, "last_four") || null }
+        : {}),
       apr_pct: current.account_type === "debt" ? num(formData, "apr", 0) : null,
       minimum_payment_cents:
         current.account_type === "debt" ? cents(num(formData, "minimum_payment", 0)) : null,
@@ -76,6 +82,73 @@ export async function updateAccount(formData: FormData) {
     .eq("household_id", householdId);
 
   if (error) throw new Error(error.message);
+  refresh();
+}
+
+export async function saveHousing(formData: FormData) {
+  const { supabase, householdId } = await requireActiveHousehold();
+  const homeValue = Math.abs(num(formData, "home_value"));
+  const mortgageOwed = Math.abs(num(formData, "mortgage_balance"));
+  const lender = text(formData, "lender");
+  const apr = num(formData, "mortgage_apr", 0);
+  const payment = num(formData, "mortgage_payment", 0);
+  const homeSelection = text(formData, "home_account_id");
+  const mortgageSelection = text(formData, "mortgage_account_id");
+
+  // --- Home value -> property account (positive balance) ---
+  if (homeSelection && homeSelection !== "new") {
+    const { error } = await supabase
+      .from("accounts")
+      .update({
+        balance_cents: cents(homeValue),
+        ...(lender ? { institution: lender } : {}),
+      })
+      .eq("id", homeSelection)
+      .eq("household_id", householdId)
+      .eq("account_type", "property");
+    if (error) throw new Error(error.message);
+  } else {
+    const { error } = await supabase.from("accounts").insert({
+      household_id: householdId,
+      name: "Home",
+      institution: lender || "Manual",
+      account_type: "property",
+      balance_cents: cents(homeValue),
+      owner_scope: "Household",
+    });
+    if (error) throw new Error(error.message);
+  }
+
+  // --- Mortgage owed -> debt account (negative balance) ---
+  if (mortgageSelection === "none") {
+    // No mortgage to track.
+  } else if (mortgageSelection && mortgageSelection !== "new") {
+    const { error } = await supabase
+      .from("accounts")
+      .update({
+        balance_cents: cents(-mortgageOwed),
+        ...(lender ? { institution: lender } : {}),
+        apr_pct: apr,
+        minimum_payment_cents: cents(payment),
+      })
+      .eq("id", mortgageSelection)
+      .eq("household_id", householdId)
+      .eq("account_type", "debt");
+    if (error) throw new Error(error.message);
+  } else if (mortgageOwed > 0) {
+    const { error } = await supabase.from("accounts").insert({
+      household_id: householdId,
+      name: "Mortgage",
+      institution: lender || "Manual",
+      account_type: "debt",
+      balance_cents: cents(-mortgageOwed),
+      owner_scope: "Household",
+      apr_pct: apr,
+      minimum_payment_cents: cents(payment),
+    });
+    if (error) throw new Error(error.message);
+  }
+
   refresh();
 }
 

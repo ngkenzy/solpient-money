@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# v220 — Edit accounts: updateAccount action + Data page edit section.
+# v220 — Edit accounts: updateAccount action + compact accounts editor on the Data page.
 set -euo pipefail
 
 PASS=0
@@ -21,14 +21,16 @@ PAGE="$ROOT/app/data/page.tsx"
 expect_grep "$ACTIONS" 'export async function updateAccount' "updateAccount exported"
 expect_grep "$ACTIONS" 'account_type === "debt" ? -Math.abs' "debt balances stay negative on update"
 expect_grep "$ACTIONS" '.eq("household_id", householdId)' "update scoped to household"
+expect_grep "$ACTIONS" 'formData.has("owner_scope")' "partial update keeps owner_scope when the form omits it"
 expect_grep "$ACTIONS" 'revalidatePath' "update revalidates pages"
 
 # ---------- Data page UI ----------
 expect_grep "$PAGE" 'updateAccount' "data page imports updateAccount"
-expect_grep "$PAGE" 'Edit accounts' "edit accounts section present"
-expect_grep "$PAGE" 'action={updateAccount}' "edit forms submit to updateAccount"
+expect_grep "$PAGE" 'All accounts' "accounts editor section present"
+expect_grep "$PAGE" 'accounts-editor-row' "compact row layout for accounts"
+expect_grep "$PAGE" 'action={updateAccount}' "editor rows submit to updateAccount"
 expect_grep "$PAGE" 'name="balance"' "balance field editable"
-expect_grep "$PAGE" 'account.type === "debt"' "debt accounts show APR/minimum payment fields"
+expect_grep "$PAGE" 'account.type === "debt"' "debt rows show APR/minimum payment fields"
 
 echo "----"
 echo "v220: $PASS passed, $FAIL failed"
