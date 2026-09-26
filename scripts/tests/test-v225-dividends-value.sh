@@ -58,6 +58,29 @@ print("REDIRECTSAFE=" + (",".join(bad_fns) if bad_fns else "ok"))
 EOF
 )
 if [ "$REDIRECTSAFE" = "REDIRECTSAFE=ok" ]; then ok "actions hoist household before try"; else bad "actions hoist household before try ($REDIRECTSAFE)"; fi
+# every table touched via .from("...") must be in the local-db client allowlist
+# (missing entries throw "Unknown Solpient table" at runtime)
+ALLOWLIST_CHECK=$(python3 - "$ROOT" << 'EOF'
+import re, os, sys
+root = sys.argv[1]
+client = open(os.path.join(root, "lib/local-db/client.ts")).read()
+m = re.search(r"new Set\(\[(.*?)\]\);", client, flags=re.S)
+allowed = set(re.findall(r'"([a-z_]+)"', m.group(1)))
+missing = set()
+for dirpath, _dirs, files in os.walk(root):
+    if any(skip in dirpath for skip in ("node_modules", ".next", ".git", "scripts/tests")):
+        continue
+    for f in files:
+        if not f.endswith((".ts", ".tsx")):
+            continue
+        src = open(os.path.join(dirpath, f)).read()
+        for t in re.findall(r'\.from\("([a-z_]+)"\)', src):
+            if t not in allowed:
+                missing.add(f"{f}:{t}")
+print("ALLOWLIST=" + (",".join(sorted(missing)) if missing else "ok"))
+EOF
+)
+if [ "$ALLOWLIST_CHECK" = "ALLOWLIST=ok" ]; then ok "all .from() tables in client allowlist"; else bad "tables missing from allowlist ($ALLOWLIST_CHECK)"; fi
 if grep -q '"/portfolio-intelligence"' "$ACTIONS"; then ok "action revalidates intelligence page"; else bad "action revalidates intelligence page"; fi
 if grep -q "dividend_cache" "$ACTIONS" && grep -q "value_snapshot_cache" "$ACTIONS"; then ok "action writes both caches"; else bad "action writes both caches"; fi
 
