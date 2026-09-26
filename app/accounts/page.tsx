@@ -99,7 +99,7 @@ export default async function AccountsPage() {
                       <strong>{account.name}</strong>
                       <span>
                         {account.institution} · •••• {account.lastFour}
-                        {account.source === "plaid" ? <em className="source-badge plaid-test">PLAID TEST</em> : account.source === "file" ? <em className="source-badge file-import">FILE IMPORT</em> : account.source === "ofx_direct" ? <em className="source-badge direct-ofx">DIRECT OFX</em> : account.source === "fdx" ? <em className="source-badge fdx-source">OAUTH / FDX</em> : null}
+                        {account.source === "plaid" ? <em className="source-badge plaid-test">PLAID TEST</em> : account.source === "file" ? <em className="source-badge file-import">FILE IMPORT</em> : account.source === "fdx" ? <em className="source-badge fdx-source">OAUTH / FDX</em> : null}
                       </span>
                     </div>
                     <span className="account-owner">{account.owner}</span>

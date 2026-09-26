@@ -18,8 +18,6 @@ Go to **Connect**. Drop in a CSV, QFX, or OFX from your bank, credit card, or br
 - Every row is fingerprinted: importing the same file twice never double-counts.
 - Review and confirm before anything is saved. Every import can be undone from the import history.
 
-**Direct OFX** (`/connect/ofx`): for supported institutions, sync directly instead of downloading files.
-
 ## Investments
 
 **Portfolio** shows every holding with allocation and performance vs. benchmark. Click a position for detail — including a notes field for your own thinking (notes only; the app never trades).

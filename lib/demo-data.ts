@@ -12,7 +12,7 @@ export type Account = {
   lastFour: string;
   apr?: number;
   minimumPayment?: number;
-  source?: "manual" | "demo" | "plaid" | "file" | "ofx_direct" | "fdx";
+  source?: "manual" | "demo" | "plaid" | "file" | "fdx";
 };
 
 export type Holding = {
@@ -26,7 +26,7 @@ export type Holding = {
   dayChange: number;
   ytdReturn: number;
   sector: string;
-  source?: "manual" | "demo" | "plaid" | "file" | "ofx_direct" | "fdx";
+  source?: "manual" | "demo" | "plaid" | "file" | "fdx";
 };
 
 export type Transaction = {
@@ -37,7 +37,7 @@ export type Transaction = {
   account: string;
   amount: number;
   type: "income" | "expense" | "transfer";
-  source?: "manual" | "demo" | "plaid" | "file" | "ofx_direct" | "fdx";
+  source?: "manual" | "demo" | "plaid" | "file" | "fdx";
 };
 
 export const dataAsOf = "September 21, 2026";

@@ -105,7 +105,7 @@ export default function TransactionsExplorer({ transactions }: { transactions: T
             <span>{transaction.date}</span>
             <strong className="transaction-description">
               <span>{transaction.merchant}</span>
-              {transaction.source === "plaid" ? <em className="source-badge plaid-test">PLAID TEST</em> : transaction.source === "file" ? <em className="source-badge file-import">FILE IMPORT</em> : transaction.source === "ofx_direct" ? <em className="source-badge direct-ofx">DIRECT OFX</em> : transaction.source === "fdx" ? <em className="source-badge fdx-source">OAUTH / FDX</em> : null}
+              {transaction.source === "plaid" ? <em className="source-badge plaid-test">PLAID TEST</em> : transaction.source === "file" ? <em className="source-badge file-import">FILE IMPORT</em> : transaction.source === "fdx" ? <em className="source-badge fdx-source">OAUTH / FDX</em> : null}
             </strong>
             <span><span className="category-pill">{transaction.category}</span></span>
             <span>{transaction.account}</span>

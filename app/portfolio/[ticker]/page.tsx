@@ -73,7 +73,7 @@ export default async function HoldingPage({
           <div><span>Cost basis</span><strong>{money(holding.costBasis)}</strong></div>
           <div><span>Current price</span><strong>{money(holding.price, true)}</strong></div>
           <div><span>Sector</span><strong>{holding.sector || "—"}</strong></div>
-          <div><span>Source</span><strong>{holding.source === "file" ? "File import" : holding.source === "ofx_direct" ? "Direct OFX" : holding.source}</strong></div>
+          <div><span>Source</span><strong>{holding.source === "file" ? "File import" : holding.source}</strong></div>
         </div>
       </section>
 

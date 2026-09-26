@@ -5,11 +5,9 @@ import type {
   SolpientConnectorAdapter,
 } from "@/lib/connect/sdk";
 import { fileConnector } from "@/lib/connect/adapters/file";
-import { directOfxConnector } from "@/lib/connect/adapters/direct-ofx";
 
 export const connectorRegistry = [
   fileConnector,
-  directOfxConnector,
 ] satisfies SolpientConnectorAdapter[];
 
 const byId = new Map<ConnectorId, SolpientConnectorAdapter>();

@@ -10,13 +10,7 @@
     "test:v04": "node scripts/test-v04-invariants.mjs",
     "test:v05": "node scripts/test-v05-invariants.mjs",
     "test:money": "node scripts/test-money-connection.mjs",
-    "test:connect": "node scripts/test-connect-v1.mjs",
     "test:connect-v11": "node scripts/test-connect-v11.mjs",
-    "test:connect-v12": "node scripts/test-connect-v12.mjs",
-    "test:connect-v13": "node scripts/test-connect-v13.mjs",
-    "test:connect-v131": "node scripts/test-connect-v131.mjs",
-    "test:connect-v132": "node scripts/test-connect-v131.mjs",
-    "test:connect-v133": "node scripts/test-connect-v131.mjs",
     "local:setup": "node scripts/local-setup.mjs",
     "local:migrate": "node scripts/local-db-init.mjs",
     "local:backup": "node scripts/local-backup.mjs",
@@ -56,8 +50,8 @@
     "test:v208": "node scripts/test-v208-net-worth-snapshots.mjs",
     "test:v209": "node scripts/test-v209-brokerage-imports.mjs",
     "test:v210": "node scripts/test-v210-market-price-refresh.mjs",
-    "test:v211": "node scripts/test-v211-vanguard-guided-connect.mjs",
-    "test:v212": "node scripts/test-v212-vanguard-file-import-guide.mjs"
+    "test:v212": "node scripts/test-v212-vanguard-file-import-guide.mjs",
+    "test:v213": "node scripts/test-v213-direct-ofx-removal.mjs"
   },
   "dependencies": {
     "lucide-react": "^0.468.0",

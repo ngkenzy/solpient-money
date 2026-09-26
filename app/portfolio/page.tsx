@@ -107,7 +107,7 @@ export default async function PortfolioPage() {
                   <strong>{holding.ticker}</strong>
                   <small>
                     {holding.name}
-                    {holding.source === "file" ? <em className="source-badge file-import">FILE IMPORT</em> : holding.source === "ofx_direct" ? <em className="source-badge direct-ofx">DIRECT OFX</em> : null}
+                    {holding.source === "file" ? <em className="source-badge file-import">FILE IMPORT</em> : null}
                   </small>
                 </span>
                 <strong>{money(holding.value)}</strong>

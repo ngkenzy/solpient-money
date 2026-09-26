@@ -208,8 +208,7 @@ export default function ConnectorRegistryPanel({
               <Cable size={25} />
               <strong>No connector instances yet</strong>
               <span>
-                Import a file or connect a Direct OFX institution to
-                create the first one.
+                Import a file to create the first one.
               </span>
             </div>
           ) : null}

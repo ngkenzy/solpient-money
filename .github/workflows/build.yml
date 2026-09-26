@@ -44,13 +44,7 @@ jobs:
       - run: npm run test:local
       - run: npm run test:v04
       - run: npm run test:v05
-      - run: npm run test:connect
       - run: npm run test:connect-v11
-      - run: npm run test:connect-v12
-      - run: npm run test:connect-v13
-      - run: npm run test:connect-v131
-      - run: npm run test:connect-v132
-      - run: npm run test:connect-v133
       - run: npm run test:v09
       - run: npm run test:v091
       - run: npm run test:v092
@@ -77,6 +71,6 @@ jobs:
       - run: npm run test:v208
       - run: npm run test:v209
       - run: npm run test:v210
-      - run: npm run test:v211
       - run: npm run test:v212
+      - run: npm run test:v213
       - run: npm run build

@@ -1,14 +1,11 @@
 import type { SolpientDbClient } from "@/lib/local-db/client";
 
-export type ConnectorId =
-  | "files"
-  | "ofx-direct";
+export type ConnectorId = "files";
 
 export type ConnectorKind =
   | "native"
   | "aggregator"
-  | "direct-api"
-  | "direct-legacy";
+  | "direct-api";
 
 export type ConnectorMaturity = "live" | "sandbox" | "future";
 

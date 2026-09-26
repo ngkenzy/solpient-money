@@ -15,7 +15,7 @@ People who want a clear picture of their money without handing their bank logins
 - **Budgeting** — Real monthly budgets per category with actuals tracked from your transactions, plus a financial plan waterfall for the bigger picture.
 - **TSP** — Thrift Savings Plan tracking with statement import and fund breakdowns (C, S, I, F, G).
 
-Plus the essentials: file import (CSV/QFX/OFX), Direct OFX bank sync, manual entry, encrypted local backups, and CSV export for your accountant.
+Plus the essentials: file import (CSV/QFX/OFX), manual entry, encrypted local backups, and CSV export for your accountant.
 
 ## Privacy: local-first by architecture, not by promise
 
@@ -59,7 +59,6 @@ Keep `.env.local` and at least one backup copy off the laptop. Without the backu
 ## Importing your data
 
 - **Files** (`/connect`): drag in CSV, QFX, or OFX from any bank or brokerage. The importer learns your bank's column layout, fingerprints every row, and re-importing the same file can never double-count. Every import is undoable.
-- **Direct OFX** (`/connect/ofx`): sync supported institutions directly.
 - **TSP** (`/tsp/import`): CSV-first statement import.
 - **Manual** (`/data`): add accounts, transactions, holdings, and goals by hand.
 
