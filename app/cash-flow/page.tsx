@@ -7,12 +7,14 @@ import {
   Repeat2,
   ShieldCheck,
   Sparkles,
+  TrendingUp,
   Wallet,
 } from "lucide-react";
 import InteractiveLineChart from "@/components/InteractiveLineChart";
 import PageHeader from "@/components/PageHeader";
 import { getCashFlowIntelligence } from "@/lib/cash-flow-intelligence";
 import { buildBillsRadar } from "@/lib/bills-radar";
+import { getSpendingDrift } from "@/lib/spending-drift";
 import { money } from "@/lib/finance";
 import { localCalendarDateKey } from "@/lib/local-calendar-date";
 
@@ -40,6 +42,7 @@ export default async function CashFlowPage() {
     intelligence.recurring,
     localCalendarDateKey()
   );
+  const drift = await getSpendingDrift();
   const recurringExpenses = intelligence.recurring.filter(
     (item) => item.kind !== "income"
   );
@@ -334,6 +337,87 @@ export default async function CashFlowPage() {
             <strong>No unusual spending signals in the latest month</strong>
             <span>
               Solpient compared current category and merchant spending with available household history.
+            </span>
+          </div>
+        )}
+      </section>
+
+      <section className="card page-card">
+        <div className="section-title-row">
+          <div>
+            <span className="card-kicker">SPENDING DRIFT</span>
+            <h2>Quiet increases worth a look</h2>
+            <p className="empty-copy">
+              Gradual merchant creep and brand-new spending patterns, compared
+              against your own history. Known recurring bills are covered by
+              Bills Radar instead.
+            </p>
+          </div>
+          <span className={"cash-alert-count" + (drift.length ? " active" : "")}>
+            {drift.length} signals
+          </span>
+        </div>
+
+        {drift.length ? (
+          <div className="drift-list">
+            {drift.map((signal) => (
+              <div className={`drift-row ${signal.level}`} key={signal.id}>
+                <span className="drift-icon">
+                  {signal.kind === "new" ? (
+                    <Sparkles size={15} />
+                  ) : (
+                    <TrendingUp size={15} />
+                  )}
+                </span>
+                <div className="drift-main">
+                  <strong>{signal.merchant}</strong>
+                  <span>
+                    {signal.category} · {signal.detail}
+                  </span>
+                  {signal.kind === "creep" ? (
+                    <span className="drift-bars">
+                      {signal.months.map((bar) => (
+                        <span className="drift-bar" key={bar.key}>
+                          <span
+                            className="drift-bar-fill"
+                            style={{
+                              height: `${Math.max(
+                                8,
+                                Math.round(
+                                  (bar.total /
+                                    Math.max(
+                                      1,
+                                      ...signal.months.map((m) => m.total)
+                                    )) *
+                                    100
+                                )
+                              )}%`,
+                            }}
+                          />
+                          <em>{bar.label}</em>
+                        </span>
+                      ))}
+                    </span>
+                  ) : null}
+                </div>
+                <div className="cash-recurring-amount">
+                  <strong>{money(signal.latest)}</strong>
+                  <span>
+                    {signal.baseline !== null
+                      ? `vs ${money(signal.baseline)} avg`
+                      : "in 45 days"}
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="cash-empty roomy">
+            <TrendingUp size={29} />
+            <strong>No creeping or new merchants detected</strong>
+            <span>
+              Spending with familiar merchants is holding steady against
+              its own history.
             </span>
           </div>
         )}
