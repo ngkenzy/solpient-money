@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import CommandPalette from "./CommandPalette";
+import ThemeToggle from "./ThemeToggle";
 import {
   Activity,
   BrainCircuit,
@@ -107,6 +108,10 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
         </nav>
 
         <CommandPalette />
+
+        <div className="sidebar-theme">
+          <ThemeToggle />
+        </div>
 
         <div className="sidebar-footer">
           <div className="mountain-mark" />

@@ -58,7 +58,8 @@
     "test:v219": "bash scripts/tests/test-v219-cap-tiers.sh",
     "test:v220": "bash scripts/tests/test-v220-edit-accounts.sh",
     "test:v221": "bash scripts/tests/test-v221-housing.sh",
-    "test:v222": "bash scripts/tests/test-v222-portfolio-equity.sh"
+    "test:v222": "bash scripts/tests/test-v222-portfolio-equity.sh",
+    "test:v223": "bash scripts/tests/test-v223-theme.sh"
   },
   "dependencies": {
     "lucide-react": "^0.468.0",

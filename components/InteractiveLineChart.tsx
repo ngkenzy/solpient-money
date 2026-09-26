@@ -97,7 +97,7 @@ export default function InteractiveLineChart({
   const yAt = (value: number) =>
     height - padY - ((value - low) / Math.max(high - low, 1)) * (height - padY * 2);
 
-  const colors = ["#1769e0", "#8a99ad", "#2f8d68"];
+  const colors = ["var(--chart-1)", "var(--chart-2)", "var(--chart-3)"];
   const activeIndex = hoverIndex ?? visible.length - 1;
   const activePoint = visible[activeIndex];
   const gradientId = `nw-area-${useId().replace(/[^a-zA-Z0-9]/g, "")}`;
@@ -149,8 +149,8 @@ export default function InteractiveLineChart({
       >
         <defs>
           <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor={colors[0]} stopOpacity={0.25} />
-            <stop offset="100%" stopColor={colors[0]} stopOpacity={0} />
+            <stop offset="0%" style={{ stopColor: colors[0] }} stopOpacity={0.25} />
+            <stop offset="100%" style={{ stopColor: colors[0] }} stopOpacity={0} />
           </linearGradient>
         </defs>
         {[0.2, 0.5, 0.8].map((ratio) => (
@@ -177,7 +177,7 @@ export default function InteractiveLineChart({
               <path
                 d={line}
                 fill="none"
-                stroke={colors[seriesIndex % colors.length]}
+                style={{ stroke: colors[seriesIndex % colors.length] }}
                 strokeWidth={seriesIndex === 0 ? 3 : 2}
                 strokeLinecap="round"
                 strokeLinejoin="round"
@@ -201,7 +201,7 @@ export default function InteractiveLineChart({
                 cy={yAt(Number(activePoint[item.key] ?? 0))}
                 r="5"
                 fill="white"
-                stroke={colors[seriesIndex % colors.length]}
+                style={{ stroke: colors[seriesIndex % colors.length] }}
                 strokeWidth="3"
               />
             ))}

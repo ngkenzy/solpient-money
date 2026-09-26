@@ -20,9 +20,11 @@ import {
   ShieldCheck,
   TrendingUp,
   Upload,
+  Moon,
   Wallet,
   WalletCards,
 } from "lucide-react";
+import { toggleTheme } from "./ThemeToggle";
 import type { LucideIcon } from "lucide-react";
 
 type PaletteItem = {
@@ -32,6 +34,7 @@ type PaletteItem = {
   keywords: string;
   icon: LucideIcon;
   section: string;
+  run?: () => void;
 };
 
 // Mirrors the AppShell nav plus deep-link actions. Keep in sync when nav changes.
@@ -54,6 +57,7 @@ const ITEMS: PaletteItem[] = [
   { label: "Refresh market prices", hint: "Portfolio", href: "/portfolio", keywords: "prices refresh yahoo quote update", icon: TrendingUp, section: "Actions" },
   { label: "Pull TSP prices", hint: "TSP", href: "/tsp", keywords: "tsp prices pull update funds", icon: RefreshCw, section: "Actions" },
   { label: "Download backup", hint: "Data", href: "/data", keywords: "backup download export encrypted restore", icon: Download, section: "Actions" },
+  { label: "Toggle dark mode", hint: "Theme", href: "", keywords: "dark mode light theme appearance toggle night", icon: Moon, section: "Actions", run: () => { toggleTheme(); } },
 ];
 
 function matches(item: PaletteItem, query: string): boolean {
@@ -103,6 +107,10 @@ export default function CommandPalette() {
 
   const go = (item: PaletteItem) => {
     setOpen(false);
+    if (item.run) {
+      item.run();
+      return;
+    }
     router.push(item.href);
   };
 
