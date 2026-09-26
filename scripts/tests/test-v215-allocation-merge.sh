@@ -20,6 +20,7 @@ expect_absent() { # file, pattern, label
 
 ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 PORTFOLIO="$ROOT/app/portfolio/page.tsx"
+EXPLORER="$ROOT/components/AllocationExplorer.tsx"
 SHELL="$ROOT/components/AppShell.tsx"
 PALETTE="$ROOT/components/CommandPalette.tsx"
 TSP_ACTIONS="$ROOT/app/tsp/actions.ts"
@@ -37,13 +38,13 @@ expect_absent "$PALETTE" 'BarChart3' "palette no longer imports BarChart3"
 
 # ---------- Content merged into the portfolio allocation section ----------
 expect_grep "$PORTFOLIO" 'id="allocation"' "portfolio keeps the allocation anchor"
-expect_grep "$PORTFOLIO" 'allocation-page-grid' "portfolio uses the two-column allocation grid"
-expect_grep "$PORTFOLIO" 'AllocationDonut' "portfolio renders the allocation donut"
+expect_grep "$PORTFOLIO" 'AllocationExplorer' "portfolio renders the allocation explorer"
+expect_absent "$PORTFOLIO" 'AllocationDonut' "portfolio no longer uses the static donut"
 expect_grep "$PORTFOLIO" 'By sector / sleeve' "portfolio includes sector exposures"
 expect_grep "$PORTFOLIO" 'bar-track' "portfolio renders exposure bars"
 expect_grep "$PORTFOLIO" 'bySector' "portfolio computes sector aggregation"
-expect_grep "$PORTFOLIO" 'money(classDollars)' "class list shows dollar values"
-expect_grep "$PORTFOLIO" '{item.value}% ·' "class list still shows percentages"
+expect_grep "$PORTFOLIO" 'alloc-exposures' "exposures sit below the explorer"
+expect_grep "$EXPLORER" '{item.value}% ·' "class list still shows percentages"
 
 # ---------- Palette still covers every remaining page ----------
 for href in '"/"' '"/accounts"' '"/connect"' '"/transactions"' '"/cash-flow"' '"/portfolio"' '"/portfolio-intelligence"' '"/performance"' '"/tsp"' '"/budget"' '"/plan"' '"/monitor"' '"/goals"' '"/data-health"' '"/data"'; do

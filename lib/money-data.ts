@@ -16,6 +16,11 @@ import {
   LOCAL_USER_EMAIL,
   LOCAL_USER_ID,
 } from "@/lib/local-db/config";
+import {
+  ALLOCATION_BUCKETS,
+  OTHER_BUCKET_LABEL,
+  OTHER_BUCKET_TONE,
+} from "@/lib/allocation-buckets";
 
 export type MoneyHousehold = {
   id: string;
@@ -107,44 +112,20 @@ function buildMonthlyCashFlow(transactions: Transaction[]) {
 
 function buildAllocation(holdings: Holding[]) {
   const total = holdings.reduce((sum, holding) => sum + holding.value, 0);
-  const buckets = [
-    {
-      label: "U.S. equities",
-      value: holdings
-        .filter(
-          (holding) =>
-            (holding.kind === "stock" || holding.kind === "etf") &&
-            holding.sector !== "International" &&
-            holding.sector !== "Lifecycle"
-        )
-        .reduce((sum, holding) => sum + holding.value, 0),
-      tone: "navy",
-    },
-    {
-      label: "International",
-      value: holdings
-        .filter((holding) => holding.sector === "International")
-        .reduce((sum, holding) => sum + holding.value, 0),
-      tone: "blue",
-    },
-    {
-      label: "Bonds",
-      value: holdings
-        .filter((holding) => holding.kind === "bond")
-        .reduce((sum, holding) => sum + holding.value, 0),
-      tone: "sky",
-    },
-    {
-      label: "Cash",
-      value: holdings
-        .filter((holding) => holding.kind === "cash")
-        .reduce((sum, holding) => sum + holding.value, 0),
-      tone: "green",
-    },
-  ];
+  const buckets = ALLOCATION_BUCKETS.map((bucket) => ({
+    label: bucket.label,
+    value: holdings
+      .filter(bucket.matches)
+      .reduce((sum, holding) => sum + holding.value, 0),
+    tone: bucket.tone,
+  }));
 
   const known = buckets.reduce((sum, item) => sum + item.value, 0);
-  buckets.push({ label: "Other", value: Math.max(0, total - known), tone: "slate" });
+  buckets.push({
+    label: OTHER_BUCKET_LABEL,
+    value: Math.max(0, total - known),
+    tone: OTHER_BUCKET_TONE,
+  });
 
   return buckets.map((item) => ({
     label: item.label,

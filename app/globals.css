@@ -11056,3 +11056,216 @@ a {
     transform: none;
   }
 }
+
+/* ---------- Allocation explorer (portfolio) ---------- */
+.alloc-explorer {
+  margin-top: 4px;
+}
+
+.alloc-explorer-top {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 44px;
+  align-items: center;
+  padding: 20px 12px 8px;
+}
+
+.alloc-donut-wrap {
+  position: relative;
+  width: 244px;
+  height: 244px;
+  flex: none;
+}
+
+.alloc-donut {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.alloc-seg {
+  cursor: pointer;
+  transition: opacity 0.22s ease;
+}
+
+.alloc-seg:hover {
+  filter: brightness(1.08);
+}
+
+.alloc-seg:focus-visible {
+  outline: 2px solid var(--blue);
+  outline-offset: 4px;
+}
+
+.alloc-donut-center {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  pointer-events: none;
+  text-align: center;
+  padding: 0 52px;
+}
+
+.alloc-donut-center strong {
+  font-size: 24px;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+
+.alloc-donut-center span {
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.4;
+}
+
+.alloc-legend {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.alloc-legend button {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  padding: 13px 16px;
+  border: 1px solid transparent;
+  border-radius: 12px;
+  background: transparent;
+  cursor: pointer;
+  text-align: left;
+  font-size: 15px;
+  color: inherit;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.alloc-legend button:hover {
+  background: #f1f6fc;
+}
+
+.alloc-legend button.is-active {
+  background: #eaf2fc;
+  border-color: var(--line);
+}
+
+.alloc-legend-label {
+  font-weight: 650;
+}
+
+.alloc-legend-values {
+  margin-left: auto;
+  font-variant-numeric: tabular-nums;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.alloc-legend button.is-active .alloc-legend-values {
+  color: var(--ink);
+  font-weight: 650;
+}
+
+.alloc-filter-panel {
+  margin-top: 18px;
+  border-top: 1px solid var(--line);
+  padding-top: 18px;
+  animation: page-in 0.25s ease;
+}
+
+.alloc-filter-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.alloc-filter-head strong {
+  font-size: 14px;
+  font-variant-numeric: tabular-nums;
+}
+
+.alloc-holdings {
+  display: flex;
+  flex-direction: column;
+}
+
+.alloc-holding-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  gap: 16px;
+  align-items: center;
+  padding: 11px 6px;
+  border-bottom: 1px solid var(--line);
+  color: inherit;
+  text-decoration: none;
+  border-radius: 8px;
+  transition: background 0.15s ease;
+}
+
+.alloc-holding-row:last-child {
+  border-bottom: none;
+}
+
+.alloc-holding-row:hover {
+  background: #f4f8fd;
+}
+
+.alloc-holding-row > strong,
+.alloc-holding-row > span:last-child {
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.alloc-holding-row > span:last-child {
+  color: var(--muted);
+  min-width: 56px;
+  text-align: right;
+}
+
+.alloc-exposures {
+  margin-top: 26px;
+  padding-top: 22px;
+  border-top: 1px solid var(--line);
+}
+
+.bar-grid.two-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  column-gap: 36px;
+}
+
+@media (max-width: 820px) {
+  .alloc-explorer-top {
+    grid-template-columns: 1fr;
+    justify-items: center;
+    gap: 20px;
+  }
+
+  .alloc-legend {
+    width: 100%;
+  }
+
+  .bar-grid.two-col {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .alloc-seg,
+  .alloc-legend button,
+  .alloc-holding-row {
+    transition: none !important;
+  }
+
+  .alloc-filter-panel {
+    animation: none !important;
+  }
+}

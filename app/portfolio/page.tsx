@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { ArrowRight, BriefcaseBusiness, CheckCircle2, TriangleAlert } from "lucide-react";
-import AllocationDonut from "@/components/AllocationDonut";
+import AllocationExplorer from "@/components/AllocationExplorer";
 import EmptyState from "@/components/EmptyState";
 import InteractiveLineChart from "@/components/InteractiveLineChart";
 import PageHeader from "@/components/PageHeader";
@@ -80,32 +80,23 @@ export default async function PortfolioPage() {
         <section className="card page-card" id="allocation">
           <div className="section-title-row">
             <div><span className="card-kicker">ALLOCATION</span><h2>Asset mix</h2></div>
+            <span className="small-muted">Select a class to see its positions</span>
           </div>
-          <div className="allocation-page-grid">
-            <div className="portfolio-allocation allocation-center">
-              <AllocationDonut items={data.allocation} totalLabel={money(metrics.total / 1000) + "K"} />
-              <div className="allocation-list roomy">
-                {data.allocation.map((item) => {
-                  const classDollars = metrics.total ? (item.value / 100) * metrics.total : 0;
-                  return (
-                    <div key={item.label}><span className={"dot " + item.tone} /><span>{item.label}</span><strong>{item.value}% · {money(classDollars)}</strong></div>
-                  );
-                })}
-              </div>
+          <AllocationExplorer items={data.allocation} holdings={holdings} total={metrics.total} />
+          <div className="alloc-exposures">
+            <div className="section-title-row">
+              <div><span className="card-kicker">EXPOSURES</span><h2>By sector / sleeve</h2></div>
             </div>
-            <div>
-              <div className="section-title-row"><div><span className="card-kicker">EXPOSURES</span><h2>By sector / sleeve</h2></div></div>
-              <div className="bar-list">
-                {bySector.map(([sector, value]) => {
-                  const weight = metrics.total ? (value / metrics.total) * 100 : 0;
-                  return (
-                    <div className="bar-item" key={sector}>
-                      <div><span>{sector}</span><strong>{weight.toFixed(1)}% · {money(value)}</strong></div>
-                      <div className="bar-track"><span style={{ width: `${weight}%` }} /></div>
-                    </div>
-                  );
-                })}
-              </div>
+            <div className="bar-grid two-col">
+              {bySector.map(([sector, value]) => {
+                const weight = metrics.total ? (value / metrics.total) * 100 : 0;
+                return (
+                  <div className="bar-item" key={sector}>
+                    <div><span>{sector}</span><strong>{weight.toFixed(1)}% · {money(value)}</strong></div>
+                    <div className="bar-track"><span style={{ width: `${weight}%` }} /></div>
+                  </div>
+                );
+              })}
             </div>
           </div>
         </section>
