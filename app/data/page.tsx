@@ -11,6 +11,7 @@ import {
   addGoal,
   addHolding,
   addTransaction,
+  updateAccount,
   updatePlanning,
 } from "./actions";
 
@@ -195,6 +196,36 @@ export default async function DataPage() {
               <button className="data-submit">Add goal</button>
             </form>
           </div>
+
+          {data.accounts.length ? (
+            <section className="card page-card">
+              <div className="section-title-row">
+                <div><span className="card-kicker">ACCOUNTS</span><h2>Edit accounts</h2></div>
+              </div>
+              <p className="small-muted">Update a name or balance any time — for example, your home value or what you still owe on the mortgage. Debt balances are stored negative.</p>
+              <div className="data-form-grid">
+                {data.accounts.map((account) => (
+                  <form className="card data-form" action={updateAccount} key={account.id}>
+                    <input type="hidden" name="id" value={account.id} />
+                    <div className="data-form-title"><strong>{account.name}</strong><span className="small-muted">{account.type}</span></div>
+                    <input name="name" defaultValue={account.name} placeholder="Account name" required />
+                    <input name="balance" type="number" step="0.01" defaultValue={account.balance} placeholder="Balance (debt stays negative)" required />
+                    <div className="split-inputs">
+                      <input name="institution" defaultValue={account.institution} placeholder="Institution" />
+                      <input name="last_four" defaultValue={account.lastFour} maxLength={8} placeholder="Last four / label" />
+                    </div>
+                    {account.type === "debt" ? (
+                      <div className="split-inputs">
+                        <input name="apr" type="number" step="0.01" defaultValue={account.apr ?? ""} placeholder="APR %" />
+                        <input name="minimum_payment" type="number" step="0.01" defaultValue={account.minimumPayment ?? ""} placeholder="Minimum payment" />
+                      </div>
+                    ) : null}
+                    <button className="data-submit">Save changes</button>
+                  </form>
+                ))}
+              </div>
+            </section>
+          ) : null}
 
           <section className="card page-card">
             <div className="section-title-row">

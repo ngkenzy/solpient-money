@@ -55,7 +55,8 @@
     "test:v214": "bash scripts/tests/test-v214-cool-pack.sh",
     "test:v215": "bash scripts/tests/test-v215-allocation-merge.sh",
     "test:v216": "bash scripts/tests/test-v216-allocation-explorer.sh",
-    "test:v219": "bash scripts/tests/test-v219-cap-tiers.sh"
+    "test:v219": "bash scripts/tests/test-v219-cap-tiers.sh",
+    "test:v220": "bash scripts/tests/test-v220-edit-accounts.sh"
   },
   "dependencies": {
     "lucide-react": "^0.468.0",

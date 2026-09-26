@@ -45,6 +45,40 @@ export async function addAccount(formData: FormData) {
   refresh();
 }
 
+export async function updateAccount(formData: FormData) {
+  const { supabase, householdId } = await requireActiveHousehold();
+  const id = text(formData, "id");
+  const { data: current } = await supabase
+    .from("accounts")
+    .select("account_type")
+    .eq("id", id)
+    .eq("household_id", householdId)
+    .single();
+  if (!current) throw new Error("Account not found");
+
+  const rawBalance = num(formData, "balance");
+  const normalizedBalance =
+    current.account_type === "debt" ? -Math.abs(rawBalance) : Math.abs(rawBalance);
+
+  const { error } = await supabase
+    .from("accounts")
+    .update({
+      name: text(formData, "name"),
+      institution: text(formData, "institution") || "Manual",
+      balance_cents: cents(normalizedBalance),
+      owner_scope: text(formData, "owner_scope") || "Household",
+      last_four: text(formData, "last_four") || null,
+      apr_pct: current.account_type === "debt" ? num(formData, "apr", 0) : null,
+      minimum_payment_cents:
+        current.account_type === "debt" ? cents(num(formData, "minimum_payment", 0)) : null,
+    })
+    .eq("id", id)
+    .eq("household_id", householdId);
+
+  if (error) throw new Error(error.message);
+  refresh();
+}
+
 export async function addTransaction(formData: FormData) {
   const { supabase, householdId } = await requireActiveHousehold();
   const type = text(formData, "transaction_type");
