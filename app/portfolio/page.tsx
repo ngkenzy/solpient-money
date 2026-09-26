@@ -5,7 +5,7 @@ import EmptyState from "@/components/EmptyState";
 import PageHeader from "@/components/PageHeader";
 import RefreshPricesButton from "./RefreshPricesButton";
 import { getPortfolioMetrics, money } from "@/lib/finance";
-import { computeGains } from "@/lib/gains";
+import HoldingsHeatmap from "@/components/HoldingsHeatmap";
 import { requireMoneyDataset } from "@/lib/money-data";
 import {
   aggregateHoldingsByTicker,
@@ -20,7 +20,6 @@ export default async function PortfolioPage() {
   const metrics = getPortfolioMetrics(data);
   const portfolioIntelligence = buildPortfolioIntelligence(data);
   const holdings = aggregateHoldingsByTicker(data.holdings);
-  const gains = computeGains(holdings);
   const bySector = Object.entries(
     data.holdings.reduce<Record<string, number>>((acc, holding) => {
       acc[holding.sector] = (acc[holding.sector] ?? 0) + holding.value;
@@ -86,59 +85,15 @@ export default async function PortfolioPage() {
           </div>
         </section>
 
-      <section className="card page-card" id="performance">
+      <section className="card page-card" id="heatmap">
         <div className="section-title-row">
-          <div><span className="card-kicker">PERFORMANCE</span><h2>Gains</h2></div>
+          <div><span className="card-kicker">HEATMAP</span><h2>Where your money sits</h2></div>
+          <span className="small-muted">Box size = position value · shade = today&apos;s change</span>
         </div>
-        {gains.withCostBasis > 0 ? (
-          <>
-            <div className="gains-hero">
-              <span className="gains-hero-label">Total gain / loss</span>
-              <strong className={gains.totalGain >= 0 ? "positive-text" : "negative-text"}>
-                {money(gains.totalGain)}
-              </strong>
-              <span className="small-muted">
-                {gains.totalGainPct >= 0 ? "+" : ""}{gains.totalGainPct.toFixed(1)}% of {money(gains.totalCost)} invested
-                {" · "}{gains.withCostBasis} of {holdings.length} positions report cost basis
-              </span>
-            </div>
-            <div className="gains-list">
-              {gains.ranked.map((holding) => (
-                <Link
-                  className="gains-row"
-                  href={`/portfolio/${holding.ticker.toLowerCase()}`}
-                  key={holding.ticker}
-                >
-                  <span className="holding-name">
-                    <strong>{holding.ticker}</strong>
-                    <small>{holding.name}</small>
-                  </span>
-                  <span className="gains-bar">
-                    <span className="gains-track">
-                      <span
-                        className={holding.gain >= 0 ? "bar-gain" : "bar-loss"}
-                        style={{ width: `${gains.maxAbsGain > 0 ? (Math.abs(holding.gain) / gains.maxAbsGain) * 50 : 0}%` }}
-                      />
-                    </span>
-                  </span>
-                  <strong className={holding.gain >= 0 ? "positive-text" : "negative-text"}>
-                    {money(holding.gain)}
-                  </strong>
-                  <span className="gains-pct">
-                    {holding.gainPct >= 0 ? "+" : ""}{holding.gainPct.toFixed(1)}%
-                  </span>
-                </Link>
-              ))}
-            </div>
-          </>
-        ) : (
-          <p className="small-muted">
-            Add cost basis to your holdings to see gains — Vanguard CSV imports include it.
-          </p>
-        )}
+        <HoldingsHeatmap holdings={holdings} />
       </section>
 
-        <section className="card page-card">
+      <section className="card page-card">
         <div className="section-title-row">
           <div><span className="card-kicker">HOLDINGS</span><h2>Positions</h2></div>
           <div className="holdings-header-actions">

@@ -10,7 +10,7 @@ People who want a clear picture of their money without handing their bank logins
 
 ## The four pillars
 
-- **Investments** — Holdings, allocation, and gains, with per-position notes. Deterministic math, no black boxes.
+- **Investments** — Holdings, allocation, and a position heatmap, with per-position notes. Deterministic math, no black boxes.
 - **Spending** — Every transaction categorized automatically, cash-flow intelligence, and a truth engine that deduplicates imports so the numbers stay honest.
 - **Budgeting** — Real monthly budgets per category with actuals tracked from your transactions, plus a financial plan waterfall for the bigger picture.
 - **TSP** — Thrift Savings Plan tracking with statement import and fund breakdowns (C, S, I, F, G).
