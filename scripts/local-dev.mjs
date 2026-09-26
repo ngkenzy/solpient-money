@@ -59,6 +59,26 @@ if (doctor.status !== 0) {
   process.exit(doctor.status ?? 1);
 }
 
+// Migrations are checksum-guarded and idempotent: pending .sql files in
+// supabase/migrations apply here so `npm run dev` never runs against a
+// stale schema. Fail-closed: a bad migration stops startup loudly.
+const migrate = spawnSync(
+  process.execPath,
+  ["scripts/local-db-init.mjs"],
+  {
+    stdio: "inherit",
+    env: {
+      ...process.env,
+      DATABASE_URL: databaseUrl,
+      SOLPIENT_DB_PORT: String(expectedPort),
+    },
+  }
+);
+
+if (migrate.status !== 0) {
+  process.exit(migrate.status ?? 1);
+}
+
 const { Client } = pg;
 const client = new Client({
   connectionString: databaseUrl,

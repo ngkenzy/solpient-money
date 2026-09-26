@@ -81,6 +81,20 @@ print("ALLOWLIST=" + (",".join(sorted(missing)) if missing else "ok"))
 EOF
 )
 if [ "$ALLOWLIST_CHECK" = "ALLOWLIST=ok" ]; then ok "all .from() tables in client allowlist"; else bad "tables missing from allowlist ($ALLOWLIST_CHECK)"; fi
+# dev boot must apply pending migrations: `npm run dev` (scripts/local-dev.mjs)
+# runs the migration runner before Next.js starts, so a fresh pull can never
+# run against a stale schema (this is what stranded dividend_cache).
+DEVBOOT="$ROOT/scripts/local-dev.mjs"
+if grep -q "local-db-init.mjs" "$DEVBOOT"; then ok "dev boot runs migration runner"; else bad "dev boot runs migration runner"; fi
+MIGRATEORDER=$(python3 - "$DEVBOOT" << 'EOF'
+import sys
+s = open(sys.argv[1]).read()
+mi = s.find("local-db-init.mjs")
+nx = s.find("dist/bin/next")
+print("MIGRATEORDER=" + ("ok" if 0 <= mi < nx else "bad"))
+EOF
+)
+if [ "$MIGRATEORDER" = "MIGRATEORDER=ok" ]; then ok "migrations run before next dev"; else bad "migrations run before next dev"; fi
 if grep -q '"/portfolio-intelligence"' "$ACTIONS"; then ok "action revalidates intelligence page"; else bad "action revalidates intelligence page"; fi
 if grep -q "dividend_cache" "$ACTIONS" && grep -q "value_snapshot_cache" "$ACTIONS"; then ok "action writes both caches"; else bad "action writes both caches"; fi
 
