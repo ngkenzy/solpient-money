@@ -11,6 +11,8 @@ export type UniversalProvider =
   | "Bank of America"
   | "Vanguard"
   | "Merrill Edge"
+  | "Schwab"
+  | "Fidelity"
   | "Thrift Savings Plan"
   | "Unknown";
 
@@ -22,6 +24,10 @@ export type UniversalSourceId =
   | "vanguard-investment"
   | "merrill-holdings"
   | "merrill-summary"
+  | "schwab-activity"
+  | "schwab-positions"
+  | "fidelity-positions"
+  | "fidelity-activity"
   | "tsp"
   | "generic";
 
@@ -1090,6 +1096,432 @@ function genericResult(fileName: string, text: string): UniversalFileResult {
   };
 }
 
+function findHeaderIndex(
+  rows: CsvRow[],
+  required: string[],
+  scanLimit = 8
+): number {
+  const wanted = required.map((header) =>
+    header.toLowerCase().replace(/[^a-z0-9]/g, "")
+  );
+  const limit = Math.min(rows.length, scanLimit);
+  for (let index = 0; index < limit; index += 1) {
+    const values = new Set(
+      rows[index].map((value) =>
+        value.toLowerCase().replace(/[^a-z0-9]/g, "")
+      )
+    );
+    if (wanted.every((header) => values.has(header))) return index;
+  }
+  return -1;
+}
+
+function cleanExportDate(raw: string): string {
+  const value = String(raw ?? "");
+  const asOf = value.toLowerCase().indexOf(" as of ");
+  return (asOf >= 0 ? value.slice(0, asOf) : value).trim();
+}
+
+function titleRowMask(rows: CsvRow[], headerIndex: number): string {
+  for (const row of rows.slice(0, headerIndex)) {
+    const match = row.join(" ").match(/\.{3}(\d{3,4})/);
+    if (match) return match[1].slice(-4);
+  }
+  return "";
+}
+
+function schwabActivityType(action: string): ParsedTransaction["type"] {
+  const lower = action.toLowerCase();
+  if (/dividend|interest|cap gain/.test(lower)) return "income";
+  if (/fee|withhold|tax paid/.test(lower)) return "expense";
+  return "transfer";
+}
+
+function parseSchwabActivity(
+  fileName: string,
+  text: string
+): UniversalFileResult {
+  const rows = csvRows(text);
+  const headerIndex = findHeaderIndex(rows, [
+    "Date",
+    "Action",
+    "Symbol",
+    "Description",
+    "Fees & Comm",
+    "Amount",
+  ]);
+  if (headerIndex < 0) {
+    throw new Error("Schwab transaction headers were not found.");
+  }
+
+  const headers = headerMap(rows[headerIndex]);
+  const mask = titleRowMask(rows, headerIndex);
+  const transactions: ParsedTransaction[] = [];
+  const occurrences = new Map<string, number>();
+
+  for (const row of rows.slice(headerIndex + 1)) {
+    const action = cell(row, headers, "Action");
+    const postedAt = isoDate(cleanExportDate(cell(row, headers, "Date")));
+    if (!postedAt || !action) continue;
+
+    const symbol = normalizeTicker(
+      cell(row, headers, "Symbol"),
+      cell(row, headers, "Description")
+    );
+    const description =
+      cell(row, headers, "Description") || symbol;
+    const amount = money(cell(row, headers, "Amount"));
+    const type = schwabActivityType(action);
+
+    const identityBase = [
+      postedAt,
+      action,
+      symbol,
+      cell(row, headers, "Quantity"),
+      cell(row, headers, "Price"),
+      amount,
+    ].join("|");
+    const occurrence = (occurrences.get(identityBase) ?? 0) + 1;
+    occurrences.set(identityBase, occurrence);
+
+    transactions.push({
+      postedAt,
+      merchant: description,
+      category:
+        type === "income"
+          ? "Investment Income"
+          : type === "expense"
+            ? "Investment Fees"
+            : "Investment Activity",
+      amount,
+      type,
+      externalId: `${identityBase}|${occurrence}`,
+    });
+  }
+
+  const name = mask ? `Schwab Brokerage ••••${mask}` : "Schwab Brokerage";
+  const key = accountKey("Schwab", "investment", mask, name);
+
+  return {
+    fileName,
+    sourceId: "schwab-activity",
+    provider: "Schwab",
+    confidence: 0.99,
+    accountKey: key,
+    accountName: name,
+    accountMask: mask,
+    accountType: "investment",
+    datasets: [
+      {
+        id: `${key}:activity`,
+        sourceId: "schwab-activity",
+        sourceLabel: "Schwab investment activity",
+        accountKey: key,
+        confidence: 0.99,
+        parsed: makeParsed({
+          kind: "transactions",
+          institution: "Schwab",
+          accountName: name,
+          accountMask: mask,
+          accountType: "investment",
+          transactions,
+          balanceMode: "preserve",
+        }),
+      },
+    ],
+    notes: [
+      "Buys and sells are treated as investment transfers, not household spending. Dividend and interest rows count as investment income.",
+    ],
+    linkedAccountMasks: [],
+  };
+}
+
+function parseSchwabPositions(
+  fileName: string,
+  text: string
+): UniversalFileResult {
+  const rows = csvRows(text);
+  const headerIndex = findHeaderIndex(rows, [
+    "Symbol",
+    "Qty (Quantity)",
+    "Mkt Val (Market Value)",
+  ]);
+  if (headerIndex < 0) {
+    throw new Error("Schwab positions headers were not found.");
+  }
+
+  const headers = headerMap(rows[headerIndex]);
+  const mask = titleRowMask(rows, headerIndex);
+  const holdings: ParsedHolding[] = [];
+
+  for (const row of rows.slice(headerIndex + 1)) {
+    const symbol = cell(row, headers, "Symbol");
+    const description = cell(row, headers, "Description");
+    if (!symbol) continue;
+    if (/total/i.test(symbol) || /total/i.test(description)) continue;
+
+    const ticker = normalizeTicker(symbol, description);
+    const shares = numberValue(cell(row, headers, "Qty (Quantity)"));
+    const price = money(cell(row, headers, "Price"));
+    const marketValue = money(cell(row, headers, "Mkt Val (Market Value)"));
+    if (!shares && !marketValue) continue;
+
+    holdings.push({
+      ticker,
+      name: description || ticker,
+      kind: cashHoldingKind(ticker, description),
+      shares,
+      price,
+      costBasis: money(cell(row, headers, "Cost Basis")),
+      marketValue,
+      sector: investmentSector(ticker, description),
+      externalId: ticker,
+    });
+  }
+
+  const name = mask ? `Schwab Brokerage ••••${mask}` : "Schwab Brokerage";
+  const key = accountKey("Schwab", "investment", mask, name);
+  const holdingValue = holdings.reduce(
+    (sum, holding) => sum + holding.marketValue,
+    0
+  );
+
+  return {
+    fileName,
+    sourceId: "schwab-positions",
+    provider: "Schwab",
+    confidence: 0.99,
+    accountKey: key,
+    accountName: name,
+    accountMask: mask,
+    accountType: "investment",
+    datasets: [
+      {
+        id: `${key}:holdings`,
+        sourceId: "schwab-positions",
+        sourceLabel: "Schwab current holdings",
+        accountKey: key,
+        confidence: 0.99,
+        parsed: makeParsed({
+          kind: "holdings",
+          institution: "Schwab",
+          accountName: name,
+          accountMask: mask,
+          accountType: "investment",
+          holdings,
+          closingBalance: holdingValue,
+          balanceMode: "holdings",
+          snapshotMode: "replace",
+        }),
+      },
+    ],
+    notes: [
+      "Current positions replace the account's holdings snapshot. Import the Schwab transaction history file too if you want the activity behind these positions.",
+    ],
+    linkedAccountMasks: [],
+  };
+}
+
+function fidelityActivityType(action: string): ParsedTransaction["type"] {
+  const lower = action.toLowerCase();
+  if (/dividend|interest|reinvest|gain|distribution/.test(lower))
+    return "income";
+  if (/fee|commission|withhold/.test(lower)) return "expense";
+  return "transfer";
+}
+
+function parseFidelityActivity(
+  fileName: string,
+  text: string
+): UniversalFileResult {
+  const rows = csvRows(text);
+  const headerIndex = findHeaderIndex(rows, [
+    "Run Date",
+    "Action",
+    "Security Description",
+    "Settlement Date",
+  ]);
+  if (headerIndex < 0) {
+    throw new Error("Fidelity activity headers were not found.");
+  }
+
+  const headers = headerMap(rows[headerIndex]);
+  const transactions: ParsedTransaction[] = [];
+  const occurrences = new Map<string, number>();
+  let mask = "";
+
+  for (const row of rows.slice(headerIndex + 1)) {
+    if (row[0]?.startsWith("--")) continue;
+    const action = cell(row, headers, "Action");
+    const postedAt = isoDate(
+      cleanExportDate(cell(row, headers, "Run Date"))
+    );
+    if (!postedAt || !action) continue;
+
+    const account = cell(row, headers, "Account");
+    mask ||= account.replace(/\D/g, "").slice(-4);
+    const symbol = normalizeTicker(
+      cell(row, headers, "Symbol"),
+      cell(row, headers, "Security Description")
+    );
+    const description =
+      cell(row, headers, "Security Description") || symbol;
+    const amount = money(cell(row, headers, "Amount ($)"));
+    const type = fidelityActivityType(action);
+
+    const identityBase = [
+      postedAt,
+      action,
+      symbol,
+      cell(row, headers, "Quantity"),
+      cell(row, headers, "Price ($)"),
+      amount,
+    ].join("|");
+    const occurrence = (occurrences.get(identityBase) ?? 0) + 1;
+    occurrences.set(identityBase, occurrence);
+
+    transactions.push({
+      postedAt,
+      merchant: description,
+      category:
+        type === "income"
+          ? "Investment Income"
+          : type === "expense"
+            ? "Investment Fees"
+            : "Investment Activity",
+      amount,
+      type,
+      externalId: `${identityBase}|${occurrence}`,
+    });
+  }
+
+  const name = mask ? `Fidelity Brokerage ••••${mask}` : "Fidelity Brokerage";
+  const key = accountKey("Fidelity", "investment", mask, name);
+
+  return {
+    fileName,
+    sourceId: "fidelity-activity",
+    provider: "Fidelity",
+    confidence: 0.99,
+    accountKey: key,
+    accountName: name,
+    accountMask: mask,
+    accountType: "investment",
+    datasets: [
+      {
+        id: `${key}:activity`,
+        sourceId: "fidelity-activity",
+        sourceLabel: "Fidelity investment activity",
+        accountKey: key,
+        confidence: 0.99,
+        parsed: makeParsed({
+          kind: "transactions",
+          institution: "Fidelity",
+          accountName: name,
+          accountMask: mask,
+          accountType: "investment",
+          transactions,
+          balanceMode: "preserve",
+        }),
+      },
+    ],
+    notes: [
+      "Buys and sells are treated as investment transfers, not household spending. Dividend and interest rows count as investment income.",
+    ],
+    linkedAccountMasks: [],
+  };
+}
+
+function parseFidelityPositions(
+  fileName: string,
+  text: string
+): UniversalFileResult {
+  const rows = csvRows(text);
+  const headerIndex = findHeaderIndex(rows, [
+    "Account",
+    "Symbol",
+    "Last Price",
+    "Current Value",
+    "Total Cost Basis",
+  ]);
+  if (headerIndex < 0) {
+    throw new Error("Fidelity positions headers were not found.");
+  }
+
+  const headers = headerMap(rows[headerIndex]);
+  const holdings: ParsedHolding[] = [];
+  let mask = "";
+
+  for (const row of rows.slice(headerIndex + 1)) {
+    if (row[0]?.startsWith("--")) continue;
+    const symbol = cell(row, headers, "Symbol");
+    const description = cell(row, headers, "Description");
+    if (!symbol) continue;
+    if (/total/i.test(symbol) || /total/i.test(description)) continue;
+
+    mask ||= cell(row, headers, "Account").replace(/\D/g, "").slice(-4);
+    const ticker = normalizeTicker(symbol, description);
+    const shares = numberValue(cell(row, headers, "Quantity"));
+    const price = money(cell(row, headers, "Last Price"));
+    const marketValue = money(cell(row, headers, "Current Value"));
+    if (!shares && !marketValue) continue;
+
+    holdings.push({
+      ticker,
+      name: description || ticker,
+      kind: cashHoldingKind(ticker, description),
+      shares,
+      price,
+      costBasis: money(cell(row, headers, "Total Cost Basis")),
+      marketValue,
+      sector: investmentSector(ticker, description),
+      externalId: ticker,
+    });
+  }
+
+  const name = mask ? `Fidelity Brokerage ••••${mask}` : "Fidelity Brokerage";
+  const key = accountKey("Fidelity", "investment", mask, name);
+  const holdingValue = holdings.reduce(
+    (sum, holding) => sum + holding.marketValue,
+    0
+  );
+
+  return {
+    fileName,
+    sourceId: "fidelity-positions",
+    provider: "Fidelity",
+    confidence: 0.99,
+    accountKey: key,
+    accountName: name,
+    accountMask: mask,
+    accountType: "investment",
+    datasets: [
+      {
+        id: `${key}:holdings`,
+        sourceId: "fidelity-positions",
+        sourceLabel: "Fidelity current holdings",
+        accountKey: key,
+        confidence: 0.99,
+        parsed: makeParsed({
+          kind: "holdings",
+          institution: "Fidelity",
+          accountName: name,
+          accountMask: mask,
+          accountType: "investment",
+          holdings,
+          closingBalance: holdingValue,
+          balanceMode: "holdings",
+          snapshotMode: "replace",
+        }),
+      },
+    ],
+    notes: [
+      "Current positions replace the account's holdings snapshot. Import the Fidelity activity history file too if you want the activity behind these positions.",
+    ],
+    linkedAccountMasks: [],
+  };
+}
+
 export function parseUniversalFinancialFile(
   fileName: string,
   text: string
@@ -1175,6 +1607,52 @@ export function parseUniversalFinancialFile(
     )
   ) {
     return parseMerrillSummary(fileName, normalized);
+  }
+
+  if (
+    findHeaderIndex(rows, [
+      "Run Date",
+      "Action",
+      "Security Description",
+      "Settlement Date",
+    ]) >= 0
+  ) {
+    return parseFidelityActivity(fileName, normalized);
+  }
+
+  if (
+    findHeaderIndex(rows, [
+      "Account",
+      "Symbol",
+      "Last Price",
+      "Current Value",
+      "Total Cost Basis",
+    ]) >= 0
+  ) {
+    return parseFidelityPositions(fileName, normalized);
+  }
+
+  if (
+    findHeaderIndex(rows, [
+      "Date",
+      "Action",
+      "Symbol",
+      "Description",
+      "Fees & Comm",
+      "Amount",
+    ]) >= 0
+  ) {
+    return parseSchwabActivity(fileName, normalized);
+  }
+
+  if (
+    findHeaderIndex(rows, [
+      "Symbol",
+      "Qty (Quantity)",
+      "Mkt Val (Market Value)",
+    ]) >= 0
+  ) {
+    return parseSchwabPositions(fileName, normalized);
   }
 
   if (

@@ -70,6 +70,17 @@ function monthLabel(dateValue: unknown) {
   return new Intl.DateTimeFormat("en-US", { month: "short" }).format(date);
 }
 
+function dayLabel(dateValue: unknown) {
+  const normalized = normalizeDate(dateValue);
+  if (!normalized) return "—";
+
+  const date = new Date(`${normalized}T12:00:00Z`);
+  return new Intl.DateTimeFormat("en-US", {
+    month: "short",
+    day: "numeric",
+  }).format(date);
+}
+
 function buildMonthlyCashFlow(transactions: Transaction[]) {
   const groups = new Map<string, { label: string; income: number; spending: number }>();
 
@@ -359,7 +370,7 @@ export async function getMoneyContext(): Promise<MoneyContext> {
   };
 
   const netWorthSeries = (netWorthResult.data ?? []).map((row) => ({
-    label: monthLabel(row.snapshot_date),
+    label: dayLabel(row.snapshot_date),
     value: dollars(row.net_worth_cents),
   }));
 

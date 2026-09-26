@@ -18,6 +18,7 @@ import { dataAsOf, demoRefresh } from "@/lib/demo-data";
 import { getFinancialSummary, getPortfolioMetrics, money } from "@/lib/finance";
 import { getFinancialHealth } from "@/lib/intelligence";
 import { requireMoneyDataset } from "@/lib/money-data";
+import { recordDailyNetWorthSnapshot } from "@/lib/net-worth-snapshots";
 
 export const dynamic = "force-dynamic";
 
@@ -41,6 +42,12 @@ export default async function HomePage() {
   const healthScore = health.score;
   const healthMax = health.components.reduce((sum, item) => sum + item.maxScore, 0);
   const persistent = context.source === "database";
+
+  if (persistent) {
+    // Record today's net-worth snapshot so the history chart grows daily.
+    // Never let a snapshot failure break the dashboard.
+    await recordDailyNetWorthSnapshot().catch(() => {});
+  }
 
   return (
     <div className="dashboard">
