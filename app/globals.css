@@ -11269,3 +11269,118 @@ a {
     animation: none !important;
   }
 }
+
+/* ---------- Gains (portfolio performance) ---------- */
+.gains-hero {
+  padding: 20px 8px 4px;
+}
+
+.gains-hero-label {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+  font-weight: 650;
+}
+
+.gains-hero strong {
+  display: block;
+  font-size: 36px;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+  margin: 6px 0 8px;
+}
+
+.gains-list {
+  margin-top: 16px;
+  display: flex;
+  flex-direction: column;
+}
+
+.gains-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr) auto auto;
+  gap: 20px;
+  align-items: center;
+  padding: 12px 6px;
+  border-top: 1px solid var(--line);
+  color: inherit;
+  text-decoration: none;
+  border-radius: 8px;
+  transition: background 0.15s ease;
+}
+
+.gains-row:hover {
+  background: #f4f8fd;
+}
+
+.gains-bar {
+  display: block;
+  min-width: 0;
+}
+
+.gains-track {
+  position: relative;
+  display: block;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--line);
+}
+
+.gains-track::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: -3px;
+  bottom: -3px;
+  width: 2px;
+  margin-left: -1px;
+  background: var(--surface);
+  border-radius: 2px;
+}
+
+.gains-track .bar-gain,
+.gains-track .bar-loss {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  border-radius: 999px;
+}
+
+.gains-track .bar-gain {
+  left: 50%;
+  background: var(--green);
+}
+
+.gains-track .bar-loss {
+  right: 50%;
+  background: var(--red);
+}
+
+.gains-row > strong,
+.gains-pct {
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.gains-pct {
+  color: var(--muted);
+  min-width: 64px;
+  text-align: right;
+}
+
+@media (max-width: 560px) {
+  .gains-row {
+    grid-template-columns: minmax(0, 1fr) auto auto;
+  }
+
+  .gains-bar {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gains-row {
+    transition: none !important;
+  }
+}

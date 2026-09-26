@@ -47,7 +47,7 @@ expect_grep "$PORTFOLIO" 'alloc-exposures' "exposures sit below the explorer"
 expect_grep "$EXPLORER" '{item.value}% ·' "class list still shows percentages"
 
 # ---------- Palette still covers every remaining page ----------
-for href in '"/"' '"/accounts"' '"/connect"' '"/transactions"' '"/cash-flow"' '"/portfolio"' '"/portfolio-intelligence"' '"/performance"' '"/tsp"' '"/budget"' '"/plan"' '"/monitor"' '"/goals"' '"/data-health"' '"/data"'; do
+for href in '"/"' '"/accounts"' '"/connect"' '"/transactions"' '"/cash-flow"' '"/portfolio"' '"/portfolio-intelligence"' '"/tsp"' '"/budget"' '"/plan"' '"/monitor"' '"/goals"' '"/data-health"' '"/data"'; do
   expect_grep "$PALETTE" "href: $href" "palette still links to $href"
 done
 

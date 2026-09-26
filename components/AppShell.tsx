@@ -10,7 +10,6 @@ import {
   CircleDollarSign,
   Goal,
   Home,
-  LineChart,
   Landmark,
   ListChecks,
   PlugZap,
@@ -43,7 +42,6 @@ const sections: Array<{ label?: string; items: NavItem[] }> = [
     items: [
       { href: "/portfolio", label: "Portfolio", icon: BriefcaseBusiness },
       { href: "/portfolio-intelligence", label: "Portfolio Intelligence", icon: BrainCircuit },
-      { href: "/performance", label: "Performance", icon: LineChart },
       { href: "/tsp", label: "Thrift Saving Plan", icon: Landmark },
     ],
   },
