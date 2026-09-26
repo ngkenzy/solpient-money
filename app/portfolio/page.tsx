@@ -1,15 +1,23 @@
 import Link from "next/link";
-import { ArrowRight, BriefcaseBusiness, CheckCircle2, TriangleAlert } from "lucide-react";
+import { ArrowRight, BriefcaseBusiness, CheckCircle2, HandCoins, TriangleAlert } from "lucide-react";
 import AllocationExplorer from "@/components/AllocationExplorer";
 import EmptyState from "@/components/EmptyState";
 import PageHeader from "@/components/PageHeader";
 import RefreshPricesButton from "./RefreshPricesButton";
+import RefreshIncomeValueButton from "./RefreshIncomeValueButton";
 import { getPortfolioMetrics, money } from "@/lib/finance";
 import { requireMoneyDataset } from "@/lib/money-data";
 import {
   aggregateHoldingsByTicker,
   buildPortfolioIntelligence,
 } from "@/lib/portfolio-intelligence";
+import {
+  DIVIDEND_SOURCE_LABEL,
+  frequencyLabel,
+  getDividendIntelligence,
+} from "@/lib/dividends";
+import { VALUE_SOURCE_LABEL } from "@/lib/value-proxies";
+import { getCashFlowIntelligence } from "@/lib/cash-flow-intelligence";
 
 export const dynamic = "force-dynamic";
 
@@ -19,6 +27,33 @@ export default async function PortfolioPage() {
   const metrics = getPortfolioMetrics(data);
   const portfolioIntelligence = buildPortfolioIntelligence(data);
   const holdings = aggregateHoldingsByTicker(data.holdings);
+  const dividendIntel = await getDividendIntelligence(holdings);
+  let recurringBillsMonthly: number | null = null;
+  if (dividendIntel.payerCount > 0) {
+    try {
+      const cashFlow = await getCashFlowIntelligence();
+      recurringBillsMonthly =
+        cashFlow.health.recurringBillsMonthly > 0
+          ? cashFlow.health.recurringBillsMonthly
+          : null;
+    } catch {
+      recurringBillsMonthly = null;
+    }
+  }
+  const dividendCoveragePct =
+    recurringBillsMonthly != null && recurringBillsMonthly > 0
+      ? (dividendIntel.monthlyAverage / recurringBillsMonthly) * 100
+      : null;
+  const maxDivMonth = Math.max(
+    1,
+    ...dividendIntel.months.map((m) => m.declared + m.projected)
+  );
+  const dividendUpdatedLabel = dividendIntel.fetchedAt
+    ? new Date(dividendIntel.fetchedAt).toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+      })
+    : null;
   const homeAccount = data.accounts.find((a) => a.type === "property") ?? null;
   const mortgageAccount =
     data.accounts.find((a) => a.type === "debt" && /mortgage|home\s*loan/i.test(a.name)) ?? null;
@@ -94,6 +129,102 @@ export default async function PortfolioPage() {
             </div>
           </div>
         </section>
+
+      <section className="card page-card" id="dividends">
+        <div className="section-title-row">
+          <div><span className="card-kicker">DIVIDENDS</span><h2>Income calendar</h2></div>
+          <div className="holdings-header-actions">
+            {dividendUpdatedLabel ? (
+              <span className="small-muted">Updated {dividendUpdatedLabel}</span>
+            ) : null}
+            {context.source === "database" ? <RefreshIncomeValueButton /> : null}
+          </div>
+        </div>
+        {dividendIntel.payerCount === 0 ? (
+          <EmptyState
+            icon={HandCoins}
+            title="No dividend data yet"
+            copy="Refresh dividends & value to pull declared payouts for every holding and build your 12-month income calendar automatically."
+          />
+        ) : (
+          <>
+            <div className="metric-grid four">
+              <div className="metric-card"><span>Annual income</span><strong>{money(dividendIntel.annualIncome)}</strong><small>Next 12 months, projected</small></div>
+              <div className="metric-card"><span>Portfolio yield</span><strong>{dividendIntel.portfolioYieldPct != null ? `${dividendIntel.portfolioYieldPct.toFixed(2)}%` : "—"}</strong><small>On invested assets</small></div>
+              <div className="metric-card"><span>Monthly average</span><strong>{money(dividendIntel.monthlyAverage)}</strong><small>Across the next year</small></div>
+              <div className="metric-card"><span>Dividend payers</span><strong>{dividendIntel.payerCount}</strong><small>Holdings paying out</small></div>
+            </div>
+            {dividendCoveragePct != null ? (
+              <p className="div-coverage">
+                Your dividends average <strong>{money(dividendIntel.monthlyAverage)}/mo</strong>, covering{" "}
+                <strong>{dividendCoveragePct.toFixed(0)}%</strong>{" "}
+                of your <strong>{money(recurringBillsMonthly ?? 0)}/mo</strong> in recurring bills.
+              </p>
+            ) : null}
+            <div className="div-calendar" role="img" aria-label="Projected dividend income by month">
+              {dividendIntel.months.map((month) => {
+                const total = month.declared + month.projected;
+                const declaredPct = total > 0 ? (month.declared / maxDivMonth) * 100 : 0;
+                const projectedPct = total > 0 ? (month.projected / maxDivMonth) * 100 : 0;
+                return (
+                  <div className="div-bar-group" key={month.monthKey} title={`${month.label}: ${money(total)}${month.declared > 0 ? ` (${money(month.declared)} declared)` : ""}`}>
+                    <div className="div-bar">
+                      <span className="div-bar-projected" style={{ height: `${projectedPct}%` }} />
+                      <span className="div-bar-declared" style={{ height: `${declaredPct}%` }} />
+                    </div>
+                    <small>{month.label}</small>
+                  </div>
+                );
+              })}
+            </div>
+            <div className="div-legend">
+              <span><i className="div-swatch declared" /> Declared</span>
+              <span><i className="div-swatch projected" /> Projected</span>
+            </div>
+            {dividendIntel.upcoming.length > 0 ? (
+              <div className="div-upcoming">
+                <h3>Upcoming payments</h3>
+                <div className="data-table div-upcoming-table">
+                  <div className="table-row table-head-row">
+                    <span>Holding</span><span>Ex-date</span><span>Pay date</span><span>Amount</span>
+                  </div>
+                  {dividendIntel.upcoming.map((item, index) => (
+                    <div className="table-row" key={`${item.ticker}-${item.payDate}-${index}`}>
+                      <span className="holding-name"><strong>{item.ticker}</strong></span>
+                      <span>{item.exDate}</span>
+                      <span>{item.payDate}</span>
+                      <span><strong>{money(item.amount)}</strong> <em className={item.declared ? "div-badge declared" : "div-badge projected"}>{item.declared ? "Declared" : "Projected"}</em></span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ) : null}
+            <div className="div-payers">
+              <h3>Your payers</h3>
+              <div className="data-table div-table">
+                <div className="table-row table-head-row">
+                  <span>Payer</span><span>Annual income</span><span>Yield</span><span>Next payment</span>
+                </div>
+                {dividendIntel.payers.map((payer) => (
+                  <div className="table-row" key={payer.ticker}>
+                    <span className="holding-name">
+                      <strong>{payer.ticker}</strong>
+                      <small>{frequencyLabel(payer.frequency)} · {money(payer.annualPerShare)}/share</small>
+                    </span>
+                    <span><strong>{money(payer.annualIncome)}</strong></span>
+                    <span>{payer.yieldPct != null ? `${payer.yieldPct.toFixed(2)}%` : "—"}</span>
+                    <span>{payer.nextPayDate ?? "—"}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <p className="small-muted div-footnote">
+              Declared payments were announced by the company; projected ones follow each payer's payout pattern.
+              Sources: {DIVIDEND_SOURCE_LABEL} dividends, {VALUE_SOURCE_LABEL} market data.
+            </p>
+          </>
+        )}
+      </section>
 
       <section className="card page-card">
         <div className="section-title-row">

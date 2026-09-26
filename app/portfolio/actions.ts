@@ -215,3 +215,194 @@ export async function refreshMarketPrices(): Promise<RefreshMarketPricesState> {
     };
   }
 }
+
+export type RefreshIncomeAndValueState = {
+  ok: boolean;
+  message: string;
+};
+
+function frequencyAnnualMultiplier(
+  frequency: string
+): number {
+  if (frequency === "monthly") return 12;
+  if (frequency === "quarterly") return 4;
+  if (frequency === "semiannual") return 2;
+  if (frequency === "annual") return 1;
+  return 0;
+}
+
+/**
+ * One-click refresh of dividend histories and value-proxy snapshots for
+ * every non-TSP holding. Dividend events come from the free Yahoo Finance
+ * chart feed; 52-week ranges and analyst targets come from Nasdaq's public
+ * quote summary. Results land in household-scoped caches that the
+ * portfolio and portfolio-intelligence pages render from.
+ */
+export async function refreshIncomeAndValue(): Promise<RefreshIncomeAndValueState> {
+  const {
+    DIVIDEND_SOURCE_LABEL,
+    fetchDividendHistories,
+    projectDividendPayments,
+  } = await import("@/lib/dividends");
+  const {
+    VALUE_SOURCE_LABEL,
+    fetchValueSnapshots,
+  } = await import("@/lib/value-proxies");
+
+  try {
+    const { database, householdId } =
+      await requireActiveHousehold();
+
+    const holdingsResult = await database
+      .from("holdings")
+      .select("ticker,shares,holding_kind")
+      .eq("household_id", householdId)
+      .gt("shares", 0)
+      .neq("holding_kind", "cash");
+
+    if (holdingsResult.error) {
+      throw new Error(
+        `Unable to read holdings before refresh: ${holdingsResult.error.message}`
+      );
+    }
+
+    const tickers = (
+      holdingsResult.data ?? []
+    )
+      .map((holding) =>
+        String(holding.ticker ?? "")
+      )
+      .filter(
+        (ticker) =>
+          ticker &&
+          !ticker.toUpperCase().startsWith("TSP-")
+      );
+
+    if (!tickers.length) {
+      return {
+        ok: false,
+        message:
+          "No holdings found. Import a brokerage CSV first.",
+      };
+    }
+
+    const [histories, snapshots] =
+      await Promise.all([
+        fetchDividendHistories(tickers),
+        fetchValueSnapshots(tickers),
+      ]);
+
+    const now = new Date().toISOString();
+    const todayKey = now.slice(0, 10);
+    let dividendPayers = 0;
+
+    for (const history of histories) {
+      const past = history.events.filter(
+        (event) =>
+          event.exDate <=
+          Math.floor(Date.now() / 1000)
+      );
+      const lastAmount = past.length
+        ? past[past.length - 1].amount
+        : null;
+      const multiplier = frequencyAnnualMultiplier(
+        history.frequency
+      );
+      const payments = projectDividendPayments(
+        history.events,
+        history.frequency
+      );
+      const next = payments.find(
+        (payment) => payment.exDate >= todayKey
+      ) ?? null;
+
+      if (history.events.length) {
+        dividendPayers += 1;
+      }
+
+      const upsert = await database
+        .from("dividend_cache")
+        .upsert(
+          {
+            household_id: householdId,
+            ticker: history.ticker,
+            dividend_events: history.events,
+            frequency: history.frequency,
+            last_amount: lastAmount,
+            annualized_amount:
+              lastAmount != null && multiplier > 0
+                ? lastAmount * multiplier
+                : null,
+            next_ex_date: next?.exDate ?? null,
+            next_pay_date: next?.payDate ?? null,
+            fetched_at: now,
+          },
+          {
+            onConflict:
+              "household_id,ticker",
+          }
+        );
+
+      if (upsert.error) {
+        throw new Error(
+          `Unable to cache dividends for ${history.ticker}: ${upsert.error.message}`
+        );
+      }
+    }
+
+    for (const snapshot of snapshots) {
+      const upsert = await database
+        .from("value_snapshot_cache")
+        .upsert(
+          {
+            household_id: householdId,
+            ticker: snapshot.ticker,
+            fifty_two_week_high:
+              snapshot.fiftyTwoWeekHigh,
+            fifty_two_week_low:
+              snapshot.fiftyTwoWeekLow,
+            analyst_target:
+              snapshot.analystTarget,
+            sector: snapshot.sector,
+            industry: snapshot.industry,
+            fetched_at: now,
+          },
+          {
+            onConflict:
+              "household_id,ticker",
+          }
+        );
+
+      if (upsert.error) {
+        throw new Error(
+          `Unable to cache value data for ${snapshot.ticker}: ${upsert.error.message}`
+        );
+      }
+    }
+
+    for (const path of [
+      "/portfolio",
+      "/portfolio-intelligence",
+    ]) {
+      revalidatePath(path);
+    }
+
+    return {
+      ok: true,
+      message:
+        `Refreshed ${DIVIDEND_SOURCE_LABEL} dividends ` +
+        `(${dividendPayers} payers) and ${VALUE_SOURCE_LABEL} value data ` +
+        `for ${snapshots.length} holdings.`,
+    };
+  } catch (error) {
+    if (isRedirectError(error)) throw error;
+
+    return {
+      ok: false,
+      message:
+        error instanceof Error
+          ? error.message
+          : "Unable to refresh dividend and value data.",
+    };
+  }
+}

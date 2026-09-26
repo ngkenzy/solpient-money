@@ -12,9 +12,17 @@ import PageHeader from "@/components/PageHeader";
 import { money } from "@/lib/finance";
 import { requireMoneyDataset } from "@/lib/money-data";
 import {
+  aggregateHoldingsByTicker,
   buildPortfolioIntelligence,
   type PortfolioSignalLevel,
 } from "@/lib/portfolio-intelligence";
+import {
+  getValueCheck,
+  signalLabel as valueSignalLabel,
+  VALUE_SOURCE_LABEL,
+  type ValueSignal,
+} from "@/lib/value-proxies";
+import { getDividendIntelligence } from "@/lib/dividends";
 
 export const dynamic = "force-dynamic";
 
@@ -45,6 +53,29 @@ export default async function PortfolioIntelligencePage() {
     buildPortfolioIntelligence(
       context.dataset
     );
+  const holdings = aggregateHoldingsByTicker(
+    context.dataset.holdings
+  );
+  const dividendIntel =
+    await getDividendIntelligence(holdings);
+  const yieldByTicker = new Map(
+    dividendIntel.payers.map((payer) => [
+      payer.ticker,
+      payer.yieldPct,
+    ])
+  );
+  const valueCheck = await getValueCheck(
+    holdings,
+    yieldByTicker
+  );
+  const valueUpdatedLabel = valueCheck.fetchedAt
+    ? new Date(
+        valueCheck.fetchedAt
+      ).toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+      })
+    : null;
 
   return (
     <div className="page portfolio-intelligence-page">
@@ -279,6 +310,134 @@ export default async function PortfolioIntelligencePage() {
             </Link>
           ))}
         </div>
+      </section>
+
+      <section className="card page-card">
+        <div className="section-title-row">
+          <div>
+            <span className="card-kicker">
+              VALUE CHECK
+            </span>
+            <h2>Cheap or expensive?</h2>
+          </div>
+          {valueUpdatedLabel ? (
+            <span className="small-muted">
+              Updated {valueUpdatedLabel} ·{" "}
+              {VALUE_SOURCE_LABEL}
+            </span>
+          ) : null}
+        </div>
+        {valueCheck.rows.length === 0 ? (
+          <p className="small-muted">
+            No value data yet. On the Portfolio
+            page, use “Refresh dividends &amp;
+            value” to pull 52-week ranges and
+            analyst targets for your holdings —
+            fully automatic, nothing to type.
+          </p>
+        ) : (
+          <>
+            <div className="value-summary">
+              <span className="value-chip">
+                <strong>
+                  {valueCheck.highYieldCount}
+                </strong>{" "}
+                high yielders (4%+)
+              </span>
+              <span className="value-chip">
+                <strong>
+                  {valueCheck.discountCount}
+                </strong>{" "}
+                trading 10%+ off highs
+              </span>
+            </div>
+            <div className="data-table value-table">
+              <div className="table-row table-head-row">
+                <span>Holding</span>
+                <span>Price</span>
+                <span>Yield</span>
+                <span>Vs 52-wk high</span>
+                <span>Analyst target</span>
+                <span>Signals</span>
+              </div>
+              {valueCheck.rows.map((row) => (
+                <div
+                  className="table-row"
+                  key={row.ticker}
+                >
+                  <span className="holding-name">
+                    <strong>{row.ticker}</strong>
+                    <small>
+                      {row.sector ?? row.name}
+                    </small>
+                  </span>
+                  <span>
+                    <strong>
+                      {money(row.price)}
+                    </strong>
+                  </span>
+                  <span>
+                    {row.yieldPct != null
+                      ? `${row.yieldPct.toFixed(2)}%`
+                      : "—"}
+                  </span>
+                  <span
+                    className={
+                      row.belowHighPct != null &&
+                      row.belowHighPct >= 10
+                        ? "positive-text"
+                        : undefined
+                    }
+                  >
+                    {row.belowHighPct != null
+                      ? `−${row.belowHighPct.toFixed(1)}%`
+                      : "—"}
+                  </span>
+                  <span
+                    className={
+                      row.targetGapPct != null &&
+                      row.targetGapPct >= 0
+                        ? "positive-text"
+                        : "negative-text"
+                    }
+                  >
+                    {row.targetGapPct != null
+                      ? `${row.targetGapPct >= 0 ? "+" : ""}${row.targetGapPct.toFixed(1)}%`
+                      : "—"}
+                  </span>
+                  <span className="value-signals">
+                    {row.signals.length ? (
+                      row.signals.map(
+                        (
+                          signal: ValueSignal
+                        ) => (
+                          <em
+                            key={signal}
+                            className={`value-signal value-signal-${signal}`}
+                          >
+                            {valueSignalLabel(
+                              signal
+                            )}
+                          </em>
+                        )
+                      )
+                    ) : (
+                      <em className="value-signal value-signal-none">
+                        Fairly priced
+                      </em>
+                    )}
+                  </span>
+                </div>
+              ))}
+            </div>
+            <p className="small-muted div-footnote">
+              Automatic proxies, not a buy
+              recommendation. Your own intrinsic
+              value is the real call — these just
+              show where price sits right now.
+            </p>
+          </>
+        )}
       </section>
 
       <div className="bottom-note">
