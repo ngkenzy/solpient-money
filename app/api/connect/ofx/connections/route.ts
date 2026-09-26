@@ -6,6 +6,10 @@ import {
 import { getDirectOfxStatus } from "@/lib/connect/direct-ofx/config";
 import { validateDirectOfxUrl } from "@/lib/connect/direct-ofx/client";
 import {
+  getDirectOfxInstitutionProfile,
+  guidedProfileConnectionValues,
+} from "@/lib/connect/direct-ofx/institutions";
+import {
   loadDirectOfxSecret,
   storeDirectOfxSecret,
 } from "@/lib/connect/direct-ofx/secrets";
@@ -58,27 +62,58 @@ export async function POST(request: Request) {
       await getConnectHouseholdContext();
     const body = (await request.json()) as Record<string, unknown>;
 
+    // Guided flows (e.g. Vanguard) send only a profileId plus credentials.
+    // Every institution value is resolved server-side from the curated
+    // profile so a client can never spoof the endpoint or identifiers.
+    const profileId = textValue(body.profileId, 64);
+    const guidedValues = profileId
+      ? guidedProfileConnectionValues(
+          getDirectOfxInstitutionProfile(profileId)
+        )
+      : null;
+
+    if (profileId && !guidedValues) {
+      throw new ConnectAuthError(
+        "Unknown or unsupported Direct OFX institution profile.",
+        400
+      );
+    }
+
     if (body.credentialIsDedicated !== true) {
       return NextResponse.json(
         {
-          error:
-            "Direct OFX requires an institution-issued Direct Connect/app credential or token. Do not enter your normal online-banking password.",
+          error: guidedValues
+            ? `Confirm that you want Solpient to store these credentials encrypted on this Mac and use them only to download your data from ${guidedValues.institutionName}.`
+            : "Direct OFX requires an institution-issued Direct Connect/app credential or token. Do not enter your normal online-banking password.",
         },
         { status: 400 }
       );
     }
 
-    const institutionName = textValue(body.institutionName, 160);
-    const endpointUrl = textValue(body.endpointUrl, 500);
-    const org = textValue(body.org, 64) || null;
-    const fid = textValue(body.fid, 64) || null;
-    const messageSet = textValue(
-      body.messageSet,
-      32
+    const institutionName = guidedValues
+      ? guidedValues.institutionName
+      : textValue(body.institutionName, 160);
+    const endpointUrl = guidedValues
+      ? guidedValues.endpointUrl
+      : textValue(body.endpointUrl, 500);
+    const org = guidedValues
+      ? guidedValues.org
+      : textValue(body.org, 64) || null;
+    const fid = guidedValues
+      ? guidedValues.fid
+      : textValue(body.fid, 64) || null;
+    const messageSet = (
+      guidedValues
+        ? guidedValues.messageSet
+        : textValue(body.messageSet, 32)
     ) as DirectOfxMessageSet;
     const accountType = textValue(body.accountType, 32);
-    const appId = textValue(body.appId, 32) || "SOLPIENT";
-    const appVer = textValue(body.appVer, 16) || "0100";
+    const appId = guidedValues
+      ? guidedValues.appId
+      : textValue(body.appId, 32) || "SOLPIENT";
+    const appVer = guidedValues
+      ? guidedValues.appVer
+      : textValue(body.appVer, 16) || "0100";
     const authMode = textValue(
       body.authMode,
       32
@@ -88,7 +123,8 @@ export async function POST(request: Request) {
     const credential = textValue(body.credential, 512);
     const accountId = textValue(body.accountId, 256);
     const bankId = textValue(body.bankId, 64);
-    const brokerId = textValue(body.brokerId, 128);
+    const brokerId =
+      guidedValues?.brokerId ?? textValue(body.brokerId, 128);
     const clientUid = textValue(body.clientUid, 128);
     const authToken = textValue(body.authToken, 512);
 

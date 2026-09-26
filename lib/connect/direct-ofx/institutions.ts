@@ -107,3 +107,46 @@ export function getDirectOfxInstitutionProfile(id: string) {
     (profile) => profile.id === id
   );
 }
+
+export type GuidedProfileConnectionValues = {
+  institutionName: string;
+  endpointUrl: string;
+  org: string | null;
+  fid: string | null;
+  messageSet: "banking" | "credit_card" | "investment";
+  brokerId: string | null;
+  appId: string;
+  appVer: string;
+};
+
+/**
+ * Server-authoritative connection values for a guided institution profile.
+ *
+ * The guided Vanguard flow sends only `profileId` plus the user's
+ * credentials — the API route derives every institution value from here so
+ * a client can never spoof the endpoint or identifiers. Returns null unless
+ * the profile is a usable candidate with a known endpoint and message set.
+ */
+export function guidedProfileConnectionValues(
+  profile: DirectOfxInstitutionProfile | undefined
+): GuidedProfileConnectionValues | null {
+  if (
+    !profile ||
+    profile.status !== "candidate" ||
+    !profile.endpointUrl ||
+    !profile.messageSet
+  ) {
+    return null;
+  }
+
+  return {
+    institutionName: profile.name,
+    endpointUrl: profile.endpointUrl,
+    org: profile.org ?? null,
+    fid: profile.fid ?? null,
+    messageSet: profile.messageSet,
+    brokerId: profile.brokerId ?? null,
+    appId: profile.appId,
+    appVer: profile.appVer,
+  };
+}

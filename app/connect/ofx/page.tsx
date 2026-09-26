@@ -9,6 +9,7 @@ import {
 import PageHeader from "@/components/PageHeader";
 import DirectOfxSetupForm from "@/components/DirectOfxSetupForm";
 import DirectOfxConnectionActions from "@/components/DirectOfxConnectionActions";
+import VanguardGuidedConnect from "@/components/VanguardGuidedConnect";
 import { requireActiveHousehold } from "@/lib/money-auth";
 import { getDirectOfxStatus } from "@/lib/connect/direct-ofx/config";
 
@@ -97,6 +98,8 @@ export default async function DirectOfxPage() {
           </div>
         </section>
       ) : null}
+
+      <VanguardGuidedConnect configured={status.configured} />
 
       <DirectOfxSetupForm configured={status.configured} />
 

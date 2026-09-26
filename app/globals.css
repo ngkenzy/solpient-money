@@ -11208,3 +11208,156 @@ a {
     align-items: flex-start;
   }
 }
+
+/* Guided Vanguard Direct Connect (test:v211) */
+.vanguard-guided {
+  border-color: #c4d9ec;
+  background: linear-gradient(180deg, #fdfeff 0%, #f5f9fd 100%);
+}
+
+.vanguard-guided-lede {
+  margin: 8px 0 0;
+  color: #5c7185;
+  font-size: 9px;
+  line-height: 1.6;
+  max-width: 640px;
+}
+
+.vanguard-guided-steps {
+  list-style: none;
+  margin: 14px 0 0;
+  padding: 0;
+  display: flex;
+  gap: 8px;
+}
+
+.vanguard-guided-step {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 12px;
+  border: 1px solid #dce5ee;
+  border-radius: 8px;
+  background: #fff;
+  color: #7d8fa1;
+  font-size: 8px;
+  font-weight: 700;
+}
+
+.vanguard-guided-step-num {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #eef2f6;
+  color: #7d8fa1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 8px;
+  font-weight: 800;
+  flex-shrink: 0;
+}
+
+.vanguard-guided-step.active {
+  border-color: #9cc3e5;
+  color: #1e3a52;
+}
+
+.vanguard-guided-step.active .vanguard-guided-step-num {
+  background: #1e6fb8;
+  color: #fff;
+}
+
+.vanguard-guided-step.done {
+  color: #2e7d4f;
+}
+
+.vanguard-guided-step.done .vanguard-guided-step-num {
+  background: #e2f2e8;
+  color: #2e7d4f;
+}
+
+.vanguard-guided-body {
+  margin-top: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.vanguard-guided-note {
+  display: grid;
+  grid-template-columns: 28px 1fr;
+  gap: 9px;
+  padding: 11px 13px;
+  border: 1px solid #d8e6f3;
+  border-radius: 8px;
+  background: #f4f9fd;
+  color: #33566f;
+}
+
+.vanguard-guided-note > div {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.vanguard-guided-note strong {
+  font-size: 9px;
+}
+
+.vanguard-guided-note span {
+  font-size: 8px;
+  line-height: 1.55;
+  color: #5c7185;
+}
+
+.vanguard-guided-note.warning {
+  border-color: #ecd9a8;
+  background: #fdf8ea;
+  color: #785f25;
+}
+
+.vanguard-guided-note.warning span {
+  color: #8a6d2f;
+}
+
+.vanguard-guided-probe {
+  padding: 11px 13px;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  font-size: 8px;
+}
+
+.vanguard-guided-probe.ok {
+  border: 1px solid #bfe3cc;
+  background: #f2faf5;
+  color: #2e7d4f;
+}
+
+.vanguard-guided-probe.attention {
+  border: 1px solid #ecd9a8;
+  background: #fdf8ea;
+  color: #785f25;
+}
+
+.vanguard-guided-probe span {
+  line-height: 1.55;
+}
+
+.vanguard-guided-form {
+  margin-top: 2px;
+}
+
+.vanguard-guided-form small {
+  margin-top: 2px;
+  line-height: 1.5;
+}
+
+@media (max-width: 640px) {
+  .vanguard-guided-steps {
+    flex-direction: column;
+  }
+}
