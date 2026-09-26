@@ -3330,14 +3330,94 @@ a {
   font-size: 13px;
 }
 
-.portfolio-context-line {
-  margin: 10px 2px 0;
-  font-size: 10px;
-  color: #43566d;
+.wealth-bar {
+  display: flex;
+  height: 26px;
+  border-radius: 999px;
+  overflow: hidden;
+  margin-top: 14px;
+  background: #eef2f7;
 }
 
-.portfolio-context-line strong {
-  font-size: 11px;
+.wealth-segment {
+  height: 100%;
+  transition: width 0.6s ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wealth-segment {
+    transition: none;
+  }
+}
+
+.wealth-investable {
+  background: linear-gradient(90deg, #155da9, #2f7fd0);
+}
+
+.wealth-home {
+  background: linear-gradient(90deg, #1d7a4f, #35a06b);
+}
+
+.wealth-legend {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.wealth-legend > div {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: #f6f9fc;
+}
+
+.wealth-legend > div > div {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.wealth-legend strong {
+  font-size: 10px;
+}
+
+.wealth-legend span {
+  font-size: 9px;
+  color: #61768f;
+}
+
+.wealth-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  margin-top: 2px;
+  flex-shrink: 0;
+}
+
+.wealth-investable-dot {
+  background: #1f6fb8;
+}
+
+.wealth-home-dot {
+  background: #24905c;
+}
+
+.wealth-total {
+  align-items: center !important;
+  justify-content: space-between;
+}
+
+.wealth-total strong:last-child {
+  font-size: 13px;
+}
+
+@media (max-width: 560px) {
+  .wealth-legend {
+    grid-template-columns: 1fr;
+  }
 }
 
 .accounts-editor {

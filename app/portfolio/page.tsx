@@ -26,6 +26,10 @@ export default async function PortfolioPage() {
     homeAccount != null
       ? homeAccount.balance - Math.abs(mortgageAccount?.balance ?? 0)
       : null;
+  const safeHomeEquity = Math.max(0, homeEquity ?? 0);
+  const combinedWealth = metrics.total + safeHomeEquity;
+  const investablePct = combinedWealth > 0 ? (metrics.total / combinedWealth) * 100 : 0;
+  const homePct = combinedWealth > 0 ? (safeHomeEquity / combinedWealth) * 100 : 0;
   const bySector = Object.entries(
     data.holdings.reduce<Record<string, number>>((acc, holding) => {
       acc[holding.sector] = (acc[holding.sector] ?? 0) + holding.value;
@@ -66,13 +70,6 @@ export default async function PortfolioPage() {
         <div className="metric-card"><span>Top-three weight</span><strong>{portfolioIntelligence.topThreeStockWeightPct.toFixed(1)}%</strong><small>Review line {data.householdPlan.topThreeStockReviewPct}%</small></div>
         <div className="metric-card"><span>Positions flagged</span><strong>{portfolioIntelligence.watchCount + portfolioIntelligence.criticalCount}</strong><small>Concentration review</small></div>
       </div>
-
-      {homeEquity !== null ? (
-        <p className="portfolio-context-line">
-          Investable assets <strong>{money(metrics.total)}</strong>
-          <span className="small-muted"> · Home equity {money(homeEquity)} stays out of the allocation above — it&rsquo;s counted in your net worth on the Overview.</span>
-        </p>
-      ) : null}
 
       <section className="card page-card" id="allocation">
           <div className="section-title-row">
@@ -157,6 +154,35 @@ export default async function PortfolioPage() {
           ))}
         </div>
       </section>
+
+      {homeEquity !== null ? (
+        <section className="card page-card">
+          <div className="section-title-row">
+            <div><span className="card-kicker">BIGGER PICTURE</span><h2>Total wealth</h2></div>
+            <span className="small-muted">Investable assets + home equity</span>
+          </div>
+          <div
+            className="wealth-bar"
+            role="img"
+            aria-label={`Investable assets ${money(metrics.total)}, home equity ${money(homeEquity)}`}
+          >
+            <span className="wealth-segment wealth-investable" style={{ width: `${investablePct}%` }} />
+            <span className="wealth-segment wealth-home" style={{ width: `${homePct}%` }} />
+          </div>
+          <div className="wealth-legend">
+            <div>
+              <span className="wealth-dot wealth-investable-dot" />
+              <div><strong>Investable assets</strong><span>{money(metrics.total)} · {investablePct.toFixed(1)}%</span></div>
+            </div>
+            <div>
+              <span className="wealth-dot wealth-home-dot" />
+              <div><strong>Home equity</strong><span>{money(homeEquity)} · {homePct.toFixed(1)}%</span></div>
+            </div>
+            <div className="wealth-total"><strong>Combined</strong><strong>{money(combinedWealth)}</strong></div>
+          </div>
+          <p className="small-muted">The allocation above stays investable-only — your home is counted here and in your net worth on the Overview.</p>
+        </section>
+      ) : null}
     </div>
   );
 }
