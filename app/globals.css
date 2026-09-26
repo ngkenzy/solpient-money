@@ -10491,6 +10491,52 @@ a {
   cursor: default;
 }
 
+.portfolio-refresh-prices {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+}
+
+.portfolio-refresh-prices-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  height: 36px;
+  border: 1px solid #d8e2e9;
+  border-radius: 9px;
+  background: #fff;
+  color: #304960;
+  padding: 0 13px;
+  font: inherit;
+  font-size: 8px;
+  font-weight: 800;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.portfolio-refresh-prices-button:hover:not(:disabled) {
+  border-color: #304960;
+}
+
+.portfolio-refresh-prices-button:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.portfolio-refresh-prices small {
+  font-size: 7px;
+  line-height: 1.35;
+  text-align: right;
+  max-width: 260px;
+}
+
+.holdings-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
 .tsp-pull-prices small {
   font-size: 7px;
   line-height: 1.35;

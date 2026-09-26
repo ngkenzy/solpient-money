@@ -4,6 +4,7 @@ import AllocationDonut from "@/components/AllocationDonut";
 import EmptyState from "@/components/EmptyState";
 import InteractiveLineChart from "@/components/InteractiveLineChart";
 import PageHeader from "@/components/PageHeader";
+import RefreshPricesButton from "./RefreshPricesButton";
 import { getPortfolioMetrics, money } from "@/lib/finance";
 import { requireMoneyDataset } from "@/lib/money-data";
 import {
@@ -89,7 +90,10 @@ export default async function PortfolioPage() {
       <section className="card page-card">
         <div className="section-title-row">
           <div><span className="card-kicker">HOLDINGS</span><h2>Positions</h2></div>
-          <span className="small-muted">Click a holding for position detail</span>
+          <div className="holdings-header-actions">
+            <span className="small-muted">Click a holding for position detail</span>
+            {context.source === "database" ? <RefreshPricesButton /> : null}
+          </div>
         </div>
         <div className="data-table holdings-table v03">
           <div className="table-row table-head-row">
