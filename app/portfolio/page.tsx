@@ -19,6 +19,13 @@ export default async function PortfolioPage() {
   const metrics = getPortfolioMetrics(data);
   const portfolioIntelligence = buildPortfolioIntelligence(data);
   const holdings = aggregateHoldingsByTicker(data.holdings);
+  const homeAccount = data.accounts.find((a) => a.type === "property") ?? null;
+  const mortgageAccount =
+    data.accounts.find((a) => a.type === "debt" && /mortgage|home\s*loan/i.test(a.name)) ?? null;
+  const homeEquity =
+    homeAccount != null
+      ? homeAccount.balance - Math.abs(mortgageAccount?.balance ?? 0)
+      : null;
   const bySector = Object.entries(
     data.holdings.reduce<Record<string, number>>((acc, holding) => {
       acc[holding.sector] = (acc[holding.sector] ?? 0) + holding.value;
@@ -59,6 +66,13 @@ export default async function PortfolioPage() {
         <div className="metric-card"><span>Top-three weight</span><strong>{portfolioIntelligence.topThreeStockWeightPct.toFixed(1)}%</strong><small>Review line {data.householdPlan.topThreeStockReviewPct}%</small></div>
         <div className="metric-card"><span>Positions flagged</span><strong>{portfolioIntelligence.watchCount + portfolioIntelligence.criticalCount}</strong><small>Concentration review</small></div>
       </div>
+
+      {homeEquity !== null ? (
+        <p className="portfolio-context-line">
+          Investable assets <strong>{money(metrics.total)}</strong>
+          <span className="small-muted"> · Home equity {money(homeEquity)} stays out of the allocation above — it&rsquo;s counted in your net worth on the Overview.</span>
+        </p>
+      ) : null}
 
       <section className="card page-card" id="allocation">
           <div className="section-title-row">

@@ -3330,6 +3330,16 @@ a {
   font-size: 13px;
 }
 
+.portfolio-context-line {
+  margin: 10px 2px 0;
+  font-size: 10px;
+  color: #43566d;
+}
+
+.portfolio-context-line strong {
+  font-size: 11px;
+}
+
 .accounts-editor {
   display: grid;
   gap: 8px;
