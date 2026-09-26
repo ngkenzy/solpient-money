@@ -52,7 +52,8 @@
     "test:v210": "node scripts/test-v210-market-price-refresh.mjs",
     "test:v212": "node scripts/test-v212-vanguard-file-import-guide.mjs",
     "test:v213": "node scripts/test-v213-direct-ofx-removal.mjs",
-    "test:v214": "bash scripts/tests/test-v214-cool-pack.sh"
+    "test:v214": "bash scripts/tests/test-v214-cool-pack.sh",
+    "test:v215": "bash scripts/tests/test-v215-allocation-merge.sh"
   },
   "dependencies": {
     "lucide-react": "^0.468.0",

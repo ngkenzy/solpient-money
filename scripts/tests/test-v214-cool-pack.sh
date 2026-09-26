@@ -30,7 +30,7 @@ expect_grep "$PALETTE" 'role="listbox"' "palette list has listbox role"
 expect_grep "$PALETTE" 'router.push(item.href)' "palette navigates on select"
 expect_grep "$PALETTE" 'ArrowDown' "palette supports arrow navigation"
 expect_grep "$PALETTE" 'Escape' "palette closes on Escape"
-for href in '"/"' '"/accounts"' '"/connect"' '"/transactions"' '"/cash-flow"' '"/portfolio"' '"/portfolio-intelligence"' '"/performance"' '"/allocation"' '"/tsp"' '"/budget"' '"/plan"' '"/monitor"' '"/goals"' '"/data-health"' '"/data"'; do
+for href in '"/"' '"/accounts"' '"/connect"' '"/transactions"' '"/cash-flow"' '"/portfolio"' '"/portfolio-intelligence"' '"/performance"' '"/tsp"' '"/budget"' '"/plan"' '"/monitor"' '"/goals"' '"/data-health"' '"/data"'; do
   expect_grep "$PALETTE" "href: $href" "palette links to $href"
 done
 expect_grep "$SHELL" 'import CommandPalette from "./CommandPalette"' "AppShell imports CommandPalette"

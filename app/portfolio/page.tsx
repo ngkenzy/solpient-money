@@ -20,6 +20,12 @@ export default async function PortfolioPage() {
   const metrics = getPortfolioMetrics(data);
   const portfolioIntelligence = buildPortfolioIntelligence(data);
   const holdings = aggregateHoldingsByTicker(data.holdings);
+  const bySector = Object.entries(
+    data.holdings.reduce<Record<string, number>>((acc, holding) => {
+      acc[holding.sector] = (acc[holding.sector] ?? 0) + holding.value;
+      return acc;
+    }, {})
+  ).sort((a, b) => b[1] - a[1]);
 
   if (!data.holdings.length) {
     return (
@@ -71,17 +77,35 @@ export default async function PortfolioPage() {
           />
         </section>
 
-        <section className="card page-card allocation-panel" id="allocation">
+        <section className="card page-card" id="allocation">
           <div className="section-title-row">
             <div><span className="card-kicker">ALLOCATION</span><h2>Asset mix</h2></div>
-            <Link className="text-button" href="/allocation">Details <ArrowRight size={15} /></Link>
           </div>
-          <div className="portfolio-allocation">
-            <AllocationDonut items={data.allocation} totalLabel={money(metrics.total / 1000) + "K"} />
-            <div className="allocation-list roomy">
-              {data.allocation.map((item) => (
-                <div key={item.label}><span className={"dot " + item.tone} /><span>{item.label}</span><strong>{item.value}%</strong></div>
-              ))}
+          <div className="allocation-page-grid">
+            <div className="portfolio-allocation allocation-center">
+              <AllocationDonut items={data.allocation} totalLabel={money(metrics.total / 1000) + "K"} />
+              <div className="allocation-list roomy">
+                {data.allocation.map((item) => {
+                  const classDollars = metrics.total ? (item.value / 100) * metrics.total : 0;
+                  return (
+                    <div key={item.label}><span className={"dot " + item.tone} /><span>{item.label}</span><strong>{item.value}% · {money(classDollars)}</strong></div>
+                  );
+                })}
+              </div>
+            </div>
+            <div>
+              <div className="section-title-row"><div><span className="card-kicker">EXPOSURES</span><h2>By sector / sleeve</h2></div></div>
+              <div className="bar-list">
+                {bySector.map(([sector, value]) => {
+                  const weight = metrics.total ? (value / metrics.total) * 100 : 0;
+                  return (
+                    <div className="bar-item" key={sector}>
+                      <div><span>{sector}</span><strong>{weight.toFixed(1)}% · {money(value)}</strong></div>
+                      <div className="bar-track"><span style={{ width: `${weight}%` }} /></div>
+                    </div>
+                  );
+                })}
+              </div>
             </div>
           </div>
         </section>

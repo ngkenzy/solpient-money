@@ -5,7 +5,6 @@ import { usePathname } from "next/navigation";
 import CommandPalette from "./CommandPalette";
 import {
   Activity,
-  BarChart3,
   BrainCircuit,
   BriefcaseBusiness,
   CircleDollarSign,
@@ -45,7 +44,6 @@ const sections: Array<{ label?: string; items: NavItem[] }> = [
       { href: "/portfolio", label: "Portfolio", icon: BriefcaseBusiness },
       { href: "/portfolio-intelligence", label: "Portfolio Intelligence", icon: BrainCircuit },
       { href: "/performance", label: "Performance", icon: LineChart },
-      { href: "/allocation", label: "Allocation", icon: BarChart3 },
       { href: "/tsp", label: "Thrift Saving Plan", icon: Landmark },
     ],
   },

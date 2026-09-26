@@ -182,7 +182,6 @@ export async function refreshMarketPrices(): Promise<RefreshMarketPricesState> {
       "/",
       "/accounts",
       "/portfolio",
-      "/allocation",
     ]) {
       revalidatePath(path);
     }

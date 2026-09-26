@@ -404,7 +404,6 @@ export async function importOfficialTspCsv(
       "/",
       "/accounts",
       "/portfolio",
-      "/allocation",
     ]) {
       revalidatePath(path);
     }
@@ -603,7 +602,6 @@ export async function updateTspFundPrice(
       "/",
       "/accounts",
       "/portfolio",
-      "/allocation",
     ]) {
       revalidatePath(path);
     }
@@ -970,7 +968,6 @@ export async function pullLatestTspPrices(): Promise<TspPullPricesState> {
       "/",
       "/accounts",
       "/portfolio",
-      "/allocation",
     ]) {
       revalidatePath(path);
     }

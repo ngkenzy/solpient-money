@@ -4,7 +4,6 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   Activity,
-  BarChart3,
   BrainCircuit,
   BriefcaseBusiness,
   CircleDollarSign,
@@ -46,7 +45,6 @@ const ITEMS: PaletteItem[] = [
   { label: "Portfolio", hint: "Holdings", href: "/portfolio", keywords: "stocks holdings investments positions refresh prices", icon: BriefcaseBusiness, section: "Pages" },
   { label: "Portfolio Intelligence", hint: "Analysis", href: "/portfolio-intelligence", keywords: "analysis diversification concentration", icon: BrainCircuit, section: "Pages" },
   { label: "Performance", hint: "Returns", href: "/performance", keywords: "returns gains chart history", icon: LineChart, section: "Pages" },
-  { label: "Allocation", hint: "Mix", href: "/allocation", keywords: "asset mix pie donut stocks bonds", icon: BarChart3, section: "Pages" },
   { label: "Thrift Saving Plan", hint: "TSP", href: "/tsp", keywords: "tsp thrift savings plan g fund f fund c fund s fund i fund federal", icon: Landmark, section: "Pages" },
   { label: "Budget", hint: "Monthly", href: "/budget", keywords: "monthly budget categories envelopes spending plan", icon: Wallet, section: "Pages" },
   { label: "Financial Plan", hint: "Waterfall", href: "/plan", keywords: "plan waterfall steps priorities", icon: ListChecks, section: "Pages" },

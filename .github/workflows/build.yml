@@ -74,4 +74,5 @@ jobs:
       - run: npm run test:v212
       - run: npm run test:v213
       - run: npm run test:v214
+      - run: npm run test:v215
       - run: npm run build
