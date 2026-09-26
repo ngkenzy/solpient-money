@@ -212,7 +212,9 @@ export default function VanguardGuidedConnect({
       <p className="vanguard-guided-lede">
         Everything technical — server address, institution identifiers, app
         identity — is filled in for you. You only enter your Vanguard sign-in
-        and account number.
+        and account number. If Vanguard won&apos;t connect directly,{" "}
+        <Link href="/connect">the Vanguard file import</Link> gets you the
+        same data in about two minutes.
       </p>
 
       <ol className="vanguard-guided-steps">
@@ -277,9 +279,11 @@ export default function VanguardGuidedConnect({
                 <strong>Vanguard didn&apos;t answer cleanly.</strong>
                 <span>
                   You can still try signing in — the full sign-in sometimes
-                  works when the anonymous check doesn&apos;t. If it fails,
-                  CSV import on the Connect page remains the reliable
-                  fallback.
+                  works when the anonymous check doesn&apos;t. If it fails,{" "}
+                  <Link href="/connect">
+                    the Vanguard file import on the Connect page
+                  </Link>{" "}
+                  remains the reliable fallback.
                 </span>
               </div>
             </div>

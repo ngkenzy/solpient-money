@@ -11,6 +11,7 @@ import UniversalImportWorkbench from "@/components/UniversalImportWorkbench";
 import ImportHistoryActions from "@/components/ImportHistoryActions";
 import DeleteTspImportButton from "@/components/DeleteTspImportButton";
 import ConnectorRegistryPanel from "@/components/ConnectorRegistryPanel";
+import VanguardFileImportGuide from "@/components/VanguardFileImportGuide";
 import { requireActiveHousehold } from "@/lib/money-auth";
 import { getConnectorOverviews } from "@/lib/connect/registry";
 import { TSP_OFFICIAL_CSV_VERSION } from "@/lib/tsp-official-csv";
@@ -272,7 +273,11 @@ export default async function ConnectPage() {
         )}
       </section>
 
-      <UniversalImportWorkbench accounts={importAccounts} />
+      <VanguardFileImportGuide />
+
+      <div id="import-center">
+        <UniversalImportWorkbench accounts={importAccounts} />
+      </div>
 
       <details className="connect-advanced-import">
         <summary>

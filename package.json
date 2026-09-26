@@ -56,7 +56,8 @@
     "test:v208": "node scripts/test-v208-net-worth-snapshots.mjs",
     "test:v209": "node scripts/test-v209-brokerage-imports.mjs",
     "test:v210": "node scripts/test-v210-market-price-refresh.mjs",
-    "test:v211": "node scripts/test-v211-vanguard-guided-connect.mjs"
+    "test:v211": "node scripts/test-v211-vanguard-guided-connect.mjs",
+    "test:v212": "node scripts/test-v212-vanguard-file-import-guide.mjs"
   },
   "dependencies": {
     "lucide-react": "^0.468.0",
