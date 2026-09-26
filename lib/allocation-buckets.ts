@@ -86,8 +86,13 @@ export function classifyHolding(holding: Holding): string | null {
   const kind = holding.kind;
 
   // Cash and cash-equivalents: split money-market/sweep funds out of cash.
+  // (TSP G Fund is short-term Treasuries — a money-market equivalent.)
   if (kind === "cash") {
-    if (MONEY_MARKET_TICKERS.has(ticker) || MONEY_MARKET_NAME.test(name)) {
+    if (
+      ticker === "TSP-G" ||
+      MONEY_MARKET_TICKERS.has(ticker) ||
+      MONEY_MARKET_NAME.test(name)
+    ) {
       return MONEY_MARKET_LABEL;
     }
     return CASH_LABEL;

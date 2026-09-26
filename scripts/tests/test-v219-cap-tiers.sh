@@ -65,7 +65,7 @@ import('./lib/allocation-buckets.ts').then((m) => {
     [{ ticker: 'TSP-S', name: 'S Fund', kind: 'etf', sector: 'U.S. Equities' }, 'U.S. Small Cap'],
     [{ ticker: 'TSP-I', name: 'I Fund', kind: 'etf', sector: 'International' }, 'International'],
     [{ ticker: 'TSP-F', name: 'F Fund', kind: 'bond', sector: 'Bonds' }, 'Bonds'],
-    [{ ticker: 'TSP-G', name: 'G Fund', kind: 'cash', sector: 'Cash' }, 'Cash'],
+    [{ ticker: 'TSP-G', name: 'G Fund', kind: 'cash', sector: 'Cash' }, 'Money Market'],
     // international
     [{ ticker: 'VXUS', name: 'Vanguard Total International Stock ETF', kind: 'etf', sector: 'International' }, 'International'],
     [{ ticker: 'VWO', name: 'Vanguard Emerging Markets ETF', kind: 'etf', sector: 'Emerging Markets' }, 'International'],
