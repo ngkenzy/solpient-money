@@ -117,5 +117,13 @@ expect_absent package.json '"test:v217"' "package.json no longer wires test:v217
 expect_grep .github/workflows/build.yml 'test:v218' "CI runs test:v218"
 expect_absent .github/workflows/build.yml 'test:v217' "CI no longer runs test:v217"
 
+# CSS must be brace-balanced: one stray brace breaks the entire stylesheet.
+if python3 -c "
+import re, sys
+text = re.sub(r'/\*.*?\*/', '', open('app/globals.css').read(), flags=re.S)
+o, c = text.count('{'), text.count('}')
+sys.exit(0 if o == c and o > 0 else 1)
+"; then ok; else fail "globals.css has unbalanced braces"; fi
+
 echo "v218: $PASS passed, $FAIL failed"
 exit $([ "$FAIL" -eq 0 ])
