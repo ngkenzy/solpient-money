@@ -1,7 +1,6 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { isRedirectError } from "next/dist/client/components/redirect-status-code";
 import { requireActiveHousehold } from "@/lib/money-auth";
 import {
   MARKET_PRICE_SOURCE_LABEL,
@@ -32,10 +31,9 @@ function quoteDateLabel(fetchedAt: string) {
  * the portfolio-facing pages.
  */
 export async function refreshMarketPrices(): Promise<RefreshMarketPricesState> {
-  try {
-    const { database, householdId } =
-      await requireActiveHousehold();
+  const { database, householdId } = await requireActiveHousehold();
 
+  try {
     const holdingsResult = await database
       .from("holdings")
       .select(
@@ -204,8 +202,6 @@ export async function refreshMarketPrices(): Promise<RefreshMarketPricesState> {
         `with ${MARKET_PRICE_SOURCE_LABEL} prices for ${quoteDateLabel(fetchedAt)}.${missingNote}`,
     };
   } catch (error) {
-    if (isRedirectError(error)) throw error;
-
     return {
       ok: false,
       message:
@@ -249,10 +245,9 @@ export async function refreshIncomeAndValue(): Promise<RefreshIncomeAndValueStat
     fetchValueSnapshots,
   } = await import("@/lib/value-proxies");
 
-  try {
-    const { database, householdId } =
-      await requireActiveHousehold();
+  const { database, householdId } = await requireActiveHousehold();
 
+  try {
     const holdingsResult = await database
       .from("holdings")
       .select("ticker,shares,holding_kind")
@@ -395,8 +390,6 @@ export async function refreshIncomeAndValue(): Promise<RefreshIncomeAndValueStat
         `for ${snapshots.length} holdings.`,
     };
   } catch (error) {
-    if (isRedirectError(error)) throw error;
-
     return {
       ok: false,
       message:

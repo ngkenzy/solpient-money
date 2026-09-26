@@ -39,6 +39,25 @@ if grep -q "requireActiveHousehold" "$VALLIB"; then ok "value cache household-sc
 
 # ---------- refresh action ----------
 if grep -q "export async function refreshIncomeAndValue" "$ACTIONS"; then ok "refreshIncomeAndValue action exists"; else bad "refreshIncomeAndValue action exists"; fi
+# redirect-safety: no internal next/dist redirect helpers (broke on Next 16 at runtime);
+# the household call runs before the try block so a redirect can never be swallowed
+if grep -q "isRedirectError\|redirect-status-code\|redirect-boundary" "$ACTIONS"; then bad "no internal redirect helpers imported"; else ok "no internal redirect helpers imported"; fi
+REDIRECTSAFE=$(python3 - "$ACTIONS" << 'EOF'
+import re, sys
+s = open(sys.argv[1]).read()
+bad_fns = []
+for m in re.finditer(r"export async function (refresh\w+)\(\)[^{]*\{", s):
+    name, start = m.group(1), m.end()
+    # find the function's requireActiveHousehold and first try {
+    fn_tail = s[start:start + 2000]
+    hh = fn_tail.find("requireActiveHousehold()")
+    tr = fn_tail.find("try {")
+    if hh == -1 or tr == -1 or hh > tr:
+        bad_fns.append(name)
+print("REDIRECTSAFE=" + (",".join(bad_fns) if bad_fns else "ok"))
+EOF
+)
+if [ "$REDIRECTSAFE" = "REDIRECTSAFE=ok" ]; then ok "actions hoist household before try"; else bad "actions hoist household before try ($REDIRECTSAFE)"; fi
 if grep -q '"/portfolio-intelligence"' "$ACTIONS"; then ok "action revalidates intelligence page"; else bad "action revalidates intelligence page"; fi
 if grep -q "dividend_cache" "$ACTIONS" && grep -q "value_snapshot_cache" "$ACTIONS"; then ok "action writes both caches"; else bad "action writes both caches"; fi
 
