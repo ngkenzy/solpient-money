@@ -41,6 +41,7 @@ const sections: Array<{ label?: string; items: NavItem[] }> = [
   {
     label: "INVEST",
     items: [
+      { href: "/fund", label: "Fund Command", icon: Activity },
       { href: "/portfolio", label: "Portfolio", icon: BriefcaseBusiness },
       { href: "/portfolio-intelligence", label: "Portfolio Intelligence", icon: BrainCircuit },
       { href: "/tsp", label: "Thrift Saving Plan", icon: Landmark },
