@@ -281,7 +281,7 @@ export default async function FundPage() {
 
       <footer className="fund-footer">
         <div><Database size={15} /><span>Holdings: {isDemo ? "demo dataset" : "local Money database"} · Research: {researchLinked ? "local private Git clone" : "not synced"}</span></div>
-        <p>Important: This view does not determine account ownership or reconcile outside positions automatically. Confirm your sister’s holdings are excluded from imports. TSP balances and cash accounts are not automatically added to the holdings total. No verified time-weighted returns or live market quotes are claimed. No trades are executed.</p>
+        <p>Important: This view does not determine account ownership or reconcile outside positions automatically. Confirm your sister’s holdings are excluded from imports. TSP balances and cash accounts are not automatically added to the holdings total. Values are assumed to share a common currency and ticker identity; verify imports. No verified time-weighted returns or live market quotes are claimed. No trades are executed.</p>
         <Link href="/data-health">Check data quality <ArrowRight size={13} /></Link>
       </footer>
     </div>
