@@ -74,3 +74,37 @@ $0 in hosted fees. PostgreSQL Docker image: $0. Storage: your disk. Runtime: you
 
 - **V3.0 "Simple"** — The simplification release. Four pillars (Investments, Spending, Budgeting, TSP), everything else removed. New monthly budget page, guided setup, empty states everywhere, CSV export, backup health nudges, rewritten docs.
 - V2.0.x — Local-first architecture, TSP tracker, import reliability hardening.
+
+
+## Fund Command Center (private dashboard, V1)
+
+Open **http://localhost:3000/fund** after starting Solpient Money. It is also in the **Invest** sidebar as **Fund Command**.
+
+This read-only dashboard adds:
+- Total tracked invested holdings, rolled up by ticker without double-counting account balances.
+- Individual-stock concentration and a transparent 30% single-position sensitivity.
+- Holdings, allocation by instrument type, and configurable review thresholds from Money.
+- A private, optional **local Git-clone bridge** to the canonical `personal-hedge-fund` Top 10 and current direction.
+- GitHub links to agent research lanes, reviews, decision records, and Solpient Research.
+
+### Connect your AI research repository (optional)
+
+Clone your **private** `ngkenzy/personal-hedge-fund` repo to your Mac using your usual GitHub authentication. In your local `.env.local` (never commit this file), set:
+
+```dotenv
+SOLPIENT_FUND_REPO_DIR=/absolute/path/to/personal-hedge-fund
+```
+
+Restart `npm run dev`, visit `/fund`, and refresh the page after each `git pull`. The reader only opens `DIRECTION.md` and `recommendations/top-10/CURRENT.md` from disk. It **does not** fetch private files from GitHub, store access tokens, change decisions, run agents, or execute trades. If the repo is missing, the page explains how to connect it. A Top 10 is only shown if the canonical file contains a published numeric ranking in a markdown table; incomplete research is shown as pending, not as an invented recommendation.
+
+### Accuracy and privacy rules
+
+- **Holdings source:** the current local Money database, not the older private GitHub portfolio snapshot. Demo mode is conspicuously marked.
+- **Ownership:** the existing Money holdings model does not distinguish every lot's owner. **Do not import someone else's positions into your household dataset.** In particular, the other family member's brokerage holdings from the October 12 research snapshot must not be included.
+- **Denominators:** the Fund Command total is the sum of positive-value holdings only. Bank balances and retirement account balances may overlap with imported holdings and are not added automatically; do not treat this as a reconciled financial-assets total.
+- **Performance:** the command center does not claim time-weighted returns, verified benchmark outperformance, current market quotes, or reliable P&L without reconciled external cash flows, valuation timestamps, and cost basis.
+- **Security:** Solpient Money is a single-user local app without internet-facing authentication. Do not deploy `/fund` to a public host, port-forward it, or expose it to untrusted networks. The bridge is designed for a private machine only.
+- **Execution:** no trades, transfer instructions, or automatic portfolio changes.
+
+Run `npm run test:fund` to check the new fund calculations and read-only research bridge. CI runs that test, lint and the Next.js build before the branch is merged.
+
