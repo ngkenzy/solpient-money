@@ -2,7 +2,7 @@ import Link from "next/link";
 import {
   Activity, ArrowRight, BookOpen, CheckCircle2, CircleAlert,
   Clock3, Database, ExternalLink, GitPullRequest, Landmark,
-  LockKeyhole, ShieldAlert, TrendingDown,
+  LockKeyhole, ShieldAlert,
 } from "lucide-react";
 import { money } from "@/lib/finance";
 import { requireMoneyDataset } from "@/lib/money-data";
