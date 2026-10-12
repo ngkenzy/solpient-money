@@ -61,7 +61,8 @@
     "test:v222": "bash scripts/tests/test-v222-portfolio-equity.sh",
     "test:v223": "bash scripts/tests/test-v223-theme.sh",
     "test:v224": "bash scripts/tests/test-v224-spending-drift.sh",
-    "test:v225": "bash scripts/tests/test-v225-dividends-value.sh"
+    "test:v225": "bash scripts/tests/test-v225-dividends-value.sh",
+    "test:fund": "node scripts/test-fund-command.mjs"
   },
   "dependencies": {
     "lucide-react": "^0.468.0",
