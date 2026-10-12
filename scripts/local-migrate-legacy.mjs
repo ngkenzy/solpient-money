@@ -65,12 +65,15 @@ function queryContainer(
 }
 
 function scalarCount(container, table) {
-  return Number(
-    queryContainer(
-      container,
-      `select case when to_regclass('public.${table}') is null then 0 else (select count(*) from public.${table}) end;`
-    ) || 0
-  );
+  // A CASE branch referencing a nonexistent table still fails at SQL parse
+  // time; check existence in a separate query before selecting its rows.
+  if (!/^[a-z_][a-z0-9_]*$/.test(table)) {
+    throw new Error("Invalid table identifier");
+  }
+  if (queryContainer(container, `select to_regclass('public.${table}') is not null;`) !== "t") {
+    return 0;
+  }
+  return Number(queryContainer(container, `select count(*) from public.${table};`) || 0);
 }
 
 function ensureRestoreRoles() {
